@@ -5,16 +5,15 @@ Scrapes daily floorsheet data from the widget URL by extracting embedded JSON
 
 import requests
 import json
-import codecs
 import pandas as pd
-from datetime import datetime
+from datetime import datetime,timedelta
 from pathlib import Path
 import time
 from typing import Optional, Dict, List
 import logging
 import re
 import unicodedata
-
+import paths
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -85,93 +84,6 @@ def _parse_decimal_cell(text: str) -> float:
     return -n if negative else n
 
 
-def _balanced_brace_object(html: str, start: int) -> Optional[str]:
-    """
-    Slice a balanced {...} from html[start] where start points at `{`.
-    Supports Next.js RSC payloads that use \\\" inside strings instead of ASCII quotes.
-    """
-    if start >= len(html) or html[start] != "{":
-        return None
-    depth = 0
-    i = start
-    in_string = False
-    esc = False
-
-    while i < len(html):
-        ch = html[i]
-        if in_string:
-            if esc:
-                esc = False
-            elif ch == "\\":
-                esc = True
-            elif ch == '"':
-                in_string = False
-            i += 1
-            continue
-        else:
-            if ch == "\\" and i + 1 < len(html) and html[i + 1] == '"':
-                in_string = True
-                i += 2
-                continue
-            if ch == '"':
-                in_string = True
-            elif ch == "{":
-                depth += 1
-            elif ch == "}":
-                depth -= 1
-                if depth == 0:
-                    return html[start : i + 1]
-            i += 1
-            continue
-    return None
-
-
-def _parse_embedded_floor_sheet_blob(raw_obj: str) -> Optional[Dict]:
-    """Parse floorSheetData object text as embedded in __next_f (\\\" style escaping)."""
-    try:
-        return json.loads(codecs.decode(raw_obj, "unicode_escape"))
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        try:
-            return json.loads(raw_obj)
-        except json.JSONDecodeError:
-            return None
-
-
-def _extract_floor_sheet_payload(html_content: str) -> Optional[Dict]:
-    """Find floorSheetData in full HTML (__next_f RSC) and decode the JSON object."""
-    key = "floorSheetData"
-    n = len(html_content)
-    start = 0
-    while True:
-        hit = html_content.find(key, start)
-        if hit == -1:
-            return None
-        j = hit + len(key)
-        k = j
-        while k < n:
-            while k < n and html_content[k].isspace():
-                k += 1
-            if k + 1 < n and html_content[k] == "\\" and html_content[k + 1] == '"':
-                k += 2
-                continue
-            break
-        if k >= n or html_content[k] != ":":
-            start = hit + 1
-            continue
-        k += 1
-        while k < n and html_content[k].isspace():
-            k += 1
-        if k >= n or html_content[k] != "{":
-            start = hit + 1
-            continue
-        raw = _balanced_brace_object(html_content, k)
-        if raw:
-            parsed = _parse_embedded_floor_sheet_blob(raw)
-            if isinstance(parsed, dict) and isinstance(parsed.get("content"), list):
-                return parsed
-        start = hit + 1
-
-
 def _pagination_from_html_nav(html_content: str) -> Dict:
     """If RSC pagination is missing, infer whether Next page exists from DOM."""
     try:
@@ -188,20 +100,6 @@ def _pagination_from_html_nav(html_content: str) -> Dict:
     except Exception:
         pass
     return {}
-
-
-def _record_from_api_row(item: Dict) -> Dict:
-    """Normalize ShareHub camelCase floorsheet rows to exporter schema."""
-    return {
-        "symbol": item.get("symbol", ""),
-        "buyer_member_id": str(item.get("buyerMemberId", "")),
-        "seller_member_id": str(item.get("sellerMemberId", "")),
-        "quantity": int(item.get("contractQuantity", 0) or 0),
-        "price": float(item.get("contractRate", 0) or 0),
-        "amount": float(item.get("contractAmount", 0) or 0),
-        "trade_time": item.get("tradeTime", ""),
-        "contract_id": str(item.get("contractId", "")),
-    }
 
 
 class FloorsheeetScraper:
@@ -247,7 +145,7 @@ class FloorsheeetScraper:
             }
             
             logger.info(f"Fetching floorsheet data - Page: {page}, Date: {api_date}, Size: {page_size}")
-            response = self.session.get(self.BASE_URL, params=params, timeout=15)
+            response = self.session.get(self.BASE_URL, params=params, timeout=30)
             response.raise_for_status()
             
             # Parse the embedded JSON data from Next.js response
@@ -273,29 +171,8 @@ class FloorsheeetScraper:
         pagination_info: Dict = {}
 
         try:
-            data = _extract_floor_sheet_payload(html_content)
-            if data:
-                pagination_info = {
-                    "hasNext": data.get("hasNext", False),
-                    "hasPrevious": data.get("hasPrevious", False),
-                    "totalPages": data.get("totalPages", 0),
-                    "pageIndex": data.get("pageIndex", 0),
-                    "totalTrades": data.get("totalTrades", 0),
-                    "totalItems": data.get("totalItems", 0),
-                    "pageSize": data.get("pageSize", 100),
-                    "totalAmount": data.get("totalAmount", 0),
-                    "totalQty": data.get("totalQty", 0),
-                }
-                raw_rows = data.get("content") or []
-                records = [_record_from_api_row(r) for r in raw_rows if isinstance(r, dict)]
-                logger.info(
-                    f"Extracted {len(records)} records from floorSheetData RSC JSON — "
-                    f"page {pagination_info['pageIndex']} of {pagination_info['totalPages']}, "
-                    f"hasNext={pagination_info['hasNext']}"
-                )
-                return records, pagination_info
 
-            logger.info("floorSheetData RSC parse failed; using HTML table + nav fallback")
+            logger.info("Scraping floorsheet data using HTML table")
             records = self._parse_html_table(html_content)
             ui = _pagination_from_html_nav(html_content)
             pagination_info = {
@@ -311,7 +188,7 @@ class FloorsheeetScraper:
             }
 
         except Exception as e:
-            logger.error(f"Error extracting JSON from HTML: {e}")
+            logger.error(f"Error scrapping data: {e}")
 
         return records, pagination_info
     
@@ -380,14 +257,14 @@ class FloorsheeetScraper:
                         contract_id = cells[7].get_text(strip=True)
                         
                         record = {
-                            'Symbol': symbol,
-                            'buyerMemberId': buyer_id,
-                            'sellerMemberId': seller_id,
+                            'symbol': symbol,
+                            'buyer_member_id': buyer_id,
+                            'seller_member_id': seller_id,
                             'volume': quantity,
-                            'rate': price,
+                            'price': price,
                             'amount': amount,
                             'transaction_time': trade_time,
-                            'Contract ID': contract_id,
+                            'contract_id': contract_id,
                         }
                         records.append(record)
                         
@@ -442,8 +319,6 @@ class FloorsheeetScraper:
             all_records.extend(records)
             logger.info(
                 f"Page {page}: {len(records)} rows (running total {len(all_records)}; "
-                f"API page {pagination_info.get('pageIndex', '?')} "
-                f"of {pagination_info.get('totalPages', '?')})"
             )
             page += 1
             time.sleep(delay)
@@ -557,12 +432,12 @@ class FloorsheeetScraper:
             'total_trades': len(df),
             'total_quantity': int(df['volume'].sum()),
             'total_amount': float(df['amount'].sum()),
-            'average_price': float(df['rate'].mean()),
+            'average_price': float(df['price'].mean()),
             'average_quantity': float(df['volume'].mean()),
-            'unique_symbols': int(df['Symbol'].nunique()),
-            'top_5_symbols': df['Symbol'].value_counts().head(5).to_dict(),
-            'top_5_by_volume': df.groupby('Symbol')['volume'].sum().nlargest(5).to_dict(),
-            'top_5_by_amount': df.groupby('Symbol')['amount'].sum().nlargest(5).to_dict(),
+            'unique_symbols': int(df['symbol'].nunique()),
+            'top_5_symbols': df['symbol'].value_counts().head(5).to_dict(),
+            'top_5_by_volume': df.groupby('symbol')['volume'].sum().nlargest(5).to_dict(),
+            'top_5_by_amount': df.groupby('symbol')['amount'].sum().nlargest(5).to_dict(),
         }
         
         return stats
@@ -582,9 +457,8 @@ class FloorsheeetScraper:
         """
         logger.info("Starting floorsheet scraper")
 
-        # Default output names: floorsheet_YYYYMMDD.{csv,json,xlsx} for the date we scraped
 
-        records = self.get_all_floorsheet_data(date=date, max_pages=max_pages)
+        records = self.get_all_floorsheet_data(date=date, max_pages=max_pages,delay=0.01)
         
         if not records:
             logger.error("No data retrieved")
@@ -600,21 +474,21 @@ class FloorsheeetScraper:
         # Save files
         if output_format in ['csv', 'both', 'all']:
             csv_file = self.save_to_csv(
-                records, filename=f"floor-{date}.csv"
+                records, filename=f"{paths.PROJECT_ROOT}/data/raw/floor-{date}.csv"
             )
             if csv_file:
                 results['files']['csv'] = csv_file
         
         if output_format in ['json', 'both', 'all']:
             json_file = self.save_to_json(
-                records, filename=f"floor-{date}.json"
+                records, filename=f"{paths.PROJECT_ROOT}/data/raw/floor-{date}.json"
             )
             if json_file:
                 results['files']['json'] = json_file
         
         if output_format in ['excel', 'all']:
             excel_file = self.save_to_excel(
-                records, filename=f"floor-{date}.xlsx"
+                records, filename=f"{paths.PROJECT_ROOT}/data/raw/floor-{date}.xlsx"
             )
             if excel_file:
                 results['files']['excel'] = excel_file
@@ -635,7 +509,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='ShareHub Floorsheet Data Scraper')
     parser.add_argument('--date', type=str, default=None, 
-                        help='Date in format YYYY-M-DD (default: today)')
+                        help='Date in format YYYY-MM-DD (default: today)')
     parser.add_argument(
         '--max-pages',
         type=int,
@@ -644,32 +518,48 @@ def main():
         help='Only fetch the first N pages (default: fetch all pages until one is empty)',
     )
     parser.add_argument('--format', choices=['csv', 'json', 'excel', 'both', 'all'], 
-                        default='both', help='Output format')
+                        default='csv', help='Output format')
     parser.add_argument('--page-size', type=int, default=100,
                         help='Items per page (default: 100)')
     
     args = parser.parse_args()
 
-    today = (
-        datetime.now().strftime("%Y-%m-%d")
-        if args.date is None
-        else _normalize_api_date(args.date)
-    )
+    # today = (
+    #     datetime.now().strftime("%Y-%m-%d")
+    #     if args.date is None
+    #     else _normalize_api_date(args.date)
+    # )
+
+
+    start_scrape = datetime.strptime('2026-04-29',"%Y-%m-%d");
+    end_scrape = datetime.strptime('2026-05-08',"%Y-%m-%d");
+
+
     
 
-    print(f"Scraping floorsheet for {today} → floor-{today}.*")
-    scraper = FloorsheeetScraper()
-    results = scraper.run(
-        date=args.date,
-        max_pages=args.max_pages,
-        output_format=args.format,
-    )
+    while(start_scrape<=end_scrape):
+        date = datetime.strftime(start_scrape,"%Y-%m-%d");
+        print(f"Scraping floorsheet for {date} → floor-{date}.*")
+        scraper = FloorsheeetScraper()
+        results = scraper.run(
+            date=date,
+            max_pages=args.max_pages,
+            output_format=args.format,
+        )
 
-    print("\n" + "="*60)
-    print("SCRAPING RESULTS")
-    print("="*60)
-    print(json.dumps(results, indent=2, default=str))
+        print("\n" + "="*60)
+        print("SCRAPING RESULTS")
+        print("="*60)
+        print(json.dumps(results, indent=2, default=str))
+
+
+
+        start_scrape += timedelta(days=1);
+
+
+   
 
 
 if __name__ == "__main__":
+    
     main()

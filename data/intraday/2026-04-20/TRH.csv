@@ -1,6 +1,0 @@
-contract_id,symbol,buyer_member_id,seller_member_id,volume,price,amount,buyer_broker,seller_broker,transaction_time
-2026042004014194,TRH,54,13,10,751.1,7511.0,Sewa Securities Pvt. Ltd.,Thrive Brokerage House Pvt. Ltd,2026-04-20 14:50:37.301970
-2026042004014195,TRH,54,13,10,751.1,7511.0,Sewa Securities Pvt. Ltd.,Thrive Brokerage House Pvt. Ltd,2026-04-20 14:50:37.302105
-2026042004014196,TRH,17,13,80,751.0,60080.0,ABC Securities Private Limited,Thrive Brokerage House Pvt. Ltd,2026-04-20 14:50:37.302186
-2026042004014723,TRH,17,80,120,751.0,90120.0,ABC Securities Private Limited,Indira securities pvt. ltd,2026-04-20 14:53:53.426506
-2026042004015504,TRH,4,80,80,750.0,60000.0,Opal Securities Investment (PVT) Ltd.,Indira securities pvt. ltd,2026-04-20 14:57:31.806565

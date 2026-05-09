@@ -4,7 +4,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DATA = PROJECT_ROOT / "data"
-INTRADAY = DATA / "intraday"
-INTERDAY = DATA / "interday"
-OUTPUTS = PROJECT_ROOT / "outputs"
-MODEL_ARTIFACTS = OUTPUTS / "models"
+RAW_DATA = DATA / "raw"
+PROCESSED_DATA = DATA / "processed"
+ARTIFACTS = PROJECT_ROOT / "artifacts"
+MODEL_ARTIFACTS = ARTIFACTS / "models"
+CONFIG = PROJECT_ROOT / "configs"

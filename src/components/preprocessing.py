@@ -1,6 +1,6 @@
 import pandas as pd
 
-def preprocess(df: pd.Dataframe,timeframe="1D"):
+def preprocess(df: pd.Dataframe,timeframe="1D") -> pd.DataFrame:
 
     df = df.copy()
 
@@ -19,8 +19,6 @@ def preprocess(df: pd.Dataframe,timeframe="1D"):
         close=("price", "last"),
         volume=("volume", "sum"),
     )
-
-   
 
     # Filter dataframe
     df = df.drop_duplicates()

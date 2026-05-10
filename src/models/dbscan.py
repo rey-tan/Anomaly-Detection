@@ -72,4 +72,4 @@ class DBSCAN:
     
     def fit_predict(self,X):
         self.fit(X);
-        return self.get_labels()
+        return self.get_labels();

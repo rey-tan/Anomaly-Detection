@@ -532,8 +532,8 @@ def main():
     # )
 
 
-    start_scrape = datetime.strptime('2024-01-01',"%Y-%m-%d");
-    end_scrape = datetime.strptime('2024-02-30',"%Y-%m-%d");
+    start_scrape = datetime.strptime('2024-11-01',"%Y-%m-%d");
+    end_scrape = datetime.strptime('2024-12-31',"%Y-%m-%d");
 
 
     

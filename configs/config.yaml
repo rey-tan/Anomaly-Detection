@@ -1,0 +1,9 @@
+stock: NABIL
+start_date: 2025-01-01
+end_date: 2026-05-08
+timeframe: 1D
+features:
+  - close
+  - returns
+  - volume
+  - volatility

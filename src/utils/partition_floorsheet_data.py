@@ -11,22 +11,22 @@ with open(paths.CONFIG / "allowed_symbols.json","r") as f:
     allowed_symbols = set(json.load(f));
 
     
-def preprocess_raw_data(date = "2025-01-01"):
+def partiton_floorsheet_data(date = "2025-01-01"):
 
-    input = paths.RAW_DATA / f"floor-{date}.csv"
+    input_file = paths.RAW_DATA / f"floor-{date}.csv"
     output_dir = paths.PROCESSED_DATA / date
     
 
-    df = pd.read_csv(Path(input), engine="python")
+    df = pd.read_csv(Path(input_file), engine="python")
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
     df["transaction_time"] = df["transaction_time"].astype(str)
 
-    # 1. remove commas
+    #remove commas
     df["transaction_time"] = df["transaction_time"].str.replace(",", "", regex=False)
 
-    # 2. fix ms safely using function
+    # ix ms safely using function
     def fix_ms(ts):
         match = re.match(r"(.*:\d{2}:\d{2}):(\d{1,3}) (AM|PM)", ts)
         if match:
@@ -58,12 +58,10 @@ def preprocess_raw_data(date = "2025-01-01"):
 
     
 
+    tickers = df[df["symbol"].isin(allowed_symbols)]
     tickers = df["symbol"].unique()
 
-    for ticker in tickers:
-
-        if ticker not in allowed_symbols:
-            continue;
+    for ticker in tickers:  
 
         ticker_df = df[df["symbol"] == ticker]
 
@@ -74,9 +72,7 @@ def preprocess_raw_data(date = "2025-01-01"):
         ticker_df.to_csv(output_dir / f"{safe_ticker}.csv", index=False)
 
 
-
-
-if __name__ == '__main__':
+def partiton_all_floorsheet_data():
 
     for file in paths.RAW_DATA.rglob("*.csv"):
 
@@ -85,4 +81,9 @@ if __name__ == '__main__':
             # floor-2025-01-01.csv -> 2025-01-01
             date = file.stem.removeprefix("floor-")
 
-            preprocess_raw_data(date)
+            partiton_floorsheet_data(date)
+
+
+
+
+

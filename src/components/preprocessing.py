@@ -1,6 +1,6 @@
 import pandas as pd
 
-def preprocess(df: pd.Dataframe,timeframe="1D") -> pd.DataFrame:
+def preprocess(df: pd.DataFrame,timeframe="1D") -> pd.DataFrame:
 
     df = df.copy()
 

@@ -1,17 +1,23 @@
 import pandas as pd
-from utils.paths import PROCESSED_DATA
+from src.utils.paths import PROCESSED_DATA
 from datetime import datetime
 
-def load_data(stock_name,start_date,end_date):
+def load_data(symbol,start_date,end_date):
     all_days = []
    
     for date_folder in sorted(PROCESSED_DATA.iterdir()):
         if not date_folder.is_dir():
             continue
 
-        date = datetime.strptime(date_folder.name, "%Y-%m-%d")
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+        date = datetime.strptime(date_folder.name, "%Y-%m-%d").date()
         if start_date <= date <= end_date:
-            file_path = date_folder / f"{stock_name}.csv"
+            file_path = date_folder / f"{symbol}.csv"
 
             if file_path.exists():
                 df = pd.read_csv(file_path)

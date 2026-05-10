@@ -1,12 +1,8 @@
 from flask import Flask, request, jsonify
-from pipeline.run_pipeline import run_pipeline
-from engines.isolation_engine import isolation_engine
-from engines.zscore_engine import zscore_engine
-from engines.dbscan_engine import dbscan_engine
-from analysis.matplotlib_visualizer import plot_results
-from analysis.mpf_visualizer import plot_ohlcv
+from src.pipelines.anomaly_detection_pipeline import run_pipeline
+from src.analysis.matplotlib_visualizer import plot_results
+from src.analysis.mpf_visualizer import plot_ohlcv
 from datetime import datetime
-from services.orchestrator import orchestrate
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -27,6 +23,8 @@ def analyze():
         "timeframe", "features", "models"
     ]
 
+
+    features = ["close", "volume", "returns", "volatility"]
     missing = [f for f in required_fields if f not in data]
 
     if missing:
@@ -44,10 +42,9 @@ def analyze():
     mode = data["mode"]
     dates = data["dates"]
 
-    train_start_date = validate_date(dates["train"]["start"])
-    train_end_date = validate_date(dates["train"]["end"])
-    test_start_date = validate_date(dates["test"]["start"])
-    test_end_date = validate_date(dates["test"]["end"])
+    start_date = validate_date(dates["train"]["start"])
+    end_date = validate_date(dates["train"]["end"])
+    
 
     timeframe = data["timeframe"]
     features = data["features"]

@@ -1,5 +1,4 @@
-from models.dbscan import DBSCAN
-import json
+from src.models.dbscan import DBSCAN
 from src.utils.paths import CONFIG
 
 def train_model(X,best_params):

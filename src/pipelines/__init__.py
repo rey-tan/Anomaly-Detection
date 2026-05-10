@@ -1,0 +1,1 @@
+from .anomaly_detection_pipeline import run_pipeline

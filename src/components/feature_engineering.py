@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 
-def build_features(df:pd.Dataframe,features:list)->pd.DataFrame :
+def build_features(df:pd.DataFrame,features:list)->pd.DataFrame :
 
+    df = df.copy()
     # Compute features
     df["returns"] = df["close"].pct_change()
     df["close"] = df["close"].replace(0, np.nan)

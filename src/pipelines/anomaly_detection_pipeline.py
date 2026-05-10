@@ -1,22 +1,18 @@
-from components.data_loader import load_data
-from components.preprocessing import preprocess
-from components.feature_engineering import build_features
-from components.scaling import scale_features
-from components.anomaly_detection import train_model
-from components.evaluation import evaluate_model
-from src.utils.load import load_config,load_json
-from src.utils.paths import CONFIG,ARTIFACTS
+from src.components.data_loader import load_data
+from src.components.preprocessing import preprocess
+from src.components.feature_engineering import build_features
+from src.components.scaling import scale_features
+from src.components.anomaly_detection import train_model
+from src.components.evaluation import compute_anomaly_stats
 
 
 
-def run_pipeline():
-    config = load_config(CONFIG / "config.yaml")
-    best_params = load_json(ARTIFACTS / "best_params.json")
+def run_pipeline(config,best_params):
 
     data = load_data(
-        stock=config["stock"],
-        start=config["start_date"],
-        end=config["end_date"]
+        symbol=config["stock"],
+        start_date=config["start_date"],
+        end_date=config["end_date"]
     )
     features = config["features"]
 
@@ -28,9 +24,17 @@ def run_pipeline():
 
     model,labels = train_model(X_scaled,best_params)
 
-    evaluate_model(labels, features)
+    metrics = compute_anomaly_stats(feature_df,labels)
 
-    return model,labels
+    feature_df["cluster"]=labels
+
+    print(feature_df["cluster"].value_counts())
+    return {
+        "model":model,
+        "labels":labels,
+        "metrics":metrics,
+        "data":feature_df
+    }
 
 
     

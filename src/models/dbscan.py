@@ -1,6 +1,5 @@
 import math
-from typing import List
-
+import numpy as np
 
 class Point:
     def __init__(self, coords):
@@ -13,7 +12,7 @@ class DBSCAN:
     def __init__(self, eps: float = 0.5, min_pts: int = 5):
         self.eps = eps
         self.min_pts = min_pts
-        self.points: List[Point] = []
+        self.points: list[Point] = []
 
    
     def fit(self, X):
@@ -72,4 +71,4 @@ class DBSCAN:
     
     def fit_predict(self,X):
         self.fit(X);
-        return self.get_labels();
+        return np.array(self.get_labels());

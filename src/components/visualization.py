@@ -2,17 +2,23 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 def plot_scatter(symbol,df):
-    df = df.copy()
+    df = df.copy().reset_index()
 
-    df["color"] = df["cluster"].apply(lambda x: "red" if x == -1 else "blue")
+    df["color"] = df["cluster"].apply(
+        lambda x: "Anomaly" if int(x) == -1 else "Normal"
+    )
 
     fig = px.scatter(
         df,
         x="close",
         y="volume",
         color="color",
+        color_discrete_map={
+            "Anomaly": "red",
+            "Normal": "blue"
+        },
         title=f"DBSCAN Clustering Results on {symbol}",
-        hover_data=["returns", "volatility"],
+        hover_data=["returns", "volatility","date"],
     )
 
     fig.update_layout(
@@ -20,12 +26,12 @@ def plot_scatter(symbol,df):
         height=600,
         legend_title="Legend",
     )
-    # fig.show
 
     return fig
 
 def plot_timeseries(symbol,df):
 
+    df = df.copy()
     fig = go.Figure()
 
     # price line

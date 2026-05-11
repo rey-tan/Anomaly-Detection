@@ -8,55 +8,48 @@ from datetime import date,datetime
 
 warnings.filterwarnings("ignore")
 
-# ------------------------
-# LOAD CONFIG
-# ------------------------
+
 config = load_config(CONFIG / "config.yaml")
 best_params = load_json(ARTIFACTS / "best_params.json")
 
 
-# st.title(f"📊 Anomaly Detection Dashboard - {config['stock']}")
+st.title(f"📊 Anomaly Detection Dashboard - {config['stock']}")
 
-# # st.sidebar.title("⚙️ Controls")
+st.sidebar.title("⚙️ Controls")
 
-# stock = st.sidebar.text_input("Stock Symbol", value="NABIL")
+stock = st.sidebar.text_input("Stock Symbol", value="NABIL")
 
-# start_date = st.sidebar.date_input(
-#     "Start Date",
-#     value=date(2026, 1, 1)
-# )
+start_date = st.sidebar.date_input(
+    "Start Date",
+    value=date(2026, 1, 1)
+)
 
-# end_date = st.sidebar.date_input(
-#     "End Date",
-#     value=date(2026, 1, 30)
-# )
-# timeframe = st.sidebar.selectbox(
-#     "Timeframe",
-#     ["1min", "5min", "1D"],
-#     index=2  # default = 1hour
-# )
-
-# runtime_config = {
-#     "stock": stock,
-#     "start_date": str(start_date),
-#     "end_date": str(end_date),
-#     "timeframe": timeframe,
-#     "features": config["features"]
-# }
+end_date = st.sidebar.date_input(
+    "End Date",
+    value=date(2026, 1, 30)
+)
+timeframe = st.sidebar.selectbox(
+    "Timeframe",
+    ["1min", "5min", "1D"],
+    index=1
+)
 
 
-# ------------------------
-# RUN PIPELINE BUTTON
-# ------------------------
-if st.button("Run Analysis"):
+
+if st.sidebar.button("Run Analysis"):
+    config = {
+        "stock": stock,
+        "start_date": str(start_date),
+        "end_date": str(end_date),
+        "timeframe": timeframe,
+        "features": config["features"]
+    }
     results = run_pipeline(config, best_params)
 
     st.session_state["results"] = results
 
 
-# ------------------------
-# LOAD RESULTS (IMPORTANT)
-# ------------------------
+
 if "results" not in st.session_state:
     st.warning("Click 'Run Analysis' to generate results")
     st.stop()
@@ -65,9 +58,7 @@ results = st.session_state["results"]
 df = results["data"]
 
 
-# ------------------------
-# METRICS SECTION
-# ------------------------
+
 st.subheader("📈 Summary")
 
 col1, col2, col3 = st.columns(3)
@@ -77,17 +68,12 @@ col2.metric("Anomalies", (df["cluster"] == -1).sum())
 col3.metric("Anomaly %", f"{(df['cluster'] == -1).mean()*100:.2f}%")
 
 
-# ------------------------
-# TABLE VIEW
-# ------------------------
 st.subheader("🔍 Anomalies")
 
 st.dataframe(df[df["cluster"] == -1])
 
 
-# ------------------------
-# PLOT
-# ------------------------
+
 st.subheader("📉 Visualization")
 
 fig1 = plot_scatter(config["stock"], df)

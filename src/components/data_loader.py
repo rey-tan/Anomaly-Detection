@@ -4,6 +4,7 @@ from datetime import datetime
 
 def load_data(symbol,start_date,end_date):
     all_days = []
+
    
     for date_folder in sorted(PROCESSED_DATA.iterdir()):
         if not date_folder.is_dir():

@@ -4,8 +4,9 @@ def preprocess(df: pd.DataFrame,timeframe="1D") -> pd.DataFrame:
 
     df = df.copy()
 
-    df["Date"] = pd.to_datetime(df["transaction_time"])
-    df = df.set_index("Date").  sort_index()
+    
+    df["date"] = pd.to_datetime(df["transaction_time"])
+    df = df.set_index("date").sort_index()
 
     # drop unnecessary columns
     df = df.drop(columns=["transaction_time"], errors="ignore")

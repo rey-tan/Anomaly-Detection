@@ -16,7 +16,7 @@ def run_pipeline(config,best_params):
     )
     features = config["features"]
 
-    clean_data = preprocess(data)
+    clean_data = preprocess(data,timeframe=config["timeframe"])
 
     feature_df = build_features(clean_data,features)
 

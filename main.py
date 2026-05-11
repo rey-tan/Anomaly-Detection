@@ -17,7 +17,13 @@ st.title(f"📊 Anomaly Detection Dashboard - {config['stock']}")
 
 st.sidebar.title("⚙️ Controls")
 
-stock = st.sidebar.text_input("Stock Symbol", value="NABIL")
+stock_options = sorted(load_json(ARTIFACTS / "allowed_symbols.json"))
+
+stock = st.sidebar.selectbox(
+    "Symbol",
+    stock_options,
+    index=0
+    )
 
 start_date = st.sidebar.date_input(
     "Start Date",
@@ -79,8 +85,8 @@ st.subheader("📉 Visualization")
 fig1 = plot_scatter(config["stock"], df)
 fig2 = plot_timeseries(config["stock"], df)
 
-st.plotly_chart(fig1, use_container_width=True)
-st.plotly_chart(fig2, use_container_width=True)
+st.plotly_chart(fig1)
+st.plotly_chart(fig2)
 
 
 # Inspect and optionally save the top-N anomalies from the test period

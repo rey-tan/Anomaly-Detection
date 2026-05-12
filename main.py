@@ -2,16 +2,16 @@ from src.pipelines import run_pipeline
 from src.components.visualization import plot_scatter,plot_timeseries
 from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_config,load_json
-from src.utils.paths import CONFIG,ARTIFACTS
+from src.utils.paths import CONFIG,ARTIFACTS, HYPERPARAMS
 import warnings
 import streamlit as st
 from datetime import date,datetime
+from src.utils.timeframes import VALID_TIMEFRAMES
 
 warnings.filterwarnings("ignore")
 
 
 config = load_config(CONFIG / "config.yaml")
-best_params = load_json(ARTIFACTS / "best_params.json")
 
 
 st.title(f"📊 Anomaly Detection Dashboard - {config['stock']}")
@@ -37,13 +37,16 @@ end_date = st.sidebar.date_input(
 )
 timeframe = st.sidebar.selectbox(
     "Timeframe",
-    ["1min", "5min", "1D"],
+    VALID_TIMEFRAMES,
     index=1
 )
 
 mode = st.sidebar.selectbox(
     "Mode",
-    ["Static","Realtime Simulation"]
+    [
+        "Static",
+        # "Realtime Simulation"
+    ]
 )
 
 
@@ -55,6 +58,8 @@ if st.sidebar.button("Run Analysis"):
         "timeframe": timeframe,
         "features": config["features"]
     }
+
+    best_params = load_json(HYPERPARAMS / f"{stock}.json")[f"{timeframe}"]
 
     if(mode == "Static"):
         results = run_pipeline(config, best_params)

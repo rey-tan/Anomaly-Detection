@@ -3,18 +3,18 @@ from pathlib import Path
 import pandas as pd
 from datetime import date
 import re
-import paths
+from src.utils.paths import RAW_DATA,PROCESSED_DATA,ARTIFACTS
 import json
 
 
-with open(paths.CONFIG / "allowed_symbols.json","r") as f:
+with open(ARTIFACTS / "allowed_symbols.json","r") as f:
     allowed_symbols = set(json.load(f));
 
     
 def partiton_floorsheet_data(date = "2025-01-01"):
 
-    input_file = paths.RAW_DATA / f"floor-{date}.csv"
-    output_dir = paths.PROCESSED_DATA / date
+    input_file = RAW_DATA / f"floor-{date}.csv"
+    output_dir = PROCESSED_DATA / date
     
 
     df = pd.read_csv(Path(input_file), engine="python")
@@ -72,12 +72,14 @@ def partiton_floorsheet_data(date = "2025-01-01"):
         ticker_df.to_csv(output_dir / f"{safe_ticker}.csv", index=False)
 
 
-def partiton_all_floorsheet_data():
+def partition_all_floorsheet_data():
 
-    for file in paths.RAW_DATA.rglob("*.csv"):
+    for file in RAW_DATA.rglob("*.csv"):
 
+        # if file.is_file() and file.stem.startswith("floor-2024"):
         if file.is_file():
 
+            print(1)
             # floor-2025-01-01.csv -> 2025-01-01
             date = file.stem.removeprefix("floor-")
 
@@ -85,5 +87,6 @@ def partiton_all_floorsheet_data():
 
 
 
-
+if(__name__ == '__main__') :
+    partition_all_floorsheet_data()
 

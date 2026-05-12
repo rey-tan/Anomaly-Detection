@@ -1,5 +1,6 @@
 from src.pipelines import run_pipeline
 from src.components.visualization import plot_scatter,plot_timeseries
+from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_config,load_json
 from src.utils.paths import CONFIG,ARTIFACTS
 import warnings
@@ -40,6 +41,10 @@ timeframe = st.sidebar.selectbox(
     index=1
 )
 
+mode = st.sidebar.selectbox(
+    "Mode",
+    ["Static","Realtime Simulation"]
+)
 
 
 if st.sidebar.button("Run Analysis"):
@@ -50,7 +55,12 @@ if st.sidebar.button("Run Analysis"):
         "timeframe": timeframe,
         "features": config["features"]
     }
-    results = run_pipeline(config, best_params)
+
+    if(mode == "Static"):
+        results = run_pipeline(config, best_params)
+
+    else:
+        results = run_realtime_pipeline(config,best_params)
 
     st.session_state["results"] = results
 

@@ -28,16 +28,9 @@ def run_pipeline(config,best_params):
 
     feature_df["cluster"]=labels
 
-    print(feature_df["cluster"].value_counts())
     return {
         "model":model,
         "labels":labels,
         "metrics":metrics,
         "data":feature_df
     }
-
-
-    
-
-
-    

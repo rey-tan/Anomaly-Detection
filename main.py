@@ -1,5 +1,5 @@
 from src.pipelines import run_pipeline
-from src.components.visualization import plot_scatter,plot_timeseries
+from src.components.visualization import plot_scatter,plot_timeseries,plot_analysis
 from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_config,load_json
 from src.utils.paths import CONFIG,ARTIFACTS, HYPERPARAMS
@@ -7,6 +7,7 @@ import warnings
 import streamlit as st
 from datetime import date,datetime
 from src.utils.timeframes import VALID_TIMEFRAMES
+from src.analysis.candlestick_visualizer import CandlestickAnomalyVisualizer
 
 warnings.filterwarnings("ignore")
 
@@ -14,7 +15,7 @@ warnings.filterwarnings("ignore")
 config = load_config(CONFIG / "config.yaml")
 
 
-st.title(f"📊 Anomaly Detection Dashboard - {config['stock']}")
+st.set_page_config(layout="wide")
 
 st.sidebar.title("⚙️ Controls")
 
@@ -25,6 +26,9 @@ stock = st.sidebar.selectbox(
     stock_options,
     index=0
     )
+
+st.title(f"📊 Anomaly Detection Dashboard - {stock}")
+
 
 start_date = st.sidebar.date_input(
     "Start Date",
@@ -75,33 +79,41 @@ if "results" not in st.session_state:
     st.warning("Click 'Run Analysis' to generate results")
     st.stop()
 
-results = st.session_state["results"]
-df = results["data"]
+else:
+
+    results = st.session_state["results"]
+    df = results["data"]
 
 
 
-st.subheader("📈 Summary")
+    st.subheader("📈 Summary")
 
-col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
 
-col1.metric("Total Rows", len(df))
-col2.metric("Anomalies", (df["cluster"] == -1).sum())
-col3.metric("Anomaly %", f"{(df['cluster'] == -1).mean()*100:.2f}%")
-
-
-st.subheader("🔍 Anomalies")
-
-st.dataframe(df[df["cluster"] == -1])
+    col1.metric("Total Rows", len(df))
+    col2.metric("Anomalies", (df["cluster"] == -1).sum())
+    col3.metric("Anomaly %", f"{(df['cluster'] == -1).mean()*100:.2f}%")
 
 
+    st.subheader("🔍 Anomalies")
 
-st.subheader("📉 Visualization")
+    st.dataframe(df[df["cluster"] == -1])
 
-fig1 = plot_scatter(config["stock"], df)
-fig2 = plot_timeseries(config["stock"], df)
 
-st.plotly_chart(fig1)
-st.plotly_chart(fig2)
+
+    st.subheader("📉 Visualization")
+
+    fig1 = plot_analysis(stock,df)
+    fig2 = plot_scatter(stock, df)
+    fig3 = plot_timeseries(stock, df)
+
+    st.plotly_chart(fig1)
+    st.plotly_chart(fig2)
+    st.plotly_chart(fig3)
+
+
+  
+
 
 
 # Inspect and optionally save the top-N anomalies from the test period

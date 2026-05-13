@@ -32,12 +32,16 @@ st.title(f"📊 Anomaly Detection Dashboard - {stock}")
 
 start_date = st.sidebar.date_input(
     "Start Date",
-    value=date(2026, 1, 1)
+    value=date(2026, 1, 1),
+    min_value=date(2023,1,1),
+    max_value=date.today()
 )
 
 end_date = st.sidebar.date_input(
     "End Date",
-    value=date(2026, 1, 30)
+    value=date(2026, 1, 30),
+    min_value=date(2023,1,1),
+    max_value=date.today()
 )
 timeframe = st.sidebar.selectbox(
     "Timeframe",

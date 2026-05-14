@@ -1,103 +1,90 @@
 import plotly.express as px
 import plotly.graph_objects as go
 
-def plot_analysis(symbol,df):
+def plot_analysis(symbol, df, timeframe):
     df_filtered = df.copy()
     
-    # df_filtered = df_filtered.between_time("11:00", "15:00")
+    if timeframe != '1D':
+        df_filtered = df_filtered.between_time("11:00", "15:00")
 
-    #create a sequence of numbers from 1 to len(df)
-    df_filtered['candle_idx'] = range(len(df))
-    # Create the figure
+
     fig = go.Figure()
 
-    # Add 'Close' close line
-    fig.add_trace(
-        go.Scatter(
-            # x=df_filtered.index,
-            x=df_filtered['candle_idx'],
-            y=df_filtered["close"],
-            mode="lines",
-            name="Close",
-            line=dict(color="blue", width=2),
-        )
-    )
+    # Close price (primary y-axis)
+    fig.add_trace(go.Scatter(
+        x=df_filtered.index,
+        y=df_filtered["close"],
+        mode="lines",
+        name="Close",
+        line=dict(color="blue", width=2),
+        yaxis="y1"
+    ))
 
-    # Add 'SMA 10' line
-    fig.add_trace(
-        go.Scatter(
-           # x=df_filtered.index,
-            x=df_filtered['candle_idx'],
-            y=df_filtered["SMA_10"],
-            mode="lines",
-            name="SMA 10",
-            line=dict(color="green", width=2, dash="dot"),
-        )
-    )
+    # SMA 10 (primary y-axis)
+    fig.add_trace(go.Scatter(
+        x=df_filtered.index,
+        y=df_filtered["SMA_10"],
+        mode="lines",
+        name="SMA 10",
+        line=dict(color="green", width=1.5, dash="dot"),
+        yaxis="y1"
+    ))
 
-    # Add 'SMA 50' line
-    fig.add_trace(
-        go.Scatter(
-            # x=df_filtered.index,
-            x=df_filtered['candle_idx'],
-            y=df_filtered["SMA_50"],
-            mode="lines",
-            name="SMA 50",
-            line=dict(color="orange", width=2, dash="dash"),
-        )
-    )
+    # SMA 50 (primary y-axis)
+    fig.add_trace(go.Scatter(
+        x=df_filtered.index,
+        y=df_filtered["SMA_50"],
+        mode="lines",
+        name="SMA 50",
+        line=dict(color="orange", width=1.5, dash="dash"),
+        yaxis="y1"
+    ))
 
-    # Add 'Upper BB' line
-    fig.add_trace(
-        go.Scatter(
-            # x=df_filtered.index,
-            x=df_filtered['candle_idx'],
-            y=df_filtered["Upper_BB"],
-            mode="lines",
-            name="Upper BB",
-            line=dict(color="red", width=1, dash="dot"),
-        )
-    )
+    # Bollinger Bands (secondary y-axis)
+    fig.add_trace(go.Scatter(
+        x=df_filtered.index,
+        y=df_filtered["Upper_BB"],
+        mode="lines",
+        name="Upper BB",
+        line=dict(color="red", width=1),
+        yaxis="y2"
+    ))
 
-    # Add 'Lower BB' line
-    fig.add_trace(
-        go.Scatter(
-            # x=df_filtered.index,
-            x=df_filtered['candle_idx'],
-            y=df_filtered["Lower_BB"],
-            mode="lines",
-            name="Lower BB",
-            line=dict(color="purple", width=1, dash="dot"),
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=df_filtered.index,
+        y=df_filtered["Lower_BB"],
+        mode="lines",
+        name="Lower BB",
+        line=dict(color="red", width=1),
+        fill='tonexty',
+        fillcolor='rgba(255,0,0,0.1)',
+        yaxis="y2"
+    ))
 
-    # Update layout for a larger figure size and title
     fig.update_layout(
-        title=f"{symbol} Stock close with Technical Indicators",
+        title=f"{symbol} Stock Price with Technical Indicators",
         xaxis_title="Date",
-        yaxis_title="Stock close",
-        legend=dict(
-            x=0, y=1, bgcolor="rgba(255,255,255,0)", bordercolor="rgba(255,255,255,0)"
-        ),
-        autosize=False,
+        yaxis=dict(title="Price", side='left'),
+        yaxis2=dict(title="Bollinger Bands", overlaying='y', side='right'),
+        legend=dict(x=0, y=1),
         width=1200,
         height=600,
+        hovermode='x unified'
     )
 
-    fig.update_xaxes(showticklabels=False)  
+    rangebreaks = [dict()]
+    if timeframe != '1D':
+        rangebreaks.append(dict(bounds=[15, 11], pattern="hour"))
 
-    # fig.update_xaxes(
-    #     rangebreaks=[
-    #         dict(bounds=["sat", "sat"]),  # remove weekends
-    #         dict(bounds=[15, 11], pattern="hour"),  # keep only 11–15
-    #     ]
-    # )
+    fig.update_xaxes(
+        type='date',
+        tickformat='%Y-%m-%d %H:%M',
+        rangebreaks=rangebreaks
+    )
 
-    return fig;
+    return fig
 
-    
-
-def plot_scatter(symbol,df):
+def plot_scatter(symbol,df,holidays,timeframe):
     df = df.copy().reset_index()
 
     df["color"] = df["cluster"].apply(
@@ -127,7 +114,7 @@ def plot_scatter(symbol,df):
 
 
 
-def plot_timeseries(symbol,df):
+def plot_timeseries(symbol,df,holidays,timeframe):
 
     df = df.copy()
     fig = go.Figure()

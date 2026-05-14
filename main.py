@@ -6,7 +6,7 @@ from src.utils.paths import CONFIG,ARTIFACTS, HYPERPARAMS
 import warnings
 import streamlit as st
 from datetime import date,datetime
-from src.utils.timeframes import VALID_TIMEFRAMES
+from src.utils.timeframes import VALID_TIMEFRAMES,generate_market_holidays
 from src.analysis.candlestick_visualizer import CandlestickAnomalyVisualizer
 
 warnings.filterwarnings("ignore")
@@ -59,25 +59,26 @@ mode = st.sidebar.selectbox(
 
 
 if st.sidebar.button("Run Analysis"):
-    config = {
-        "stock": stock,
-        "start_date": str(start_date),
-        "end_date": str(end_date),
-        "timeframe": timeframe,
-        "features": config["features"]
-    }
+    with st.spinner("Running analysis..."):
+        config = {
+            "stock": stock,
+            "start_date": str(start_date),
+            "end_date": str(end_date),
+            "timeframe": timeframe,
+            "features": config["features"]
+        }
 
-    best_params = load_json(HYPERPARAMS / f"{stock}.json")[f"{timeframe}"]
+        best_params = load_json(HYPERPARAMS / f"{stock}.json")[f"{timeframe}"]
 
-    if(mode == "Static"):
-        results = run_pipeline(config, best_params)
+        if(mode == "Static"):
+            results = run_pipeline(config, best_params)
 
-    else:
-        results = run_realtime_pipeline(config,best_params)
+        else:
+            results = run_realtime_pipeline(config,best_params)
 
-    st.session_state["results"] = results
+        st.session_state["results"] = results
 
-
+    st.success("Analysis complete! Scroll down to see results.")
 
 if "results" not in st.session_state:
     st.warning("Click 'Run Analysis' to generate results")
@@ -107,9 +108,12 @@ else:
 
     st.subheader("📉 Visualization")
 
-    fig1 = plot_analysis(stock,df)
-    fig2 = plot_scatter(stock, df)
-    fig3 = plot_timeseries(stock, df)
+    # market_holidays = generate_market_holidays(start_date,end_date)
+
+
+    fig1 = plot_analysis(stock,df,timeframe)
+    fig2 = plot_scatter(stock, df,timeframe)
+    fig3 = plot_timeseries(stock, df,timeframe)
 
     st.plotly_chart(fig1)
     st.plotly_chart(fig2)

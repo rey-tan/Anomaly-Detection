@@ -1,39 +1,65 @@
-# Anomaly Engine (stock anomaly detection)
+# Anomaly Engine (NEPSE stock anomaly detection)
 
-This project detects unusual stock price behaviour using a custom Isolation Forest–style model and plots anomaly scores over time. It targets NEPSE-style CSV data and supports both **interday** and **intraday** modes.
+A production-ready stock anomaly detection system with a FastAPI backend and Streamlit dashboard. Detects unusual price behavior using DBSCAN clustering and supports both static and realtime simulation modes with result caching and user authentication.
 
-## Repository layout
+## Architecture
 
 ```
 Anomaly Engine/
-├── main.py                 # Scripted run (train/score/plot)
-├── AnomalyDetector.ipynb   # Notebook workflow
-├── pyproject.toml            # Package metadata + src layout (pip install -e .)
-├── requirements.txt        # Pinned deps for local venvs
-├── config/                 # Configuration
+├── main.py                      # Streamlit dashboard (frontend)
+├── src/
+│   ├── api/                     # FastAPI backend
+│   │   ├── app.py               # FastAPI app with auth + analyze endpoints
+│   │   ├── database.py          # SQLAlchemy setup (SQLite)
+│   │   ├── models.py            # SQLAlchemy models (User, PipelineCache)
+│   │   ├── schemas.py           # Pydantic request/response models
+│   │   ├── crud.py              # Database operations
+│   │   ├── security.py          # JWT tokens, password hashing
+│   │   └── __init__.py
+│   ├── pipelines/               # Analysis pipelines
+│   │   ├── anomaly_detection_pipeline.py
+│   │   └── realtime_detection_pipeline.py
+│   ├── components/              # Feature engineering, scaling, visualization
+│   ├── models/                  # ML models (DBSCAN, etc.)
+│   ├── analysis/                # Candlestick visualizers
+│   └── utils/                   # Data loading, paths, helpers
+├── configs/
+│   └── config.yaml              # Feature definitions, timeframes
 ├── data/
-│   ├── interday/           # One CSV per symbol, e.g. NABIL.csv
-│   └── intraday/           # Date folders with per-symbol CSVs
-└── src/                    # All importable code (on PYTHONPATH via main/notebook or editable install)
-    ├── loaders/
-    ├── aggregators/
-    ├── features/
-    ├── filters/
-    ├── models/             # e.g. isolation_forest.py
-    ├── engines/
-    ├── pipeline/
-    ├── analysis/
-    └── utils/
+│   ├── processed/               # Processed OHLCV data by date
+│   └── raw/                     # Raw CSV exports
+├── artifacts/
+│   ├── models/                  # Trained model artifacts
+│   ├── hyperparams/             # Best hyperparameters per symbol/timeframe
+│   └── metrics/                 # Pipeline metrics
+├── pyproject.toml               # Package metadata
+├── requirements.txt             # Dependencies
+└── README.md
 ```
+
+## How it works
+
+1. **Backend (FastAPI)**: Handles authentication, pipeline execution, caching, and result persistence
+   - `/login` — JWT-based user authentication
+   - `/analyze` — Execute pipeline with automatic caching
+   - `/cache/{hash}` — Retrieve cached results
+   - `/cache` — Save results explicitly
+
+2. **Frontend (Streamlit)**: Interactive dashboard for stock selection, timeframe control, and visualization
+   - Login required before access
+   - Real-time visual feedback
+   - Cached result reuse to avoid re-running expensive pipelines
+
+3. **Database (SQLite)**: Persistent storage for users and pipeline results
 
 ## Prerequisites
 
-- Python **3.10+** (3.11+ recommended)
-- `pip`
+- Python **3.10+**
+- `pip` and `venv`
 
-## Quickstart
+## Quick Start
 
-From this directory (`Anomaly Engine/`):
+### 1. Set up the environment
 
 ```bash
 python -m venv venv
@@ -42,57 +68,136 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-**Option A — run the script**
+### 2. Start the FastAPI backend
 
 ```bash
-python main.py
+uvicorn src.api.app:app --reload
 ```
 
-`main.py` adds `src/` to `sys.path` so imports like `pipeline`, `engines`, and `analysis` resolve without an install.
+This will:
+- Create the SQLite database (`anomaly_engine.db`)
+- Create the default admin user: `admin` / `admin123`
+- Start the backend on `http://localhost:8000`
 
-**Option B — editable install (optional)**
+### 3. Start the Streamlit frontend (in a new terminal)
 
 ```bash
-pip install -e .
+source venv/bin/activate   # If not already activated
+streamlit run main.py
 ```
 
-Then you can import `loaders`, `pipeline`, etc. from any working directory (e.g. other notebooks or tools).
+The dashboard opens at `http://localhost:8501`
 
-**Option C — Jupyter**
+### 4. Log in
 
-Open `AnomalyDetector.ipynb` in VS Code or JupyterLab. The first cell prepends `src/` to `sys.path` when the notebook’s working directory is the repo root (`Anomaly Engine/`).
+- Username: `admin`
+- Password: `admin123`
 
-## Configuring a run
+## Features
 
-- **Script:** edit variables at the top of `main.py` (`stock_name`, `mode`, date ranges, `features`, `timeframe`, model hyperparameters).
-- **Notebook:** edit the parameters cell (`stock_name`, dates, `features`, `n_estimators`, `contamination`, etc.).
+### Authentication
 
-Interday loads `data/interday/<SYMBOL>.csv`. Intraday expects files under `data/intraday/<YYYY-MM-DD>/<SYMBOL>.csv` (see `src/loaders/` for details).
+- JWT-based session tokens
+- Password hashing with bcrypt
+- User persistence in SQLite
 
-## Expected data (high level)
+### Analysis Modes
 
-Columns used by the pipeline include timestamp/`transaction_time`, OHLC, and `quantity` where applicable. The pipeline filters and aggregates before feature engineering (SMA/EMA, returns, etc.). Normalize or align raw exports with what `loaders` and `aggregators` expect.
+- **Static**: Analyze historical data for a date range
+- **Realtime Simulation**: Simulate rolling-window anomaly detection
 
-## Outputs
+### Result Caching
 
-- Console summary of top anomalous periods (when using `main.py`).
-- Matplotlib plots from `analysis/matplotlib_visualizer.py` (train and test periods).
+- Automatic cache on `/analyze` endpoint
+- Configurable cache lookup before expensive pipeline runs
+- Explicit cache save via `/cache` endpoint for re-runs
+
+### Visualizations
+
+- Time series with anomaly markers
+- Scatter plot (price vs. volume, colored by cluster)
+- Technical analysis (SMA, RSI, Bollinger Bands)
+
+## Configuration
+
+Edit `configs/config.yaml` to define:
+- Feature columns for analysis
+- Valid timeframes
+- Market holidays
+
+Example:
+
+```yaml
+features:
+  - close
+  - volume
+  - returns
+  - volatility
+```
+
+Edit hyperparameters in `artifacts/hyperparams/{SYMBOL}.json`:
+
+```json
+{
+  "1H": {
+    "dbscan": {
+      "eps": 0.5,
+      "min_pts": 5
+    }
+  }
+}
+```
+
+## Deployment
+
+### For local development
+
+```bash
+# Terminal 1: Backend
+uvicorn src.api.app:app --reload
+
+# Terminal 2: Frontend
+streamlit run main.py
+```
+
+### For production
+
+1. Change `SECRET_KEY` in `src/api/security.py`
+2. Use a production WSGI server (e.g., Gunicorn)
+3. Use PostgreSQL instead of SQLite for scaling
+4. Deploy frontend behind a reverse proxy
+
+Example production backend startup:
+
+```bash
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.api.app:app
+```
+
+## Development Notes
+
+- Add new users via the backend API (extend the `/users` endpoint)
+- Modify caching strategy in `src/api/crud.py` and `src/api/app.py`
+- Pipeline logic is independent of the API; swap pipelines in `src/pipelines/`
+- Visualizations use Plotly; customize in `src/components/visualization.py`
 
 ## Troubleshooting
 
-**Imports fail in the notebook**
+**Backend fails to start:**
+- Ensure port 8000 is not in use: `lsof -i :8000` (Mac/Linux) or `netstat -ano | findstr :8000` (Windows)
+- Check that the venv is activated
 
-- Set the notebook cwd to `Anomaly Engine/` (the folder that contains `src/`), or run `pip install -e .` and restart the kernel.
+**Frontend shows "Could not validate credentials":**
+- Verify the backend is running on `http://localhost:8000`
+- Check that you're using correct username/password (default: `admin` / `admin123`)
 
-**“No such file or directory” for CSVs**
+**Results not caching:**
+- Verify the database file exists: `ls anomaly_engine.db`
+- Check backend logs for database errors
+- Ensure the same config payload is used (hash is based on stock, dates, features, timeframe, mode)
 
-- Interday: ensure `data/interday/<SYMBOL>.csv` exists and matches `stock_name`.
-- Intraday: ensure date folders and files exist under `data/intraday/`.
-
-**Jupyter uses the wrong Python**
-
-- Start Jupyter after activating the same venv where you ran `pip install -r requirements.txt`.
+**API keeps creating the default admin user:**
+- Delete `anomaly_engine.db` and restart the backend to reset
 
 ## License
 
-This project was developed for educational purposes; data comes from external sources.
+Educational project for stock anomaly detection on NEPSE data.

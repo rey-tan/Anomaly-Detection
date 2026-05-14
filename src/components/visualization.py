@@ -84,7 +84,7 @@ def plot_analysis(symbol, df, timeframe):
 
     return fig
 
-def plot_scatter(symbol,df,holidays,timeframe):
+def plot_scatter(symbol, df, timeframe):
     df = df.copy().reset_index()
 
     df["color"] = df["cluster"].apply(
@@ -101,7 +101,7 @@ def plot_scatter(symbol,df,holidays,timeframe):
             "Normal": "blue"
         },
         title=f"DBSCAN Clustering Results on {symbol}",
-        hover_data=["returns", "volatility","date"],
+        hover_data=["returns", "volatility"],
     )
 
     fig.update_layout(
@@ -114,7 +114,7 @@ def plot_scatter(symbol,df,holidays,timeframe):
 
 
 
-def plot_timeseries(symbol,df,holidays,timeframe):
+def plot_timeseries(symbol, df, timeframe):
 
     df = df.copy()
     fig = go.Figure()

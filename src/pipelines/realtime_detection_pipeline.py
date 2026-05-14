@@ -6,47 +6,39 @@ from src.components.anomaly_detection import train_model
 from src.components.evaluation import compute_anomaly_stats
 import pandas as pd
 
-
 WINDOW = 500  # last 500 rows
+
 
 def get_window(df):
     return df.tail(WINDOW)
 
+
 def detect_anomaly(df, features, best_params):
-    
     window_df = get_window(df)
-
-    X_scaled = scale_features(window_df,features)
-
-    model,labels = train_model(X_scaled,best_params) #retrain on window
-
-    window_df["cluster"]=labels
-
-    return window_df
+    X_scaled = scale_features(window_df, features)
+    model, labels = train_model(X_scaled, best_params)
+    window_df = window_df.copy()
+    window_df["cluster"] = labels
+    return window_df, model
 
 
-def streaming_simulation(df,features,best_params):
-    results = []
+def streaming_simulation(df, features, best_params):
+    df = df.copy()
+    labels = pd.Series(0, index=df.index, dtype=int)
+    last_model = None
 
     for i in range(100, len(df)):
-        #get the first i rows
-        current_df = df.iloc[:i].copy()
-        
-        window_df = detect_anomaly(current_df, features, best_params)
-        
-        latest = window_df.iloc[-1]
-        
-        results.append({
-            "time": latest.name,
-            "close": latest["close"],
-            "anomaly": latest["anomaly"]
-        })
+        current_df = df.iloc[: i + 1].copy()
+        window_df, model = detect_anomaly(current_df, features, best_params)
+        labels.iloc[i] = int(window_df["cluster"].iloc[-1])
+        last_model = model
 
-    return pd.DataFrame(results)
+    df["cluster"] = labels
+    df["anomaly"] = df["cluster"] == -1
+    return df, last_model
 
 
-def run_realtime_pipeline(config,best_params):
-
+def run_realtime_pipeline(config, best_params):
     data = load_data(
         symbol=config["stock"],
         start_date=config["start_date"],
@@ -54,14 +46,18 @@ def run_realtime_pipeline(config,best_params):
     )
     features = config["features"]
 
-    clean_data = preprocess(data,timeframe=config["timeframe"])
+    clean_data = preprocess(data, timeframe=config["timeframe"])
+    feature_df = build_features(clean_data, features)
 
-    feature_df = build_features(clean_data,features)
+    result_df, model = streaming_simulation(feature_df, features, best_params)
+    metrics = compute_anomaly_stats(result_df, result_df["cluster"])
 
-    results = streaming_simulation(feature_df,features,best_params)
-    
-
-    return results;
+    return {
+        "model": model,
+        "labels": result_df["cluster"],
+        "metrics": metrics,
+        "data": result_df,
+    }
 
 
     

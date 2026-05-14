@@ -1,10 +1,25 @@
-# Runtime + notebook. Install: pip install -r requirements.txt
-# Optional: pip install -e .  (editable install; exposes packages under src/)
+# Backend
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+sqlalchemy>=2.0
+passlib[bcrypt]>=1.7.0
+python-jose[cryptography]>=3.0.0
+python-multipart>=0.0.6
 
+# Frontend
+streamlit>=1.32.0
+requests>=2.31.0
+
+# Data & ML
 numpy==2.2.3
 pandas==2.2.3
-matplotlib==3.10.0
 scipy==1.15.2
 scikit-learn==1.6.1
+
+# Visualization
+matplotlib==3.10.0
+plotly>=5.0.0
+
+# Development (optional)
 jupyterlab>=4.3.5
 flask==3.1.0

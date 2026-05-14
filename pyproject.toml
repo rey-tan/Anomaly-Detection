@@ -8,6 +8,13 @@ version = "0.1.0"
 description = "NEPSE anomaly detection pipeline"
 requires-python = ">=3.10"
 dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "sqlalchemy>=2.0",
+    "passlib[bcrypt]>=1.7.0",
+    "python-jose[cryptography]>=3.0.0",
+    "python-multipart>=0.0.6",
+    "requests>=2.0",
     "pandas",
     "numpy",
     "scikit-learn",

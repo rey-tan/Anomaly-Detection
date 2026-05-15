@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -72,6 +73,17 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
+def require_role(allowed_roles: List[str]):
+    def role_dependency(current_user: models.User = Depends(get_current_user)):
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+        return current_user
+    return role_dependency
+
+
 @app.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = crud.authenticate_user(db, form_data.username, form_data.password)
@@ -81,7 +93,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = security.create_access_token(data={"sub": user.username})
+    crud.log_user_activity(db, user.id, "login", resource="/login", details={"status": "success"})
+    access_token = security.create_access_token(data={"sub": user.username, "role": user.role})
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -91,6 +104,7 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     cache_key = crud.get_config_hash(config)
     cache_entry = crud.get_cache_entry(db, cache_key)
     if cache_entry:
+        crud.log_user_activity(db, current_user.id, "analysis_cache_hit", resource=config["stock"], details={"config_hash": cache_key})
         return {
             "metrics": cache_entry.metrics or {},
             "data": cache_entry.data or [],
@@ -137,6 +151,30 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         data=data,
     )
 
+    crud.log_user_activity(db, current_user.id, "analysis_run", resource=config["stock"], details={"config_hash": cache_key, "mode": config["mode"]})
+    crud.create_user_analysis(
+        db=db,
+        user_id=current_user.id,
+        config_hash=cache_key,
+        stock=config["stock"],
+        mode=config["mode"],
+        timeframe=config["timeframe"],
+        start_date=config["start_date"],
+        end_date=config["end_date"],
+        features=config["features"],
+        best_params=best_params,
+        metrics=metrics,
+        status="success",
+        duration_seconds=None,
+    )
+    crud.create_notification(
+        db=db,
+        user_id=current_user.id,
+        title="Analysis complete",
+        message=f"Your analysis for {config['stock']} completed successfully.",
+        type="analysis",
+    )
+
     return {"metrics": metrics, "data": data, "best_params": best_params}
 
 
@@ -172,11 +210,71 @@ def save_cache(request: schemas.CacheCreate, db: Session = Depends(database.get_
         metrics=request.metrics,
         data=request.data,
     )
+    crud.log_user_activity(db, current_user.id, "cache_save", resource=config["stock"], details={"config_hash": config_hash})
     return {
         "metrics": entry.metrics or {},
         "data": entry.data or [],
         "best_params": entry.best_params or {},
     }
+
+
+@app.get("/users", response_model=List[schemas.UserRead], dependencies=[Depends(require_role(["admin"]))])
+def read_users(db: Session = Depends(database.get_db)):
+    return crud.get_users(db)
+
+
+@app.post("/users", response_model=schemas.UserRead, dependencies=[Depends(require_role(["admin"]))])
+def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    user = crud.create_user(
+        db,
+        username=request.username,
+        password=request.password,
+        role=request.role or "user",
+        permissions=request.permissions,
+    )
+    return user
+
+
+@app.patch("/users/{user_id}/role", response_model=schemas.UserRead, dependencies=[Depends(require_role(["admin"]))])
+def update_user_role(user_id: int, request: schemas.UserRoleUpdate, db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return crud.update_user_role(db, user, request.role)
+
+
+@app.get("/users/{user_id}/activity", response_model=List[schemas.UserActivityRead], dependencies=[Depends(require_role(["admin"]))])
+def read_user_activity(user_id: int, db: Session = Depends(database.get_db)):
+    return crud.get_user_activity(db, user_id)
+
+
+@app.get("/me/analyses", response_model=List[schemas.UserAnalysisRead])
+def read_my_analyses(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    return crud.get_user_analyses(db, current_user.id)
+
+
+@app.get("/me/notifications", response_model=List[schemas.NotificationRead])
+def read_my_notifications(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    return crud.get_user_notifications(db, current_user.id)
+
+
+@app.post("/me/notifications/{notification_id}/read", response_model=schemas.NotificationRead)
+def mark_my_notification_read(notification_id: int, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    updated = crud.mark_notification_read(db, notification_id)
+    if updated is None or updated.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found")
+    return updated
+
+
+@app.post("/notifications", response_model=schemas.NotificationRead, dependencies=[Depends(require_role(["admin"]))])
+def create_notification(request: schemas.NotificationCreate, db: Session = Depends(database.get_db)):
+    return crud.create_notification(
+        db=db,
+        user_id=request.user_id,
+        title=request.title,
+        message=request.message,
+        type=request.type or "info",
+    )
 
 
 @app.on_event("startup")

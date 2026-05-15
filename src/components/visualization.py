@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -5,7 +6,16 @@ def plot_analysis(symbol, df, timeframe):
     df_filtered = df.copy()
     
     if timeframe != '1D':
-        df_filtered = df_filtered.between_time("11:00", "15:00")
+        if not isinstance(df_filtered.index, pd.DatetimeIndex):
+            if 'transaction_time' in df_filtered.columns:
+                df_filtered['transaction_time'] = pd.to_datetime(df_filtered['transaction_time'])
+                df_filtered = df_filtered.set_index('transaction_time')
+            elif 'date' in df_filtered.columns:
+                df_filtered['date'] = pd.to_datetime(df_filtered['date'])
+                df_filtered = df_filtered.set_index('date')
+
+        if isinstance(df_filtered.index, pd.DatetimeIndex):
+            df_filtered = df_filtered.between_time("11:00", "15:00")
 
 
     fig = go.Figure()

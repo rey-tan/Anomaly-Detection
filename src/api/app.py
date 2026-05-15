@@ -1,6 +1,10 @@
+from datetime import date, datetime
+
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+import numpy as np
+import pandas as pd
 
 from src.pipelines.anomaly_detection_pipeline import run_pipeline
 from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
@@ -11,6 +15,36 @@ from . import crud, database, models, schemas, security
 app = FastAPI(title="Anomaly Engine API")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+
+def convert_numpy_types(obj):
+    """Convert numpy, pandas, and datetime types to JSON-serializable native types."""
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    elif isinstance(obj, (np.floating,)):
+        return float(obj)
+    elif isinstance(obj, (np.ndarray,)):
+        return obj.tolist()
+    elif isinstance(obj, (np.datetime64,)):
+        return str(obj)
+    elif isinstance(obj, (np.timedelta64,)):
+        return str(obj)
+    elif isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    elif isinstance(obj, (pd.Timestamp,)):
+        return obj.isoformat()
+    elif isinstance(obj, (pd.Timedelta,)):
+        return str(obj)
+    elif isinstance(obj, pd.Series):
+        return convert_numpy_types(obj.tolist())
+    elif isinstance(obj, pd.DataFrame):
+        return convert_numpy_types(obj.to_dict(orient="records"))
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_numpy_types(item) for item in obj]
+    else:
+        return obj
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
@@ -83,6 +117,11 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
 
     data = df.to_dict(orient="records")
     metrics = results.get("metrics", {})
+
+    # Convert numpy/pandas types to native JSON-serializable values
+    data = convert_numpy_types(data)
+    metrics = convert_numpy_types(metrics)
+    best_params = convert_numpy_types(best_params)
 
     crud.create_cache_entry(
         db=db,

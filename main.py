@@ -102,7 +102,7 @@ if not st.session_state["authenticated"]:
             success, error = login(username, password)
             if success:
                 st.success("Login successful")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error(error)
 
@@ -112,7 +112,7 @@ st.sidebar.title("⚙️ Controls")
 st.sidebar.markdown(f"**Logged in as:** {st.session_state['username']}")
 if st.sidebar.button("Logout"):
     logout()
-    st.experimental_rerun()
+    st.rerun()
 
 stock_options = sorted(load_json(ARTIFACTS / "allowed_symbols.json"))
 stock = st.sidebar.selectbox("Symbol", stock_options, index=0)

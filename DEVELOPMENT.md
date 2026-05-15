@@ -35,17 +35,18 @@ Frontend available at `http://localhost:8501`
 
 ### `src/api/` — FastAPI Backend
 
-- `app.py` — Main app, routes (`/login`, `/analyze`, `/cache`)
+- `app.py` — Main app, routes (`/login`, `/me`, `/analyze`, `/users`, `/cache`)
 - `database.py` — SQLAlchemy engine, session factory
-- `models.py` — SQLAlchemy ORM models (`User`, `PipelineCache`)
+- `models.py` — SQLAlchemy ORM models (`User`, `PipelineCache`, `UserActivity`, `Notification`, `UserAnalysis`)
 - `schemas.py` — Pydantic request/response models
-- `crud.py` — Database CRUD operations + config hashing
-- `security.py` — JWT token, password hashing
+- `crud.py` — Database CRUD operations + config hashing + activity logging
+- `security.py` — JWT token, password hashing, role-based authorization
 
 **When to modify:**
 - Add a new endpoint → update `app.py`
 - Change database schema → update `models.py` and `schemas.py`
-- Add new auth flow → update `security.py` and `crud.py`
+- Add new auth/authorization flow → update `security.py` and `crud.py`
+- Add user management features → update `app.py`, `crud.py`, `models.py`
 
 ### `src/pipelines/` — Analysis Pipelines
 

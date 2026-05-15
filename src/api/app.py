@@ -98,6 +98,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@app.get("/me", response_model=schemas.UserRead)
+def read_current_user(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+
 @app.post("/analyze", response_model=schemas.AnalyzeResponse)
 def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
     config = request.dict()
@@ -243,6 +248,15 @@ def update_user_role(user_id: int, request: schemas.UserRoleUpdate, db: Session 
     return crud.update_user_role(db, user, request.role)
 
 
+@app.delete("/users/{user_id}", dependencies=[Depends(require_role(["admin"]))])
+def delete_user(user_id: int, db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    crud.delete_user(db, user)
+    return {"message": "User deleted"}
+
+
 @app.get("/users/{user_id}/activity", response_model=List[schemas.UserActivityRead], dependencies=[Depends(require_role(["admin"]))])
 def read_user_activity(user_id: int, db: Session = Depends(database.get_db)):
     return crud.get_user_activity(db, user_id)
@@ -284,6 +298,6 @@ def startup_event():
     try:
         admin = crud.get_user_by_username(db, "admin")
         if admin is None:
-            crud.create_user(db, "admin", "admin123")
+            crud.create_user(db, "admin", "admin123", role="admin")
     finally:
         db.close()

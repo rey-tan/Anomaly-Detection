@@ -58,6 +58,11 @@ def update_user_permissions(db: Session, user: models.User, permissions: Dict[st
     return user
 
 
+def delete_user(db: Session, user: models.User):
+    db.delete(user)
+    db.commit()
+
+
 def log_user_activity(db: Session, user_id: int, action: str, resource: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
     entry = models.UserActivity(
         user_id=user_id,

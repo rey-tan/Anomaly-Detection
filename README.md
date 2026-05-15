@@ -1,17 +1,18 @@
 # Anomaly Engine (NEPSE stock anomaly detection)
 
-A production-ready stock anomaly detection system with a FastAPI backend and Streamlit dashboard. Detects unusual price behavior using DBSCAN clustering and supports both static and realtime simulation modes with result caching and user authentication.
+A production-ready stock anomaly detection system with a FastAPI backend and Streamlit dashboard. Detects unusual price behavior using DBSCAN clustering and supports both static and realtime simulation modes with result caching, user authentication, role-based authorization, and comprehensive audit trails.
 
 ## Architecture
 
 ```
 Anomaly Engine/
-├── main.py                      # Streamlit dashboard (frontend)
+├── main.py                      # Streamlit dashboard (frontend + admin UI)
+├── flask.py                     # Alternative Flask API (legacy)
 ├── src/
 │   ├── api/                     # FastAPI backend
-│   │   ├── app.py               # FastAPI app with auth + analyze endpoints
+│   │   ├── app.py               # FastAPI app with auth, RBAC, analyze endpoints
 │   │   ├── database.py          # SQLAlchemy setup (SQLite)
-│   │   ├── models.py            # SQLAlchemy models (User, PipelineCache)
+│   │   ├── models.py            # SQLAlchemy models (User, Cache, Activity, etc.)
 │   │   ├── schemas.py           # Pydantic request/response models
 │   │   ├── crud.py              # Database operations
 │   │   ├── security.py          # JWT tokens, password hashing
@@ -31,7 +32,8 @@ Anomaly Engine/
 ├── artifacts/
 │   ├── models/                  # Trained model artifacts
 │   ├── hyperparams/             # Best hyperparameters per symbol/timeframe
-│   └── metrics/                 # Pipeline metrics
+│   ├── metrics/                 # Pipeline metrics
+│   └── allowed_symbols.json     # Valid stock symbols
 ├── pyproject.toml               # Package metadata
 ├── requirements.txt             # Dependencies
 └── README.md
@@ -39,18 +41,21 @@ Anomaly Engine/
 
 ## How it works
 
-1. **Backend (FastAPI)**: Handles authentication, pipeline execution, caching, and result persistence
-   - `/login` — JWT-based user authentication
-   - `/analyze` — Execute pipeline with automatic caching
+1. **Backend (FastAPI)**: Handles authentication, authorization, pipeline execution, caching, and user management
+   - `/login` — JWT-based user authentication with role assignment
+   - `/me` — Get current user profile and notifications
+   - `/analyze` — Execute pipeline with automatic caching and logging
    - `/cache/{hash}` — Retrieve cached results
-   - `/cache` — Save results explicitly
+   - `/users` — Admin user management (CRUD operations)
+   - `/users/{id}/activity` — Admin audit log access
 
-2. **Frontend (Streamlit)**: Interactive dashboard for stock selection, timeframe control, and visualization
+2. **Frontend (Streamlit)**: Interactive dashboard with role-based UI
    - Login required before access
-   - Real-time visual feedback
-   - Cached result reuse to avoid re-running expensive pipelines
+   - Role-specific features (admin panel for user management)
+   - Real-time visual feedback and notifications
+   - Admin controls for system management
 
-3. **Database (SQLite)**: Persistent storage for users and pipeline results
+3. **Database (SQLite)**: Persistent storage for users, cache, audit trails, and notifications
 
 ## Prerequisites
 
@@ -95,11 +100,12 @@ The dashboard opens at `http://localhost:8501`
 
 ## Features
 
-### Authentication
+### Authentication & Authorization
 
-- JWT-based session tokens
+- JWT-based session tokens with role assignment
 - Password hashing with bcrypt
-- User persistence in SQLite
+- Role-based access control (user, analyst, admin)
+- Admin panel for user management
 
 ### Analysis Modes
 
@@ -111,6 +117,13 @@ The dashboard opens at `http://localhost:8501`
 - Automatic cache on `/analyze` endpoint
 - Configurable cache lookup before expensive pipeline runs
 - Explicit cache save via `/cache` endpoint for re-runs
+
+### Audit & Monitoring
+
+- Complete activity logging for all user actions
+- Analysis history tracking with performance metrics
+- System notifications for completion and errors
+- Admin access to user activity logs
 
 ### Visualizations
 

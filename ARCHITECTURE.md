@@ -3,9 +3,9 @@
 ## Overview
 
 Anomaly Engine is a distributed stock anomaly detection system with:
-- **FastAPI backend** for pipeline execution, authentication, and caching
-- **Streamlit frontend** for interactive dashboard and visualization
-- **SQLite database** for user management and result persistence
+- **FastAPI backend** for pipeline execution, authentication, authorization, caching, and user management
+- **Streamlit frontend** for interactive dashboard, visualization, and admin controls
+- **SQLite database** for user management, audit trails, notifications, and result persistence
 
 ## Component Design
 
@@ -13,27 +13,37 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 
 **Entry point:** `src/api/app.py`
 
-#### Authentication (`src/api/security.py`)
+#### Authentication & Authorization (`src/api/security.py`)
 
-- JWT token-based auth with HS256
-- Password hashing using bcrypt (via passlib)
+- JWT token-based authentication with HS256
+- Password hashing using bcrypt
+- Role-based access control (RBAC) with user roles: `user`, `analyst`, `admin`
+- Permission-based authorization for fine-grained access control
 - Default admin user created on startup
 
 **Token flow:**
 1. Client POSTs credentials to `/login`
 2. Backend validates username/password against database
-3. Backend returns JWT access token
+3. Backend returns JWT access token with user role
 4. Client includes token in `Authorization: Bearer <token>` header
-5. Backend decodes and validates token on protected endpoints
+5. Backend decodes token, validates, and checks role permissions on protected endpoints
 
 #### Routes
 
-| Route | Method | Auth | Purpose |
-|-------|--------|------|---------|
-| `/login` | POST | No | Issue JWT token |
-| `/analyze` | POST | Yes | Run pipeline + auto-cache |
-| `/cache/{hash}` | GET | Yes | Retrieve cached result |
-| `/cache` | POST | Yes | Save result explicitly |
+| Route | Method | Auth | Role Required | Purpose |
+|-------|--------|------|---------------|---------|
+| `/login` | POST | No | - | Issue JWT token |
+| `/me` | GET | Yes | any | Get current user profile |
+| `/me/notifications` | GET | Yes | any | Get user notifications |
+| `/analyze` | POST | Yes | user+ | Run pipeline + auto-cache |
+| `/cache/{hash}` | GET | Yes | user+ | Retrieve cached result |
+| `/cache` | POST | Yes | user+ | Save result explicitly |
+| `/cache/{hash}` | DELETE | Yes | admin | Delete cached result |
+| `/users` | GET | Yes | admin | List all users |
+| `/users` | POST | Yes | admin | Create new user |
+| `/users/{id}/role` | PATCH | Yes | admin | Update user role |
+| `/users/{id}` | DELETE | Yes | admin | Delete user |
+| `/users/{id}/activity` | GET | Yes | admin | Get user activity log |
 
 #### Database Models (`src/api/models.py`)
 
@@ -41,7 +51,37 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 - `id` (PK)
 - `username` (unique)
 - `hashed_password`
+- `role` (user/analyst/admin)
+- `permissions` (JSON dict for fine-grained permissions)
 - `is_active`
+- `created_at`
+
+**UserActivity**
+- `id` (PK)
+- `user_id` (FK to User)
+- `action` (login, analyze, etc.)
+- `resource` (endpoint or object affected)
+- `details` (JSON metadata)
+- `created_at`
+
+**Notification**
+- `id` (PK)
+- `user_id` (FK to User)
+- `title`
+- `message`
+- `is_read`
+- `created_at`
+
+**UserAnalysis**
+- `id` (PK)
+- `user_id` (FK to User)
+- `config_hash`
+- `stock`, `mode`, `timeframe`, `start_date`, `end_date`
+- `features` (JSON)
+- `best_params` (JSON)
+- `metrics` (JSON)
+- `status` (success/error)
+- `duration_seconds`
 - `created_at`
 
 **PipelineCache**
@@ -53,23 +93,25 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 - `metrics` (JSON)
 - `data` (JSON) — full result dataframe as list of dicts
 - `created_at`
-
 #### Pipeline Execution
 
 When `/analyze` is called:
 
 1. **Validate** request against `AnalyzeConfig` schema
-2. **Hash** the config to generate `config_hash`
-3. **Check cache** in `pipeline_cache` table
+2. **Log activity** — record analysis attempt in `user_activity` table
+3. **Hash** the config to generate `config_hash`
+4. **Check cache** in `pipeline_cache` table
    - If hit: return cached data
    - If miss: continue
-4. **Load hyperparams** from `artifacts/hyperparams/{stock}.json`
-5. **Execute pipeline** (static or realtime mode)
+5. **Load hyperparams** from `artifacts/hyperparams/{stock}.json`
+6. **Execute pipeline** (static or realtime mode)
    - `run_pipeline()` for static analysis
    - `run_realtime_pipeline()` for rolling-window simulation
-6. **Serialize results** to JSON (convert DataFrame)
-7. **Save to cache** in database
-8. **Return** results to client
+7. **Serialize results** to JSON (convert DataFrame, handle pandas Timestamps)
+8. **Save to cache** in database
+9. **Log analysis** — record completion in `user_analysis` table
+10. **Create notification** — notify user of analysis completion
+11. **Return** results to client
 
 #### Caching Strategy
 
@@ -77,6 +119,20 @@ When `/analyze` is called:
 - Same config = same hash = cache hit
 - Cache is per-user (JWT token validates ownership implicitly; can be extended)
 - Manual cache write via `/cache` POST for explicit control
+- Admin can delete cache entries via `/cache/{hash}` DELETE
+
+#### User Management & Audit
+
+- **Role-based access**: `user` (basic analysis), `analyst` (extended features), `admin` (full system control)
+- **Activity logging**: All user actions logged to `user_activity` table for audit trails
+- **Notifications**: System-generated notifications for important events (analysis complete, errors, admin actions)
+- **Admin controls**: Create/update/delete users, view activity logs, manage cache
+
+#### Notification System
+
+- **Triggers**: Analysis completion, system errors, admin user management actions
+- **Delivery**: Stored in database, retrieved via `/me/notifications`
+- **Management**: Mark as read, automatic cleanup of old notifications
 
 ### Frontend (Streamlit)
 
@@ -88,24 +144,34 @@ When `/analyze` is called:
 st.session_state["authenticated"]  # Boolean
 st.session_state["auth_token"]     # JWT string
 st.session_state["username"]       # Username string
+st.session_state["role"]           # User role (user/analyst/admin)
 st.session_state["results"]        # Analysis results dict
 ```
 
 #### Flow
 
 1. **Login check** — if not authenticated, show login form
-2. **API login** — POST credentials to backend, store token
-3. **Dashboard** — show controls (stock, date range, timeframe, mode)
-4. **Analysis** — POST analysis config to `/analyze`, get results
-5. **Cache save** — POST results to `/cache` (non-blocking, warnings only)
-6. **Visualization** — render plots using Plotly
+2. **API login** — POST credentials to backend, store token and role
+3. **Role-based UI** — show appropriate controls based on user role
+4. **Dashboard** — show analysis controls (stock, date range, timeframe, mode)
+5. **Analysis** — POST analysis config to `/analyze`, get results
+6. **Cache save** — POST results to `/cache` (non-blocking, warnings only)
+7. **Visualization** — render plots using Plotly
+8. **Admin panel** — if admin role, show user management interface
+9. **Notifications** — display unread notifications in sidebar
 
 #### API Integration (`main.py` functions)
 
-- `login(username, password)` — Call `/login`, store token
+- `login(username, password)` — Call `/login`, store token and role
 - `logout()` — Clear session state
+- `get_user_profile()` — Call `/me` for current user info
+- `get_notifications()` — Call `/me/notifications` for user alerts
 - `analyze_via_api(payload)` — Call `/analyze`, handle errors
 - `save_cache_via_api(payload, results)` — Call `/cache` to persist
+- `get_all_users()` — Admin: list all users
+- `create_user_via_api()` — Admin: create new user
+- `update_user_role_via_api()` — Admin: change user role
+- `delete_user_via_api()` — Admin: remove user
 
 ### Data Pipeline
 
@@ -132,11 +198,82 @@ st.session_state["results"]        # Analysis results dict
 - `plot_scatter()` — Price vs. volume, colored by cluster (-1 = anomaly)
 - `plot_timeseries()` — Price line with anomaly markers
 
-## Data Flow Diagram
+## Database Schema (ER Diagram)
+
+```mermaid
+erDiagram
+    User ||--o{ UserActivity : "logs"
+    User ||--o{ Notification : "receives"
+    User ||--o{ UserAnalysis : "performs"
+    User ||--o{ PipelineCache : "owns"
+
+    User {
+        int id PK
+        string username UK
+        string hashed_password
+        string role
+        json permissions
+        bool is_active
+        datetime created_at
+    }
+
+    UserActivity {
+        int id PK
+        int user_id FK
+        string action
+        string resource
+        json details
+        datetime created_at
+    }
+
+    Notification {
+        int id PK
+        int user_id FK
+        string title
+        string message
+        bool is_read
+        datetime created_at
+    }
+
+    UserAnalysis {
+        int id PK
+        int user_id FK
+        string config_hash
+        string stock
+        string mode
+        string timeframe
+        date start_date
+        date end_date
+        json features
+        json best_params
+        json metrics
+        string status
+        int duration_seconds
+        datetime created_at
+    }
+
+    PipelineCache {
+        int id PK
+        string config_hash UK
+        string stock
+        string mode
+        string timeframe
+        date start_date
+        date end_date
+        json features
+        json best_params
+        json metrics
+        json data
+        datetime created_at
+    }
+```
 
 ```
 ┌─────────────────┐
 │  Streamlit UI   │
+│  (Login +       │
+│   Dashboard +   │
+│   Admin Panel)  │
 └────────┬────────┘
          │ 1. POST /login (username, password)
          ▼
@@ -144,16 +281,27 @@ st.session_state["results"]        # Analysis results dict
 │         FastAPI Backend                 │
 │  ┌──────────────────────────────────┐  │
 │  │ 1. Validate credentials          │  │
-│  │ 2. Generate JWT token            │  │
+│  │ 2. Generate JWT token + role     │  │
 │  │ 3. Return token to Streamlit     │  │
 │  └──────────────────────────────────┘  │
 │  ┌──────────────────────────────────┐  │
 │  │ POST /analyze                    │  │
-│  │ 1. Hash config → cache_key       │  │
-│  │ 2. Lookup in PipelineCache DB    │  │
-│  │ 3. If miss: Run pipeline()       │  │
-│  │ 4. Save to cache                 │  │
-│  │ 5. Return {metrics, data}        │  │
+│  │ 1. Check role permissions        │  │
+│  │ 2. Log activity to UserActivity  │  │
+│  │ 3. Hash config → cache_key       │  │
+│  │ 4. Lookup in PipelineCache DB    │  │
+│  │ 5. If miss: Run pipeline()       │  │
+│  │ 6. Save to cache                 │  │
+│  │ 7. Log to UserAnalysis           │  │
+│  │ 8. Create Notification           │  │
+│  │ 9. Return {metrics, data}        │  │
+│  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐  │
+│  │ Admin Endpoints                  │  │
+│  │ - GET/POST/DELETE /users         │  │
+│  │ - PATCH /users/{id}/role         │  │
+│  │ - GET /users/{id}/activity       │  │
+│  │ - DELETE /cache/{hash}           │  │
 │  └──────────────────────────────────┘  │
 │              ▲                          │
 │              │ 2. JWT in header         │
@@ -162,26 +310,40 @@ st.session_state["results"]        # Analysis results dict
          ┌─────┴──────┐
          │            │
          ▼            ▼
-    ┌────────────┐  ┌──────────────┐
-    │ Hyperparams│  │SQLite DB     │
-    │ JSON files │  │ (Users,      │
-    │            │  │  Cache)      │
-    └────────────┘  └──────────────┘
+    ┌────────────┐  ┌──────────────────────┐
+    │ Hyperparams│  │   SQLite DB          │
+    │ JSON files │  │ (Users, Cache,       │
+    │            │  │  Activity, Analysis, │
+    │            │  │  Notifications)      │
+    └────────────┘  └──────────────────────┘
 ```
 
 ## Security Considerations
 
-### Authentication
-- JWT tokens expire after `ACCESS_TOKEN_EXPIRE_MINUTES` (default 60)
-- Passwords hashed with bcrypt (10+ rounds)
-- Default credentials should be changed in production
+### Authentication & Authorization
+- JWT tokens expire after `ACCESS_TOKEN_EXPIRE_MINUTES` (default 60 minutes)
+- Passwords hashed with bcrypt (12 rounds, direct implementation)
+- Role-based access control with three levels: `user`, `analyst`, `admin`
+- Permission-based fine-grained access control via JSON permissions field
+- Default admin credentials should be changed in production
 
-### Caching
+### Audit & Monitoring
+- All user actions logged to `user_activity` table for compliance
+- Analysis attempts and completions tracked in `user_analysis` table
+- System notifications for important events and errors
+- Admin can view user activity logs and manage users
+
+### Data Protection
 - Cache is stored in plaintext in SQLite (not encrypted)
-- In production, consider encrypting sensitive columns
+- In production, consider encrypting sensitive columns or using encrypted database
 - Cache hash is deterministic; users can't forge cache entries (JWT prevents tampering)
+- User passwords are properly hashed; never stored in plaintext
 
 ### API Access
+- All sensitive endpoints require JWT authentication
+- Role-based route protection prevents unauthorized access
+- Admin-only endpoints for user management and system control
+- Input validation via Pydantic schemas prevents injection attacks
 - All pipeline endpoints require valid JWT
 - Database queries are parameterized (SQLAlchemy ORM prevents SQL injection)
 - CORS not enabled; assumes same-origin deployment

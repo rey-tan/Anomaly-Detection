@@ -27,6 +27,9 @@ if "auth_token" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state["username"] = ""
 
+if "role" not in st.session_state:
+    st.session_state["role"] = "user"
+
 if "results" not in st.session_state:
     st.session_state["results"] = None
 
@@ -49,6 +52,11 @@ def login(username: str, password: str):
     st.session_state["authenticated"] = True
     st.session_state["auth_token"] = token
     st.session_state["username"] = username
+    try:
+        profile = get_user_profile()
+        st.session_state["role"] = profile.get("role", "user")
+    except Exception:
+        st.session_state["role"] = "user"
     return True, None
 
 
@@ -56,7 +64,62 @@ def logout():
     st.session_state["authenticated"] = False
     st.session_state["auth_token"] = ""
     st.session_state["username"] = ""
+    st.session_state["role"] = "user"
     st.session_state["results"] = None
+
+
+def get_user_profile():
+    headers = {"Authorization": f"Bearer {st.session_state['auth_token']}"}
+    response = requests.get(f"{API_URL}/me", headers=headers, timeout=10)
+    if response.status_code != 200:
+        raise ValueError(response.json().get("detail", response.text))
+    return response.json()
+
+
+def get_notifications():
+    headers = {"Authorization": f"Bearer {st.session_state['auth_token']}"}
+    response = requests.get(f"{API_URL}/me/notifications", headers=headers, timeout=10)
+    if response.status_code != 200:
+        raise ValueError(response.json().get("detail", response.text))
+    return response.json()
+
+
+def get_all_users():
+    headers = {"Authorization": f"Bearer {st.session_state['auth_token']}"}
+    response = requests.get(f"{API_URL}/users", headers=headers, timeout=10)
+    if response.status_code != 200:
+        raise ValueError(response.json().get("detail", response.text))
+    return response.json()
+
+
+def create_user_via_api(username: str, password: str, role: str = "user"):
+    headers = {"Authorization": f"Bearer {st.session_state['auth_token']}"}
+    body = {
+        "username": username,
+        "password": password,
+        "role": role,
+    }
+    response = requests.post(f"{API_URL}/users", json=body, headers=headers, timeout=10)
+    if response.status_code != 200:
+        raise ValueError(response.json().get("detail", response.text))
+    return response.json()
+
+
+def update_user_role_via_api(user_id: int, new_role: str):
+    headers = {"Authorization": f"Bearer {st.session_state['auth_token']}"}
+    body = {"role": new_role}
+    response = requests.patch(f"{API_URL}/users/{user_id}/role", json=body, headers=headers, timeout=10)
+    if response.status_code != 200:
+        raise ValueError(response.json().get("detail", response.text))
+    return response.json()
+
+
+def delete_user_via_api(user_id: int):
+    headers = {"Authorization": f"Bearer {st.session_state['auth_token']}"}
+    response = requests.delete(f"{API_URL}/users/{user_id}", headers=headers, timeout=10)
+    if response.status_code != 200:
+        raise ValueError(response.json().get("detail", response.text))
+    return response.json()
 
 
 def analyze_via_api(payload: dict):
@@ -110,6 +173,7 @@ if not st.session_state["authenticated"]:
 
 st.sidebar.title("⚙️ Controls")
 st.sidebar.markdown(f"**Logged in as:** {st.session_state['username']}")
+st.sidebar.markdown(f"**Role:** {st.session_state['role']}")
 if st.sidebar.button("Logout"):
     logout()
     st.rerun()
@@ -158,6 +222,62 @@ if st.sidebar.button("Run Analysis"):
             st.success("Analysis complete! Scroll down to see results.")
         except Exception as exc:
             st.error(f"Analysis failed: {exc}")
+
+try:
+    notifications = get_notifications()
+except Exception:
+    notifications = []
+
+if notifications:
+    st.sidebar.markdown("### 🔔 Notifications")
+    for note in notifications[:5]:
+        status = "✅" if note["is_read"] else "🔔"
+        st.sidebar.write(f"{status} **{note['title']}**: {note['message']}")
+
+if st.session_state["role"] == "admin":
+    with st.sidebar.expander("Admin Panel", expanded=True):
+        st.markdown("#### Manage Users")
+        try:
+            users = get_all_users()
+            for user in users:
+                st.write(f"**{user['username']}** ({user['role']})")
+                new_role = st.selectbox("New role", ["user", "analyst", "admin"], index=["user", "analyst", "admin"].index(user['role']), key=f"role_{user['id']}")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Update Role", key=f"update_{user['id']}"):
+                        if new_role != user['role']:
+                            try:
+                                update_user_role_via_api(user['id'], new_role)
+                                st.success(f"Updated {user['username']} to {new_role}")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error(f"Could not update: {exc}")
+                with col2:
+                    if st.button("Delete", key=f"delete_{user['id']}"):
+                        try:
+                            delete_user_via_api(user['id'])
+                            st.success(f"Deleted {user['username']}")
+                            st.rerun()
+                        except Exception as exc:
+                            st.error(f"Could not delete: {exc}")
+        except Exception as exc:
+            st.error(f"Could not load users: {exc}")
+
+        st.markdown("---")
+        st.markdown("#### Create new user")
+        new_username = st.text_input("New username", key="admin_new_username")
+        new_password = st.text_input("New password", type="password", key="admin_new_password")
+        new_role = st.selectbox("Role", ["user", "analyst", "admin"], key="admin_new_role")
+        if st.button("Create user", key="admin_create_user"):
+            if not new_username or not new_password:
+                st.error("Username and password are required")
+            else:
+                try:
+                    created = create_user_via_api(new_username, new_password, new_role)
+                    st.success(f"Created user {created['username']} with role {created['role']}")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(f"Could not create user: {exc}")
 
 if st.session_state["results"] is None:
     st.warning("Click 'Run Analysis' to generate results")

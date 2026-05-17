@@ -4,7 +4,6 @@ from src.components.feature_engineering import build_features
 from src.components.scaling import scale_features
 from src.components.anomaly_detection import train_model
 from src.components.evaluation import compute_anomaly_stats
-import streamlit as st
 
 
 def run_pipeline(config,best_params):
@@ -23,17 +22,23 @@ def run_pipeline(config,best_params):
 
         X_scaled = scale_features(feature_df,features)
 
-        model,labels = train_model(X_scaled,best_params)
+        label_sets = train_model(X_scaled,best_params, feature_df)
 
-        metrics = compute_anomaly_stats(feature_df,labels)
+        metrics = {
+            "dbscan": compute_anomaly_stats(feature_df, label_sets["dbscan"]),
+            "isolation_forest": compute_anomaly_stats(feature_df, label_sets["isolation_forest"]),
+            "zscore": compute_anomaly_stats(feature_df, label_sets["zscore"]),
+        }
 
-        feature_df["cluster"]=labels
+        feature_df["cluster_dbscan"] = label_sets["dbscan"]
+        feature_df["cluster_isolation_forest"] = label_sets["isolation_forest"]
+        feature_df["cluster_zscore"] = label_sets["zscore"]
+        feature_df["cluster"] = label_sets["dbscan"]
 
         return {
-            "model":model,
-            "labels":labels,
-            "metrics":metrics,
-            "data":feature_df
+            "labels": label_sets,
+            "metrics": metrics,
+            "data": feature_df
         }
     except KeyError as e:
         st.error(f"Missing config key: {e}")

@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import numpy as np
 import pandas as pd
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.pipelines.anomaly_detection_pipeline import run_pipeline
 from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
@@ -14,6 +15,16 @@ from src.utils.paths import HYPERPARAMS
 from . import crud, database, models, schemas, security
 
 app = FastAPI(title="Anomaly Engine API")
+
+origins = ["http://localhost:5173"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -230,11 +241,16 @@ def read_users(db: Session = Depends(database.get_db)):
 
 @app.post("/users", response_model=schemas.UserRead, dependencies=[Depends(require_role(["admin"]))])
 def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    allowed_roles = {"analyst", "admin"}
+    role = request.role
+    if role not in allowed_roles:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Role must be analyst or admin")
+
     user = crud.create_user(
         db,
         username=request.username,
         password=request.password,
-        role=request.role or "user",
+        role=role,
         permissions=request.permissions,
     )
     return user
@@ -242,6 +258,10 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_
 
 @app.patch("/users/{user_id}/role", response_model=schemas.UserRead, dependencies=[Depends(require_role(["admin"]))])
 def update_user_role(user_id: int, request: schemas.UserRoleUpdate, db: Session = Depends(database.get_db)):
+    allowed_roles = {"analyst", "admin"}
+    if request.role not in allowed_roles:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Role must be analyst or admin")
+
     user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

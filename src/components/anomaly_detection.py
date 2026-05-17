@@ -1,25 +1,37 @@
+import numpy as np
 from src.models.dbscan import DBSCAN
-from src.utils.paths import CONFIG
-
-def train_model(X,best_params):
-    
-    dbscan_params = best_params['dbscan']
-
-    model = DBSCAN(eps=dbscan_params['eps'], min_pts=dbscan_params['min_pts'])
-
-    labels = model.fit_predict(X);
-
-    return model,labels
+from src.models.isolation_forest import IsolationForest
+from src.models.zscore import zscore
 
 
-    # Ensemble: flag if ANY model agrees
-# anomaly_score = (z_score_pred + dbscan_pred + if_pred) / 3
+def _predict_dbscan(X, params):
+    model = DBSCAN(eps=params.get("eps", 1.0), min_pts=params.get("min_pts", 5))
+    return model.fit_predict(X)
 
-# # High confidence anomaly: if 2/3 models agree
-# high_confidence = anomaly_score >= 0.66
 
-# # Or: take union of all predictions (sensitive, catch more)
-# any_anomaly = (z_score_pred | dbscan_pred | if_pred)
+def _predict_isolation_forest(X, params):
+    model = IsolationForest(
+        n_trees=params.get("n_estimators", 100),
+        contamination=params.get("contamination", 0.01),
+    )
+    return model.fit_predict(X)
 
-# # Or: take intersection (conservative, fewer false positives)
-# consensus_anomaly = (z_score_pred & dbscan_pred & if_pred)
+
+def _predict_zscore(df, threshold: float):
+    if "returns" not in df.columns:
+        if "close" not in df.columns:
+            return np.ones(len(df), dtype=int)
+        series = df["close"].fillna(method="ffill").fillna(0)
+    else:
+        series = df["returns"].fillna(0)
+
+    z_scores = zscore(series)
+    return np.where(np.abs(z_scores) > threshold, -1, 1)
+
+
+def train_model(X, best_params, df):
+    return {
+        "dbscan": _predict_dbscan(X, best_params.get("dbscan", {})),
+        "isolation_forest": _predict_isolation_forest(X, best_params.get("isolation_forest", {})),
+        "zscore": _predict_zscore(df, best_params.get("z_score", {}).get("threshold", 2.0)),
+    }

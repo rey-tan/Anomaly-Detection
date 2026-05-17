@@ -17,7 +17,7 @@ class TokenData(BaseModel):
 class UserCreate(BaseModel):
     username: str
     password: str
-    role: Optional[str] = "user"
+    role: Optional[str] = "analyst"
     permissions: Optional[Dict[str, Any]] = None
 
 
@@ -30,7 +30,7 @@ class UserRead(BaseModel):
     created_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserRoleUpdate(BaseModel):
@@ -49,7 +49,7 @@ class UserActivityRead(BaseModel):
     created_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserAnalysisRead(BaseModel):
@@ -68,7 +68,7 @@ class UserAnalysisRead(BaseModel):
     executed_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class NotificationRead(BaseModel):
@@ -81,7 +81,7 @@ class NotificationRead(BaseModel):
     read_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class NotificationCreate(BaseModel):

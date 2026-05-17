@@ -76,7 +76,7 @@ def partition_all_floorsheet_data():
 
     for file in RAW_DATA.rglob("*.csv"):
 
-        # if file.is_file() and file.stem.startswith("floor-2024"):
+        # if file.is_file() and file.stem.startswith("floor-2026-05"):
         if file.is_file():
 
             print(1)
@@ -88,5 +88,11 @@ def partition_all_floorsheet_data():
 
 
 if(__name__ == '__main__') :
-    partition_all_floorsheet_data()
+    # partition_all_floorsheet_data()
+    partiton_floorsheet_data("2026-05-11")
+    partiton_floorsheet_data("2026-05-12")
+    partiton_floorsheet_data("2026-05-13")
+    partiton_floorsheet_data("2026-05-14")
+    partiton_floorsheet_data("2026-05-15")
+
 

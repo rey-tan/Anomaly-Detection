@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { login, fetchProfile, analyze } from "./api";
+import { login, fetchProfile, analyze, toggleFavorite } from "./api";
 import AnalysisPanel from "./components/AnalysisPanel";
 import AnomalyChart from "./components/AnomalyChart";
 import MetricsGrid from "./components/MetricsGrid";
-import SaveCacheButton from "./components/SaveCacheButton";
 import UsersPanel from "./components/UsersPanel";
 import AnalysisHistory from "./components/AnalysisHistory";
 
@@ -156,6 +155,7 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem(STORAGE_KEY) || "");
   const [user, setUser] = useState(null);
   const [results, setResults] = useState(null);
+  const [selectedAnalysis, setSelectedAnalysis] = useState(null);
   const [lastConfig, setLastConfig] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -348,7 +348,7 @@ function App() {
                     <strong>{results && lastConfig ? "Available" : "Not yet"}</strong>
                   </div>
                 </div>
-                {results && lastConfig ? <SaveCacheButton token={token} config={lastConfig} results={results} onSaved={() => {}} /> : null}
+                {null}
               </aside>
             </section>
           ) : null}
@@ -360,6 +360,23 @@ function App() {
                   <p className="eyebrow">Results page</p>
                   <h2>Inspect the latest analysis outputs</h2>
                   <p>The chart, metrics, and tuned parameters are now isolated here instead of sitting on the same page as the input form.</p>
+                  {selectedAnalysis ? (
+                    <div className="favorite-row">
+                      <button
+                        className="favorite-button large"
+                        onClick={async () => {
+                          try {
+                            const updated = await toggleFavorite(token, selectedAnalysis.id, !selectedAnalysis.is_favorite);
+                            setSelectedAnalysis(updated);
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }}
+                      >
+                        {selectedAnalysis.is_favorite ? "★ Favorite" : "☆ Save to favorites"}
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
                 {results ? <ResultStats data={results.data || []} metrics={results.metrics} /> : null}
                 {results ? <MetricsGrid metrics={results.metrics} bestParams={results.best_params} /> : <section className="empty-state-card"><h2>No results yet</h2><p>Run an analysis from the Analysis page to populate this view.</p></section>}
@@ -367,11 +384,11 @@ function App() {
 
               <div className="page-panel">
                 {results ? <AnomalyChart data={results.data || []} /> : <section className="empty-state-card"><h2>Chart preview</h2><p>Once analysis is complete, price action and anomaly markers appear here.</p></section>}
-                {results && lastConfig ? <SaveCacheButton token={token} config={lastConfig} results={results} onSaved={() => {}} /> : null}
+                {null}
               </div>
 
               <aside className="page-panel">
-                <AnalysisHistory token={token} onSelect={(payload) => { setResults(payload); setPage('results'); }} />
+                <AnalysisHistory token={token} onSelect={(payload, analysis) => { setResults(payload); setSelectedAnalysis(analysis); setPage('results'); }} />
               </aside>
             </section>
           ) : null}

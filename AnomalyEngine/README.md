@@ -114,9 +114,9 @@ The dashboard opens at `http://localhost:8501`
 
 ### Result Caching
 
-- Automatic cache on `/analyze` endpoint
-- Configurable cache lookup before expensive pipeline runs
-- Explicit cache save via `/cache` endpoint for re-runs
+- Automatic cache on `/analyze` endpoint: the backend computes a deterministic `config_hash` and writes a `PipelineCache` entry on cache miss.
+- Full artifact persistence: the backend also writes a gzipped JSON artifact containing `{ metrics, data, best_params }` to `artifacts/results/{user_id}/{config_hash}.json.gz` and records the path in `UserAnalysis.data_path` for retrieval.
+- Explicit cache save via `/cache` endpoint remains available but is no longer required for the common workflow.
 
 ### Audit & Monitoring
 
@@ -124,6 +124,12 @@ The dashboard opens at `http://localhost:8501`
 - Analysis history tracking with performance metrics
 - System notifications for completion and errors
 - Admin access to user activity logs
+
+### Favorites & history (new)
+
+- Every analysis run is recorded in `UserAnalysis` and can be listed via `GET /me/analyses`.
+- Users can mark important analyses as favorites via `POST /me/analyses/{id}/favorite` (body `{ "favorite": true }`).
+- The React frontend (`AnomalyUI`) includes an analysis history panel and a favorite toggle to quickly revisit or highlight notable runs.
 
 ### Visualizations
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAnalyses, fetchAnalysisData } from "../api";
+import { fetchAnalyses, fetchAnalysisData, toggleFavorite } from "../api";
 
 export default function AnalysisHistory({ token, onSelect }) {
   const [items, setItems] = useState([]);
@@ -18,9 +18,19 @@ export default function AnalysisHistory({ token, onSelect }) {
   const handleClick = async (analysis) => {
     try {
       const payload = await fetchAnalysisData(token, analysis.id);
-      onSelect(payload);
+      onSelect(payload, analysis);
     } catch (err) {
       setError(err.message || "Failed to load artifact");
+    }
+  };
+
+  const handleFavorite = async (analysis, ev) => {
+    ev.stopPropagation();
+    try {
+      const updated = await toggleFavorite(token, analysis.id, !analysis.is_favorite);
+      setItems((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    } catch (err) {
+      setError(err.message || "Failed to update favorite");
     }
   };
 
@@ -47,6 +57,9 @@ export default function AnalysisHistory({ token, onSelect }) {
                 <span>{a.timeframe}</span>
                 <span>{a.status}</span>
               </div>
+            </button>
+            <button className="favorite-button" onClick={(ev) => handleFavorite(a, ev)}>
+              {a.is_favorite ? "★" : "☆"}
             </button>
           </li>
         ))}

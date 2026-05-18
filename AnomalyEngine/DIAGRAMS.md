@@ -379,22 +379,7 @@ erDiagram
         bool is_active
         datetime created_at
     }
-    PIPELINE_CACHE {
-        int id PK
-        string config_hash
-        string stock
-        string mode
-        string timeframe
-        string start_date
-        string end_date
-        json features
-        json best_params
-        json metrics
-        json data
-        datetime created_at
-    }
-
-    USER ||--o{ PIPELINE_CACHE : creates
+  %% Note: pipeline cache is an implementation detail and omitted from this ER diagram
 ```
 
 > Note: the ER diagram uses a simple relationship for illustration. In this project the cache entries are not strictly owned by a single user yet, but the data model is still useful to document how database entities are structured.
@@ -404,3 +389,102 @@ erDiagram
 ## Notes
 
 This project uses a relational data store for auth and caching, so ER diagrams are relevant even though the application code is not strictly object-oriented. The ER diagram documents the data model behind the FastAPI backend.
+
+---
+
+## Updated diagrams (artifact persistence & favorites)
+
+The system now persists full analysis artifacts (gzipped JSON) to the workspace under `artifacts/results/{user_id}/{config_hash}.json.gz` and records the file path in `UserAnalysis.data_path`. Users can mark important analyses with `UserAnalysis.is_favorite` which is exposed by the API and surfaced in the UI.
+
+### Updated Component Diagram (summary)
+
+```mermaid
+flowchart TB
+  Browser["Browser / React UI (AnomalyUI)"] -->|Login / Analyze / List analyses| FastAPI["FastAPI Backend"]
+  Streamlit["Streamlit App\n(main.py)"] -->|API requests| FastAPI
+  FastAPI -->|Reads/Writes| DB["SQLite / SQLAlchemy DB"]
+  FastAPI -->|Loads hyperparams| Hyperparams["artifacts/hyperparams"]
+  FastAPI -->|Calls| AnalysisEngine["src/pipelines/analysis_engine.py"]
+  FastAPI -->|Calls wrappers| StaticPipeline["src/pipelines/anomaly_detection_pipeline.py"]
+  FastAPI -->|Calls wrappers| RealtimePipeline["src/pipelines/realtime_detection_pipeline.py"]
+  FastAPI -->|Uses| Components["src/components/*"]
+  FastAPI -->|Reads/Writes artifacts| Artifacts["artifacts/results/{user_id}/ (gzipped JSON)"]
+  Browser -->|Requests analyses list| FastAPI
+  Browser -->|Requests artifact| FastAPI
+```
+
+### Report-ready ER Diagram
+
+This ER diagram is suitable to include in a technical report. It lists primary keys (PK), foreign keys (FK), and attributes relevant for compliance and data retention reviews.
+
+```mermaid
+erDiagram
+  USER {
+    int id PK
+    string username UK
+    string hashed_password
+    string role
+    json permissions
+    bool is_active
+    datetime created_at
+  }
+
+  USER ||--o{ USER_ACTIVITY : logs
+  USER ||--o{ NOTIFICATION : receives
+  USER ||--o{ USER_ANALYSIS : performs
+
+  USER_ACTIVITY {
+    int id PK
+    int user_id FK
+    string action
+    string resource
+    json details
+    datetime created_at
+  }
+
+  NOTIFICATION {
+    int id PK
+    int user_id FK
+    string title
+    string message
+    string type
+    bool is_read
+    datetime created_at
+    datetime read_at
+  }
+
+  USER_ANALYSIS {
+    int id PK
+    int user_id FK
+    string config_hash
+    string stock
+    string mode
+    string timeframe
+    date start_date
+    date end_date
+    json features
+    json best_params
+    json metrics
+    string data_path
+    bool is_favorite
+    string status
+    int duration_seconds
+    datetime executed_at
+  }
+
+  ARTIFACT_STORE {
+    string path PK
+    int user_id FK
+    string config_hash
+    datetime created_at
+    int size_bytes
+  }
+
+  USER ||--o{ ARTIFACT_STORE : stores
+  USER_ANALYSIS }o--|| ARTIFACT_STORE : references
+
+```
+
+Notes:
+- `ARTIFACT_STORE` is a conceptual representation for report purposes (artifacts are files on disk, not a separate DB table). The `data_path` attribute on `USER_ANALYSIS` points to the file.
+

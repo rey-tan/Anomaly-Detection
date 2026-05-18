@@ -111,3 +111,12 @@ export async function fetchAnalysisData(token, analysisId) {
   }
   return response.json();
 }
+
+export async function toggleFavorite(token, analysisId, favorite) {
+  const response = await fetch(`${BASE_URL}/me/analyses/${analysisId}/favorite`, {
+    method: "POST",
+    headers: buildHeaders(token),
+    body: JSON.stringify({ favorite }),
+  });
+  return unwrapResponse(response);
+}

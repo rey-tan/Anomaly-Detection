@@ -95,6 +95,25 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 - `metrics` (JSON)
 - `data` (JSON) — full result dataframe as list of dicts
 - `created_at`
+
+### Artifact persistence & favorites (new)
+
+The system now persists the full analysis payload (metrics, data, best_params) to disk as a gzipped JSON artifact under `artifacts/results/{user_id}/{config_hash}.json.gz`. The `UserAnalysis` model stores a `data_path` string pointing to that file for retrieval and auditing.
+
+Key points:
+- Artifacts are written on every analysis run (cache miss or new run) to avoid storing large JSON blobs directly in the database.
+- The `UserAnalysis` record now includes `data_path` and `is_favorite` (boolean) fields:
+    - `data_path`: filesystem path to gzipped JSON artifact
+    - `is_favorite`: user-controlled flag for marking important analyses
+- API endpoints added:
+    - `GET /me/analyses` — list a user's analyses
+    - `GET /me/analyses/{id}/data` — download artifact JSON for a specific analysis (validates ownership)
+    - `POST /me/analyses/{id}/favorite` — set/unset favorite (body: `{ "favorite": true }`)
+
+Security and operational notes:
+- Artifact files are stored within the project workspace under `artifacts/results/` by default. For production, consider moving artifacts to object storage (S3/GCS) with access controls and lifecycle policies.
+- Because artifacts can be large, the DB only stores metadata (`data_path`, metrics, best_params) and not the full JSON payload.
+- Implement retention/cleanup policies to bound disk usage (e.g., purge artifacts older than N days or keep only favorites).
 #### Pipeline Execution
 
 When `/analyze` is called:

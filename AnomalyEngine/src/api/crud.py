@@ -120,6 +120,16 @@ def create_user_analysis(
     return entry
 
 
+def set_analysis_favorite(db: Session, analysis_id: int, user_id: int, favorite: bool):
+    analysis = db.query(models.UserAnalysis).filter(models.UserAnalysis.id == analysis_id).first()
+    if not analysis or analysis.user_id != user_id:
+        return None
+    analysis.is_favorite = favorite
+    db.commit()
+    db.refresh(analysis)
+    return analysis
+
+
 def get_user_analyses(db: Session, user_id: int, limit: Optional[int] = None):
     query = db.query(models.UserAnalysis).filter(models.UserAnalysis.user_id == user_id).order_by(models.UserAnalysis.executed_at.desc())
     if limit is not None:

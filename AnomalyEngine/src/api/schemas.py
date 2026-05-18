@@ -63,6 +63,7 @@ class UserAnalysisRead(BaseModel):
     features: List[Any]
     best_params: Optional[Dict[str, Any]]
     metrics: Optional[Dict[str, Any]]
+    is_favorite: Optional[bool] = False
     data_path: Optional[str] = None
     status: str
     duration_seconds: Optional[int]

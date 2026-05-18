@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import List
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import numpy as np
@@ -349,3 +349,17 @@ def get_analysis_data(
     if not path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artifact file not found")
     return FileResponse(str(path), media_type="application/json", filename=path.name)
+
+
+@app.post("/me/analyses/{analysis_id}/favorite", response_model=schemas.UserAnalysisRead)
+def toggle_favorite(
+    analysis_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    favorite = bool(payload.get("favorite", False))
+    updated = crud.set_analysis_favorite(db, analysis_id, current_user.id, favorite)
+    if updated is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Analysis not found or not owned")
+    return updated

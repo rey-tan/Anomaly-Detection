@@ -97,6 +97,7 @@ def create_user_analysis(
     metrics: Optional[Dict[str, Any]],
     status: str = "success",
     duration_seconds: Optional[int] = None,
+    data_path: Optional[str] = None,
 ):
     entry = models.UserAnalysis(
         user_id=user_id,
@@ -111,6 +112,7 @@ def create_user_analysis(
         metrics=metrics,
         status=status,
         duration_seconds=duration_seconds,
+        data_path=data_path,
     )
     db.add(entry)
     db.commit()

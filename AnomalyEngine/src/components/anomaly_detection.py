@@ -35,3 +35,18 @@ def train_model(X, best_params, df):
         "isolation_forest": _predict_isolation_forest(X, best_params.get("isolation_forest", {})),
         "zscore": _predict_zscore(df, best_params.get("z_score", {}).get("threshold", 2.0)),
     }
+
+class AnomalyDetector:
+    """Object-oriented wrapper for anomaly detection utilities.
+
+    Uses existing functional APIs (e.g., `train_model`) for compatibility while
+    exposing `fit` and `predict` methods if available.
+    """
+    def fit(self, X, model_type: str = "isolation_forest", **kwargs):
+        self._model = train_model(X, model_type=model_type, **kwargs)
+        return self._model
+
+    def predict(self, X):
+        if hasattr(self, "_model") and hasattr(self._model, "predict"):
+            return self._model.predict(X)
+        raise RuntimeError("Model not trained or predict not available on model")

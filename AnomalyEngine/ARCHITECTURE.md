@@ -69,7 +69,9 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 - `user_id` (FK to User)
 - `title`
 - `message`
+- `type`
 - `is_read`
+- `read_at`
 - `created_at`
 
 **UserAnalysis**
@@ -82,7 +84,7 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 - `metrics` (JSON)
 - `status` (success/error)
 - `duration_seconds`
-- `created_at`
+- `executed_at`
 
 **PipelineCache**
 - `id` (PK)
@@ -105,8 +107,8 @@ When `/analyze` is called:
    - If miss: continue
 5. **Load hyperparams** from `artifacts/hyperparams/{stock}.json`
 6. **Execute pipeline** (static or realtime mode)
-   - `run_pipeline()` for static analysis
-   - `run_realtime_pipeline()` for rolling-window simulation
+    - `StaticAnalysisPipeline` via `run_pipeline()` for static analysis
+    - `RealtimeAnalysisPipeline` via `run_realtime_pipeline()` for rolling-window simulation
 7. **Serialize results** to JSON (convert DataFrame, handle pandas Timestamps)
 8. **Save to cache** in database
 9. **Log analysis** — record completion in `user_analysis` table
@@ -175,20 +177,107 @@ st.session_state["results"]        # Analysis results dict
 
 ### Data Pipeline
 
-**Static Mode** (`src/pipelines/anomaly_detection_pipeline.py`)
-- Load historical data for date range
-- Preprocess (handle missing values, NaNs)
-- Engineer features (SMA, RSI, volatility)
-- Scale features
-- Train DBSCAN on full dataset
-- Return labeled clusters + metrics
+The pipeline layer is organized around `src/pipelines/analysis_engine.py`.
 
-**Realtime Mode** (`src/pipelines/realtime_detection_pipeline.py`)
-- Load historical data
-- Preprocess and engineer features
-- Simulate rolling window (last 500 rows)
-- Re-train DBSCAN for each step
-- Return full dataset with rolling labels
+**Core classes**
+- `AnalysisRequest` — normalized in-memory representation of the API payload
+- `DataLoader` — loads processed symbol data from disk (class-based service)
+- `Preprocessor` — resamples and cleans OHLCV data (class-based service)
+- `FeatureEngineering` — builds returns, volatility, SMA, RSI, and Bollinger Bands (class-based service)
+- `FeatureScaler` — fits and applies scaling to selected features (class-based service)
+- `Evaluator` — computes anomaly metrics and statistics (class-based service)
+- `AnomalyDetector` / `AnomalyDetectorService` — produces DBSCAN, Isolation Forest, and z-score labels
+- `StaticAnalysisPipeline` — runs a full historical analysis pass
+- `RealtimeAnalysisPipeline` — runs a rolling-window simulation using the same services
+
+**Static mode**
+- Load historical data for the requested date range
+- Preprocess the raw frame
+- Engineer features and scale the requested columns
+- Produce labels for DBSCAN, Isolation Forest, and z-score detectors
+- Compute per-detector anomaly metrics
+
+**Realtime mode**
+- Load and preprocess the requested data range
+- Engineer features once, then simulate a rolling window
+- Re-run detector predictions per step and capture the latest cluster label
+- Return the annotated time series with an `anomaly` marker column
+
+### Pipeline Class Diagram
+
+```mermaid
+classDiagram
+    class AnalysisRequest {
+        +stock: str
+        +start_date: str
+        +end_date: str
+        +timeframe: str
+        +features: list[str]
+        +mode: str
+        +from_mapping(config)
+    }
+
+    class PipelineResult {
+        +data: DataFrame
+        +labels: dict
+        +metrics: dict
+        +best_params: dict
+        +model: Any
+        +as_response(include_model)
+    }
+
+    class DataLoader {
+        +load(stock, start_date, end_date)
+    }
+
+    class Preprocessor {
+        +transform(df, timeframe)
+    }
+
+    class FeatureEngineering {
+        +transform(df, features)
+    }
+
+    class FeatureScaler {
+        +fit_transform(df, features)
+    }
+
+    class Evaluator {
+        +compute(df, labels)
+    }
+
+    class AnomalyDetector {
+        +predict(X, df, best_params)
+    }
+
+    class BaseAnalysisPipeline {
+        <<abstract>>
+        #_prepare_features()
+        #_build_metrics(feature_df, label_sets)
+        #_attach_labels(feature_df, label_sets)
+        +run()*
+    }
+
+    class StaticAnalysisPipeline {
+        +run()
+    }
+
+    class RealtimeAnalysisPipeline {
+        +window_size: int
+        +run()
+    }
+
+    BaseAnalysisPipeline <|-- StaticAnalysisPipeline
+    BaseAnalysisPipeline <|-- RealtimeAnalysisPipeline
+    BaseAnalysisPipeline --> AnalysisRequest
+    BaseAnalysisPipeline --> DataLoader
+    BaseAnalysisPipeline --> Preprocessor
+    BaseAnalysisPipeline --> FeatureEngineering
+    BaseAnalysisPipeline --> FeatureScaler
+    BaseAnalysisPipeline --> AnomalyDetector
+    StaticAnalysisPipeline --> PipelineResult
+    RealtimeAnalysisPipeline --> PipelineResult
+```
 
 ### Visualization
 
@@ -389,7 +478,7 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_
 ```
 
 ### Changing the ML model
-1. Replace `run_pipeline()` in `src/pipelines/anomaly_detection_pipeline.py`
+1. Extend or replace `StaticAnalysisPipeline` and `RealtimeAnalysisPipeline` in `src/pipelines/analysis_engine.py`
 2. Update feature engineering in `src/components/feature_engineering.py`
 3. Adjust schema/frontend visualization as needed
 

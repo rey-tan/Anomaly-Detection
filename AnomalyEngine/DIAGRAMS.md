@@ -130,7 +130,9 @@ Models the database entities and relationships.
   - `user_id` (FK to User)
   - `title`
   - `message`
+  - `type`
   - `is_read`
+  - `read_at`
   - `created_at`
 - `UserAnalysis` table
   - `id` (PK)
@@ -143,7 +145,7 @@ Models the database entities and relationships.
   - `metrics` (JSON)
   - `status` (success/error)
   - `duration_seconds`
-  - `created_at`
+  - `executed_at`
 - `PipelineCache` table
   - `id` (PK)
   - `config_hash` (unique)
@@ -164,6 +166,81 @@ An ER diagram is about data, not object-oriented programming. It is appropriate 
 - ER diagrams describe entities, attributes, and relationships.
 - They are used for database design and data modeling.
 - You can use them for any system that persists data, regardless of whether the code uses classes or functional style.
+
+### Class Diagram
+
+```mermaid
+classDiagram
+  class AnalysisRequest {
+    +stock: str
+    +start_date: str
+    +end_date: str
+    +timeframe: str
+    +features: list[str]
+    +mode: str
+    +from_mapping(config)
+  }
+
+  class PipelineResult {
+    +data: DataFrame
+    +labels: dict
+    +metrics: dict
+    +best_params: dict
+    +model: Any
+    +as_response(include_model)
+  }
+
+  class BaseAnalysisPipeline {
+    <<abstract>>
+    #_prepare_features()
+    #_build_metrics(feature_df, label_sets)
+    #_attach_labels(feature_df, label_sets)
+    +run()*
+  }
+
+  class StaticAnalysisPipeline {
+    +run()
+  }
+
+  class RealtimeAnalysisPipeline {
+    +window_size: int
+    +run()
+  }
+
+  class DataLoader {
+    +load(stock, start_date, end_date)
+  }
+  class Preprocessor {
+    +transform(df, timeframe)
+  }
+
+  class FeatureEngineering {
+    +transform(df, features)
+  }
+
+  class FeatureScaler {
+    +fit_transform(df, features)
+  }
+
+  class Evaluator {
+    +compute(df, labels)
+  }
+
+  class AnomalyDetector {
+    +predict(X, df, best_params)
+  }
+
+  BaseAnalysisPipeline <|-- StaticAnalysisPipeline
+  BaseAnalysisPipeline <|-- RealtimeAnalysisPipeline
+  BaseAnalysisPipeline --> AnalysisRequest
+  BaseAnalysisPipeline --> DataLoader
+  BaseAnalysisPipeline --> Preprocessor
+  BaseAnalysisPipeline --> FeatureEngineering
+  BaseAnalysisPipeline --> FeatureScaler
+  BaseAnalysisPipeline --> AnomalyDetector
+  StaticAnalysisPipeline --> PipelineResult
+  RealtimeAnalysisPipeline --> PipelineResult
+```
 
 ---
 
@@ -217,8 +294,9 @@ flowchart TB
     Browser["Browser / Streamlit UI"] -->|Login / Analyze| FastAPI["FastAPI Backend"]
     FastAPI -->|Reads/Writes| DB["SQLite / SQLAlchemy DB"]
     FastAPI -->|Loads hyperparams| Hyperparams["artifacts/hyperparams"]
-    FastAPI -->|Calls| StaticPipeline["src/pipelines/anomaly_detection_pipeline.py"]
-    FastAPI -->|Calls| RealtimePipeline["src/pipelines/realtime_detection_pipeline.py"]
+    FastAPI -->|Calls| AnalysisEngine["src/pipelines/analysis_engine.py"]
+    FastAPI -->|Calls wrappers| StaticPipeline["src/pipelines/anomaly_detection_pipeline.py"]
+    FastAPI -->|Calls wrappers| RealtimePipeline["src/pipelines/realtime_detection_pipeline.py"]
     FastAPI -->|Uses| Components["src/components/*"]
     Streamlit["Streamlit App\n(main.py)"] -->|API requests| FastAPI
 ```

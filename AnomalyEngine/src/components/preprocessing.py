@@ -26,3 +26,13 @@ def preprocess(df: pd.DataFrame,timeframe="1D") -> pd.DataFrame:
 
     return df
 
+
+class Preprocessor:
+    """Object-oriented preprocessing service.
+
+    Use `Preprocessor().transform(df, timeframe)` to get the same result as
+    `preprocess(df, timeframe)`.
+    """
+    def transform(self, df: pd.DataFrame, timeframe: str = "1D") -> pd.DataFrame:
+        return preprocess(df, timeframe=timeframe)
+

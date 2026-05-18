@@ -37,3 +37,13 @@ def load_data(symbol,start_date,end_date):
         df = df.reset_index()
     
     return df
+
+
+class DataLoader:
+    """Class-based data loader service.
+
+    Keeps the existing `load_data` function for compatibility but provides
+    an object-oriented interface via `DataLoader().load(...)`.
+    """
+    def load(self, symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
+        return load_data(symbol, start_date, end_date)

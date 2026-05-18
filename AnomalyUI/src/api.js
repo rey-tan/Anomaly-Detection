@@ -94,3 +94,20 @@ export async function deleteUser(token, userId) {
   });
   return unwrapResponse(response);
 }
+
+export async function fetchAnalyses(token) {
+  const response = await fetch(`${BASE_URL}/me/analyses`, {
+    headers: buildHeaders(token),
+  });
+  return unwrapResponse(response);
+}
+
+export async function fetchAnalysisData(token, analysisId) {
+  const response = await fetch(`${BASE_URL}/me/analyses/${analysisId}/data`, {
+    headers: buildHeaders(token),
+  });
+  if (!response.ok) {
+    throw new Error(response.statusText || "Failed to fetch analysis data");
+  }
+  return response.json();
+}

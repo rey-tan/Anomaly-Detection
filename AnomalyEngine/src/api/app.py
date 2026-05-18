@@ -156,9 +156,10 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     metrics = convert_numpy_types(metrics)
     best_params = convert_numpy_types(best_params)
 
-    # persist artifact to disk and record path
+    # persist full artifact to disk and record path
+    artifact_payload = {"metrics": metrics, "data": data, "best_params": best_params}
     try:
-        data_path = write_result_artifact(data, current_user.id, cache_key)
+        data_path = write_result_artifact(artifact_payload, current_user.id, cache_key)
     except Exception:
         data_path = None
 

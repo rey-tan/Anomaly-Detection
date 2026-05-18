@@ -6,6 +6,7 @@ import AnomalyChart from "./components/AnomalyChart";
 import MetricsGrid from "./components/MetricsGrid";
 import SaveCacheButton from "./components/SaveCacheButton";
 import UsersPanel from "./components/UsersPanel";
+import AnalysisHistory from "./components/AnalysisHistory";
 
 const STORAGE_KEY = "anomalyui_token";
 const DEFAULT_PAGE = "dashboard";
@@ -368,6 +369,10 @@ function App() {
                 {results ? <AnomalyChart data={results.data || []} /> : <section className="empty-state-card"><h2>Chart preview</h2><p>Once analysis is complete, price action and anomaly markers appear here.</p></section>}
                 {results && lastConfig ? <SaveCacheButton token={token} config={lastConfig} results={results} onSaved={() => {}} /> : null}
               </div>
+
+              <aside className="page-panel">
+                <AnalysisHistory token={token} onSelect={(payload) => { setResults(payload); setPage('results'); }} />
+              </aside>
             </section>
           ) : null}
 

@@ -4,7 +4,7 @@ from src.components.feature_engineering import build_features
 from src.components.scaling import scale_features
 from src.components.anomaly_detection import train_model
 from src.components.evaluation import compute_anomaly_stats
-
+import streamlit as st
 
 def run_pipeline(config,best_params):
 

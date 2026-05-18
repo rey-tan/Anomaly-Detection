@@ -4,6 +4,7 @@ import { login, fetchProfile, analyze } from "./api";
 import AnalysisPanel from "./components/AnalysisPanel";
 import AnomalyChart from "./components/AnomalyChart";
 import MetricsGrid from "./components/MetricsGrid";
+import SaveCacheButton from "./components/SaveCacheButton";
 
 const STORAGE_KEY = "anomalyui_token";
 

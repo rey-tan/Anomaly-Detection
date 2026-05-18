@@ -16,8 +16,8 @@ export default function AnalysisPanel({ onSubmit, loading }) {
     stock: "API",
     timeframe: "1D",
     mode: "Static",
-    start_date: "2023-01-01",
-    end_date: "2023-12-31",
+    start_date: "2025-01-01",
+    end_date: "2025-12-31",
     features: ["close", "volume", "volatility", "returns"],
   });
 

@@ -131,6 +131,14 @@ The dashboard opens at `http://localhost:8501`
 - Scatter plot (price vs. volume, colored by cluster)
 - Technical analysis (SMA, RSI, Bollinger Bands)
 
+## Running tests
+
+See [TESTING.md](TESTING.md) for instructions to run unit and integration tests locally. Recommended command to run the full suite:
+
+```
+python -m pytest -q
+```
+
 ## Configuration
 
 Edit `configs/config.yaml` to define:
@@ -190,8 +198,13 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.api.app:app
 
 - Add new users via the backend API (extend the `/users` endpoint)
 - Modify caching strategy in `src/api/crud.py` and `src/api/app.py`
-- Pipeline logic is independent of the API; swap pipelines in `src/pipelines/`
+- Pipeline logic is implemented as a class-based engine in `src/pipelines/analysis_engine.py`
+- The API still calls compatibility wrappers in `src/pipelines/anomaly_detection_pipeline.py` and `src/pipelines/realtime_detection_pipeline.py`
 - Visualizations use Plotly; customize in `src/components/visualization.py`
+ - Pipeline logic is implemented as a fully OOP, class-based engine in `src/pipelines/analysis_engine.py`.
+ - Component modules have been converted to class-based services: `DataLoader`, `Preprocessor`, `FeatureEngineering`, `FeatureScaler`, `Evaluator`, and `AnomalyDetector` (compatibility functional wrappers retained).
+ - The API still calls compatibility wrappers in `src/pipelines/anomaly_detection_pipeline.py` and `src/pipelines/realtime_detection_pipeline.py`
+ - Visualizations use Plotly; customize in `src/components/visualization.py`
 
 ## Troubleshooting
 

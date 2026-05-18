@@ -58,6 +58,7 @@ class UserAnalysis(Base):
     features = Column(JSON, nullable=False)
     best_params = Column(JSON, nullable=True)
     metrics = Column(JSON, nullable=True)
+    data_path = Column(String, nullable=True)
     status = Column(String, nullable=False, default="success")
     executed_at = Column(DateTime(timezone=True), server_default=func.now())
     duration_seconds = Column(Integer, nullable=True)

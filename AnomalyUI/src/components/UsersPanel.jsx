@@ -7,6 +7,36 @@ export default function UsersPanel({ token }) {
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "analyst" });
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+
+    const loadUsers = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getUsers(token);
+        if (active) {
+          setUsers(data || []);
+        }
+      } catch (err) {
+        if (active) {
+          setError(err.message || "Failed to load users");
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadUsers();
+
+    return () => {
+      active = false;
+    };
+  }, [token]);
+
   const load = async () => {
     setLoading(true);
     setError("");
@@ -19,11 +49,6 @@ export default function UsersPanel({ token }) {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!token) return;
-    load();
-  }, [token]);
 
   const handleCreate = async (e) => {
     e.preventDefault();

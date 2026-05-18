@@ -8,6 +8,7 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from src.components.data_loader import DataLoader
 
 
 class CandlestickAnomalyVisualizer:
@@ -535,7 +536,7 @@ Example 3: Different timeframes
 ──────────────────────────────
 
 for timeframe in ['1min', '5min', '1D']:
-    df = load_data('CHCL', timeframe)
+    df = DataLoader().load('CHCL', None, None)
     
     visualizer = CandlestickAnomalyVisualizer('CHCL', df, timeframe=timeframe)
     fig = visualizer.plot_candlestick_with_anomalies()

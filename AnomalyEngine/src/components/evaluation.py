@@ -19,3 +19,10 @@ def compute_anomaly_stats(df, labels):
     results["volume_normal_mean"] = normal_df["volume"].mean()
 
     return results
+
+
+class Evaluator:
+    """Object-oriented evaluation service providing anomaly statistics."""
+
+    def compute(self, df, labels):
+        return compute_anomaly_stats(df, labels)

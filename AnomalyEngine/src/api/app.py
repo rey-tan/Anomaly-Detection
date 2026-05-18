@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import List
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -12,6 +13,8 @@ from src.pipelines.anomaly_detection_pipeline import run_pipeline
 from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS
+from fastapi.responses import FileResponse
+from src.utils.io import write_result_artifact, read_result_artifact
 from . import crud, database, models, schemas, security
 
 app = FastAPI(title="Anomaly Engine API")
@@ -153,6 +156,12 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     metrics = convert_numpy_types(metrics)
     best_params = convert_numpy_types(best_params)
 
+    # persist artifact to disk and record path
+    try:
+        data_path = write_result_artifact(data, current_user.id, cache_key)
+    except Exception:
+        data_path = None
+
     crud.create_cache_entry(
         db=db,
         config_hash=cache_key,
@@ -180,6 +189,7 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         features=config["features"],
         best_params=best_params,
         metrics=metrics,
+        data_path=data_path,
         status="success",
         duration_seconds=None,
     )
@@ -321,3 +331,20 @@ def startup_event():
             crud.create_user(db, "admin", "admin123", role="admin")
     finally:
         db.close()
+
+
+@app.get("/me/analyses/{analysis_id}/data")
+def get_analysis_data(
+    analysis_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    analysis = db.query(models.UserAnalysis).filter(models.UserAnalysis.id == analysis_id).first()
+    if not analysis or analysis.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Analysis not found")
+    if not analysis.data_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data artifact not available")
+    path = Path(analysis.data_path)
+    if not path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artifact file not found")
+    return FileResponse(str(path), media_type="application/json", filename=path.name)

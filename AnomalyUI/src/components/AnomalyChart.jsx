@@ -12,10 +12,6 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
-function formatDate(value) {
-  return value ? new Date(value).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
-}
-
 export default function AnomalyChart({ data = [] }) {
   const labels = data.map((row) => row.date || row.transaction_time || "");
   const closeSeries = data.map((row) => row.close ?? row.price ?? null);

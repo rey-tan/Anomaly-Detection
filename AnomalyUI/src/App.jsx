@@ -5,15 +5,27 @@ import AnalysisPanel from "./components/AnalysisPanel";
 import AnomalyChart from "./components/AnomalyChart";
 import MetricsGrid from "./components/MetricsGrid";
 import SaveCacheButton from "./components/SaveCacheButton";
+import UsersPanel from "./components/UsersPanel";
 
 const STORAGE_KEY = "anomalyui_token";
+const DEFAULT_PAGE = "dashboard";
+
+const NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", description: "Overview" },
+  { id: "analysis", label: "Analysis", description: "Run model" },
+  { id: "results", label: "Results", description: "Charts & metrics" },
+  { id: "users", label: "Users", description: "Admin only" },
+];
 
 function Header({ user, onLogout }) {
   return (
     <header className="topbar">
-      <div>
+      <div className="topbar-copy">
         <p className="eyebrow">Anomaly Engine</p>
         <h1>Detect hidden market risk with precision.</h1>
+        <p className="topbar-subtitle">
+          Separate pages for navigation, analysis, results, and admin tools. The workspace stays focused instead of stacking everything in one screen.
+        </p>
       </div>
       <div className="user-chip">
         <div>
@@ -50,11 +62,16 @@ function LoginPage({ onSuccess }) {
 
   return (
     <main className="auth-page">
+      <div className="auth-background">
+        <span />
+        <span />
+        <span />
+      </div>
       <div className="auth-panel">
         <div className="brand-block">
           <p className="eyebrow">Secure access</p>
           <h1>Sign in to Anomaly Engine</h1>
-          <p>Use your analyst account to run real-time anomaly detection and review actionable findings.</p>
+          <p>Use your analyst account to run anomaly detection, review findings, and manage the workspace in dedicated pages.</p>
         </div>
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>
@@ -86,7 +103,7 @@ function LoginPage({ onSuccess }) {
   );
 }
 
-function ResultStats({ data = [], metrics = {} }) {
+function ResultStats({ data = [] }) {
   const anomalyCount = data.filter((item) => item.cluster === -1).length;
   const points = data.length;
   const firstDate = data[0]?.date || data[0]?.transaction_time || "—";
@@ -112,6 +129,28 @@ function ResultStats({ data = [], metrics = {} }) {
   );
 }
 
+function NavButton({ item, active, onClick, badge }) {
+  return (
+    <button className={active ? "nav-item active" : "nav-item"} onClick={onClick} type="button">
+      <span className="nav-item-label">
+        <strong>{item.label}</strong>
+        <small>{item.description}</small>
+      </span>
+      {badge ? <span className="nav-badge">{badge}</span> : null}
+    </button>
+  );
+}
+
+function StatCard({ label, value, helper }) {
+  return (
+    <article className="stat-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {helper ? <p>{helper}</p> : null}
+    </article>
+  );
+}
+
 function App() {
   const [token, setToken] = useState(localStorage.getItem(STORAGE_KEY) || "");
   const [user, setUser] = useState(null);
@@ -119,7 +158,7 @@ function App() {
   const [lastConfig, setLastConfig] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showUsers, setShowUsers] = useState(false);
+  const [page, setPage] = useState(DEFAULT_PAGE);
 
   useEffect(() => {
     if (!token) return;
@@ -139,6 +178,7 @@ function App() {
     try {
       const profile = await fetchProfile(accessToken);
       setUser(profile);
+      setPage(DEFAULT_PAGE);
     } catch (err) {
       setError(err.message || "Unable to load profile");
     }
@@ -149,7 +189,9 @@ function App() {
     setToken("");
     setUser(null);
     setResults(null);
+    setLastConfig(null);
     setError("");
+    setPage(DEFAULT_PAGE);
   };
 
   const handleAnalyze = async (payload) => {
@@ -159,6 +201,7 @@ function App() {
       const response = await analyze(token, payload);
       setResults(response);
       setLastConfig(payload);
+      setPage("results");
     } catch (err) {
       setError(err.message || "Analysis failed");
     } finally {
@@ -166,14 +209,11 @@ function App() {
     }
   };
 
-  const summary = useMemo(() => {
-    if (!results) return null;
-    return {
-      metrics: results.metrics,
-      bestParams: results.best_params,
-      data: results.data,
-    };
-  }, [results]);
+  const anomalyCount = useMemo(() => results?.data?.filter((item) => item.cluster === -1).length || 0, [results]);
+  const activeMetricCount = useMemo(() => Object.keys(results?.metrics || {}).length, [results]);
+  const navItems = useMemo(() => {
+    return NAV_ITEMS.filter((item) => item.id !== "users" || user?.role === "admin");
+  }, [user]);
 
   if (!token) {
     return <LoginPage onSuccess={handleLogin} />;
@@ -182,53 +222,176 @@ function App() {
   return (
     <div className="app-shell">
       <Header user={user} onLogout={handleLogout} />
+      <section className="workspace-grid">
+        <aside className="side-rail">
+          <div className="side-rail-card">
+            <p className="eyebrow">Workspace</p>
+            <h2>Pages</h2>
+            <p>Jump between focused views instead of scrolling through one long page.</p>
+          </div>
+          <nav className="nav-stack" aria-label="Primary">
+            {navItems.map((item) => (
+              <NavButton
+                key={item.id}
+                item={item}
+                active={page === item.id}
+                onClick={() => setPage(item.id)}
+                badge={item.id === "results" && results ? "Live" : null}
+              />
+            ))}
+          </nav>
 
-      <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-        {user?.role === "admin" ? (
-          <button className="primary-button" onClick={() => setShowUsers((s) => !s)}>{showUsers ? "Close users" : "Manage users"}</button>
-        ) : null}
-        {results ? <span style={{ alignSelf: "center", color: "#94a3b8" }}>Last run: {lastConfig?.stock || "—"} </span> : null}
-      </div>
+          <div className="side-rail-card side-rail-footer">
+            <span>Last run</span>
+            <strong>{lastConfig?.stock || "No analysis yet"}</strong>
+            <p>{lastConfig ? `${lastConfig.timeframe} • ${lastConfig.mode}` : "Run an analysis to populate charts and metrics."}</p>
+          </div>
+        </aside>
 
-      <main className="content-grid">
-        <div className="left-panel">
-          <AnalysisPanel onSubmit={handleAnalyze} loading={loading} />
-          {error ? <div className="alert-box">{error}</div> : null}
-          {results ? <ResultStats data={results.data || []} metrics={results.metrics} /> : null}
-          {results && lastConfig ? (
-            <div style={{ marginTop: 12 }}>
-              <SaveCacheButton token={token} config={lastConfig} results={results} onSaved={() => {}} />
-            </div>
-          ) : null}
-          {showUsers && user?.role === "admin" ? <UsersPanel token={token} /> : null}
-        </div>
-
-        <div className="right-panel">
-          <section className="hero-card">
-            <div>
-              <p className="eyebrow">Live insights</p>
-              <h2>Fast review of your last analysis</h2>
-              <p>Visualize anomalies, model health, and the latest tuning parameters in one view.</p>
-            </div>
-            <div className="hero-footer">
-              <span>{user?.role ? `Role: ${user.role}` : "Analyst dashboard"}</span>
-              <strong>Backend API: {import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}</strong>
-            </div>
-          </section>
-
-          {results ? (
+        <main className="page-stage">
+          {page === "dashboard" ? (
             <>
-              <MetricsGrid metrics={results.metrics} bestParams={results.best_params} />
-              <AnomalyChart data={results.data || []} />
+              <section className="hero-card hero-card-split">
+                <div>
+                  <p className="eyebrow">Live insights</p>
+                  <h2>Overview of the current anomaly workspace</h2>
+                  <p>Track model health, see the last analyzed symbol, and move into a dedicated page for the next task.</p>
+                </div>
+                <div className="hero-footer">
+                  <span>{user?.role ? `Role: ${user.role}` : "Analyst dashboard"}</span>
+                  <strong>Backend API: {import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}</strong>
+                </div>
+              </section>
+
+              <section className="stats-grid">
+                <StatCard label="Current page" value="Dashboard" helper="Use the sidebar to switch to analysis, results, or admin pages." />
+                <StatCard label="Latest symbol" value={lastConfig?.stock || "—"} helper="Most recent analysis target." />
+                <StatCard label="Flagged anomalies" value={anomalyCount} helper="Count from the latest result set." />
+                <StatCard label="Metrics groups" value={activeMetricCount} helper="How many models are currently summarized." />
+              </section>
+
+              <section className="dashboard-grid">
+                <article className="dashboard-card">
+                  <div className="section-heading compact">
+                    <div>
+                      <h2>Quick actions</h2>
+                      <p>Open a focused page for the task you want to complete next.</p>
+                    </div>
+                  </div>
+                  <div className="quick-links">
+                    <button className="quick-link" onClick={() => setPage("analysis")} type="button">
+                      Run a new analysis
+                    </button>
+                    <button className="quick-link" onClick={() => setPage("results")} type="button" disabled={!results}>
+                      Review latest results
+                    </button>
+                    {user?.role === "admin" ? (
+                      <button className="quick-link" onClick={() => setPage("users")} type="button">
+                        Manage users
+                      </button>
+                    ) : null}
+                  </div>
+                </article>
+
+                <article className="dashboard-card">
+                  <div className="section-heading compact">
+                    <div>
+                      <h2>Analysis context</h2>
+                      <p>The most recent configuration is kept separate from the charts page so it does not clutter the layout.</p>
+                    </div>
+                  </div>
+                  <div className="context-stack">
+                    <div className="context-row">
+                      <span>Mode</span>
+                      <strong>{lastConfig?.mode || "—"}</strong>
+                    </div>
+                    <div className="context-row">
+                      <span>Timeframe</span>
+                      <strong>{lastConfig?.timeframe || "—"}</strong>
+                    </div>
+                    <div className="context-row">
+                      <span>Feature count</span>
+                      <strong>{lastConfig?.features?.length || 0}</strong>
+                    </div>
+                  </div>
+                </article>
+              </section>
             </>
-          ) : (
-            <section className="empty-state-card">
-              <h2>Begin your first run</h2>
-              <p>Complete the form on the left and submit an analysis configuration to unlock charts and anomaly details.</p>
+          ) : null}
+
+          {page === "analysis" ? (
+            <section className="page-split">
+              <div className="page-panel">
+                <div className="page-intro">
+                  <p className="eyebrow">Analysis page</p>
+                  <h2>Run a new anomaly detection job</h2>
+                  <p>Use one focused page for configuration and submission so the analysis form does not compete with the results view.</p>
+                </div>
+                <AnalysisPanel onSubmit={handleAnalyze} loading={loading} />
+                {error ? <div className="alert-box">{error}</div> : null}
+              </div>
+
+              <aside className="page-panel page-panel-aside">
+                <div className="page-intro compact-copy">
+                  <p className="eyebrow">Before you run</p>
+                  <h3>Keep the set small and intentional</h3>
+                  <p>Choose the symbol, window, and features you actually want to inspect. You can move to the results page after the run completes.</p>
+                </div>
+                <div className="context-stack">
+                  <div className="context-row">
+                    <span>Selected page</span>
+                    <strong>Analysis</strong>
+                  </div>
+                  <div className="context-row">
+                    <span>Saved cache</span>
+                    <strong>{results && lastConfig ? "Available" : "Not yet"}</strong>
+                  </div>
+                </div>
+                {results && lastConfig ? <SaveCacheButton token={token} config={lastConfig} results={results} onSaved={() => {}} /> : null}
+              </aside>
             </section>
-          )}
-        </div>
-      </main>
+          ) : null}
+
+          {page === "results" ? (
+            <section className="page-split results-layout">
+              <div className="page-panel">
+                <div className="page-intro">
+                  <p className="eyebrow">Results page</p>
+                  <h2>Inspect the latest analysis outputs</h2>
+                  <p>The chart, metrics, and tuned parameters are now isolated here instead of sitting on the same page as the input form.</p>
+                </div>
+                {results ? <ResultStats data={results.data || []} metrics={results.metrics} /> : null}
+                {results ? <MetricsGrid metrics={results.metrics} bestParams={results.best_params} /> : <section className="empty-state-card"><h2>No results yet</h2><p>Run an analysis from the Analysis page to populate this view.</p></section>}
+              </div>
+
+              <div className="page-panel">
+                {results ? <AnomalyChart data={results.data || []} /> : <section className="empty-state-card"><h2>Chart preview</h2><p>Once analysis is complete, price action and anomaly markers appear here.</p></section>}
+                {results && lastConfig ? <SaveCacheButton token={token} config={lastConfig} results={results} onSaved={() => {}} /> : null}
+              </div>
+            </section>
+          ) : null}
+
+          {page === "users" && user?.role === "admin" ? (
+            <section className="page-split single-column">
+              <div className="page-panel">
+                <div className="page-intro">
+                  <p className="eyebrow">Admin page</p>
+                  <h2>Manage users separately from analysis work</h2>
+                  <p>Keeping the admin tools on their own page makes the analyst workflow cleaner.</p>
+                </div>
+                <UsersPanel token={token} />
+              </div>
+            </section>
+          ) : null}
+
+          {page === "users" && user?.role !== "admin" ? (
+            <section className="empty-state-card">
+              <h2>Admin access required</h2>
+              <p>Only admin users can open the user management page.</p>
+            </section>
+          ) : null}
+        </main>
+      </section>
     </div>
   );
 }

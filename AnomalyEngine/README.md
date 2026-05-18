@@ -137,6 +137,10 @@ The dashboard opens at `http://localhost:8501`
 - Scatter plot (price vs. volume, colored by cluster)
 - Technical analysis (SMA, RSI, Bollinger Bands)
 
+Recent UI update (May 2026):
+
+- Anomaly overlay rendering: the `AnomalyChart` component (AnomalyUI `src/components/AnomalyChart.jsx`) no longer uses a single combined `anomalyPoints` series that could hide overlapping markers. Instead, anomaly markers are plotted using numeric x-indices with small horizontal offsets and retain the original date label for tooltip titles. This makes multiple concurrent detector flags visible and easier to inspect. Tweak the offsets or add jitter/legend controls in `AnomalyChart.jsx` if you prefer a different visual behavior.
+
 ## Running tests
 
 See [TESTING.md](TESTING.md) for instructions to run unit and integration tests locally. Recommended command to run the full suite:

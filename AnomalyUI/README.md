@@ -2,6 +2,17 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Frontend changes
+
+- Anomaly overlay update: the anomaly marker rendering was changed to avoid overlapping markers hiding each other. Markers now use numeric x-indices with small horizontal offsets and show the original date in the tooltip title. This improves visibility when multiple detectors flag the same timestamp. If you want different behavior (vertical jitter, larger offset, or an interactive legend toggle), adjust `AnomalyChart.jsx` in `src/components`.
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)

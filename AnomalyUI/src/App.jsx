@@ -24,7 +24,7 @@ function Header({ user, onLogout }) {
         <p className="eyebrow">Anomaly Engine</p>
         <h1>Detect hidden market risk with precision.</h1>
         <p className="topbar-subtitle">
-          Separate pages for navigation, analysis, results, and admin tools. The workspace stays focused instead of stacking everything in one screen.
+          Analyze your data for unusual patterns and potential risks.
         </p>
       </div>
       <div className="user-chip">
@@ -106,8 +106,12 @@ function LoginPage({ onSuccess }) {
 function ResultStats({ data = [] }) {
   const anomalyCount = data.filter((item) => item.cluster === -1).length;
   const points = data.length;
-  const firstDate = data[0]?.date || data[0]?.transaction_time || "—";
-  const lastDate = data[data.length - 1]?.date || data[data.length - 1]?.transaction_time || "—";
+
+  const formatDate = (value) => (value ? String(value).split("T")[0] : "—");
+
+  const firstDate = formatDate(data[0]?.date || data[0]?.transaction_time);
+  const lastDate = formatDate(data[data.length - 1]?.date || data[data.length - 1]?.transaction_time);
+  
 
   return (
     <div className="result-summary">
@@ -228,7 +232,7 @@ function App() {
           <div className="side-rail-card">
             <p className="eyebrow">Workspace</p>
             <h2>Pages</h2>
-            <p>Jump between focused views instead of scrolling through one long page.</p>
+            <p></p>
           </div>
           <nav className="nav-stack" aria-label="Primary">
             {navItems.map((item) => (
@@ -324,9 +328,9 @@ function App() {
             <section className="page-split">
               <div className="page-panel">
                 <div className="page-intro">
-                  <p className="eyebrow">Analysis page</p>
+                  <p className="eyebrow">Analysis:</p>
                   <h2>Run a new anomaly detection job</h2>
-                  <p>Use one focused page for configuration and submission so the analysis form does not compete with the results view.</p>
+                  <p></p>
                 </div>
                 <AnalysisPanel onSubmit={handleAnalyze} loading={loading} />
                 {error ? <div className="alert-box">{error}</div> : null}
@@ -340,15 +344,12 @@ function App() {
                 </div>
                 <div className="context-stack">
                   <div className="context-row">
-                    <span>Selected page</span>
+                    <span>Current page:</span>
                     <strong>Analysis</strong>
                   </div>
-                  <div className="context-row">
-                    <span>Saved cache</span>
-                    <strong>{results && lastConfig ? "Available" : "Not yet"}</strong>
-                  </div>
                 </div>
-                {null}
+                  <img src="/abstract-stock-market.webp" alt="Abstract illustration of stock market analysis" className="aside-graphic" />
+
               </aside>
             </section>
           ) : null}
@@ -359,7 +360,7 @@ function App() {
                 <div className="page-intro">
                   <p className="eyebrow">Results page</p>
                   <h2>Inspect the latest analysis outputs</h2>
-                  <p>The chart, metrics, and tuned parameters are now isolated here instead of sitting on the same page as the input form.</p>
+                  <p>Chart, metrics, and tuned parameters:</p>
                   {selectedAnalysis ? (
                     <div className="favorite-row">
                       <button
@@ -399,9 +400,9 @@ function App() {
                 <div className="page-intro">
                   <p className="eyebrow">Admin page</p>
                   <h2>Manage users separately from analysis work</h2>
-                  <p>Keeping the admin tools on their own page makes the analyst workflow cleaner.</p>
+                  <p></p>
                 </div>
-                <UsersPanel token={token} />
+                <UsersPanel token={token} currentUser={user} />
               </div>
             </section>
           ) : null}

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-import streamlit as st
+import logging
 
 from src.pipelines.analysis_engine import StaticAnalysisPipeline
+
+logger = logging.getLogger(__name__)
 
 
 def run_pipeline(config, best_params):
@@ -11,10 +13,10 @@ def run_pipeline(config, best_params):
         result = pipeline.run()
         return result.as_response()
     except KeyError as e:
-        st.error(f"Missing config key: {e}")
+        logger.error("Missing config key: %s", e)
     except ValueError as e:
-        st.error(f"Value error: {e}")
-    except Exception as e:
-        st.exception(e)
+        logger.error("Value error: %s", e)
+    except Exception:
+        logger.exception("Unexpected error running pipeline")
 
     return None

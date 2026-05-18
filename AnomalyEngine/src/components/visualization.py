@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import numpy as np
 
 def plot_analysis(symbol, df, timeframe):
     df_filtered = df.copy()
@@ -127,36 +128,117 @@ def plot_scatter(symbol, df, timeframe):
 def plot_timeseries(symbol, df, timeframe):
 
     df = df.copy()
+    
+    df["ensemble_label"] = df.apply(classify_ensemble, axis=1)
+    df["z_label"] = df["Anomaly_Z_Score"].apply(z_label)
+
+    critical = df[df["ensemble_label"] == "Critical Anomaly"]
+    density = df[df["ensemble_label"] == "Density Based Anomaly"]
+    structure = df[df["ensemble_label"] == "Structure Based Anomaly"]
+
     fig = go.Figure()
 
-    # price line
+    # Add the line for the closing close
     fig.add_trace(
         go.Scatter(
             x=df.index,
             y=df["close"],
             mode="lines",
-            name="Close",
-            line=dict(width=2),
+            name="Close prices",
+            line=dict(color="blue"),
         )
     )
 
-    # anomalies
-    anomalies = df[df["cluster"] == -1]
-
+    # Critical anomalies
     fig.add_trace(
         go.Scatter(
-            x=anomalies.index,
-            y=anomalies["close"],
+            x=critical.index,
+            y=critical["close"],
             mode="markers",
-            name="Anomalies",
-            marker=dict(color="red", size=8),
+            name="Critical",
+            hovertemplate=
+            "Time: %{x}<br>" +
+            "Price: %{y}<br>" +
+            "Deviation: %{customdata[0]:.2f}σ<br>" +
+            "<extra></extra>",
+            customdata=np.stack([
+                critical["Anomaly_Z_Score"]
+            ], axis=-1),
+            marker=dict(color="red", size=10)
         )
     )
 
+    # Density anomalies
+    fig.add_trace(
+        go.Scatter(
+            x=density.index,
+            y=density["close"],
+            mode="markers",
+            name="Density",
+            hovertemplate=
+            "Time: %{x}<br>" +
+            "Price: %{y}<br>" +
+            "Deviation: %{customdata[0]:.2f}σ<br>" +
+            "<extra></extra>",
+            customdata=np.stack([
+                density["Anomaly_Z_Score"]
+            ], axis=-1),
+            marker=dict(color="orange", size=8)
+        )
+    )
+
+    # Structure anomalies
+    fig.add_trace(
+        go.Scatter(
+            x=structure.index,
+            y=structure["close"],
+            mode="markers",
+            name="Structure",
+            hovertemplate=
+            "Time: %{x}<br>" +
+            "Price: %{y}<br>" +
+            "Deviation: %{customdata[0]:.2f}σ<br>" +
+            "<extra></extra>",
+            customdata=np.stack([
+                structure["Anomaly_Z_Score"]
+            ], axis=-1),
+            marker=dict(color="green", size=8)
+        )
+    )
+
+    # Update layout
     fig.update_layout(
-        title=f"{symbol} Price with DBSCAN Anomalies",
+        title=f"{symbol} Stock close with Detected Anomalies",
+        xaxis_title="Date",
+        yaxis_title="Close prices",
+        legend_title="Legend",
         width=1200,
         height=600,
     )
 
     return fig
+
+
+
+def classify_ensemble(row):
+
+    if row["Anomaly_Isolation_Forest"] == -1 and row["Anomaly_DBSCAN"] == -1:
+        return "Critical Anomaly"
+
+    elif row["Anomaly_DBSCAN"] == -1:
+        return "Density Based Anomaly"
+
+    elif row["Anomaly_Isolation_Forest"] == -1:
+        return "Structure Based Anomaly"
+
+    return "Normal"
+
+def z_label(z):
+    if abs(z) < 1:
+        return "Normal (within 1σ)"
+    elif abs(z) < 2:
+        return "Mild deviation (1–2σ)"
+    elif abs(z) < 3:
+        return "Strong deviation (2–3σ)"
+    else:
+        return "Extreme deviation (>3σ)"

@@ -38,16 +38,17 @@ export default function AnalysisHistory({ token, onSelect }) {
     <aside className="history-panel">
       <div className="section-heading compact">
         <div>
-          <h3>Past analyses</h3>
-          <p>Click an entry to load its results into the viewer.</p>
+          <p className="eyebrow">Past analyses</p>
+          <h3>Quickly revisit prior runs</h3>
+          <p>Click an entry to load its results into the viewer, or star it to mark it as a favorite.</p>
         </div>
       </div>
       {loading ? <div className="loading">Loading…</div> : null}
       {error ? <div className="alert-box">{error}</div> : null}
-      <ul className="analysis-list">
+      <div className="analysis-list">
         {items.map((a) => (
-          <li key={a.id} className="analysis-list-item">
-            <button type="button" onClick={() => handleClick(a)}>
+          <article key={a.id} className={a.is_favorite ? "analysis-list-item favorite" : "analysis-list-item"}>
+            <button type="button" className="analysis-entry" onClick={() => handleClick(a)}>
               <div className="analysis-row">
                 <strong>{a.stock}</strong>
                 <small>{new Date(a.executed_at).toLocaleString()}</small>
@@ -58,12 +59,12 @@ export default function AnalysisHistory({ token, onSelect }) {
                 <span>{a.status}</span>
               </div>
             </button>
-            <button className="favorite-button" onClick={(ev) => handleFavorite(a, ev)}>
-              {a.is_favorite ? "★" : "☆"}
+            <button className="favorite-button" type="button" onClick={(ev) => handleFavorite(a, ev)} aria-label="Toggle favorite">
+              {a.is_favorite ? "★ Favorite" : "☆ Favorite"}
             </button>
-          </li>
+          </article>
         ))}
-      </ul>
+      </div>
     </aside>
   );
 }

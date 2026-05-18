@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.streamlit.insights import insights_page
+from src.streamlit_components.insights import insights_page
 from src.ui.auth import ensure_session_state, show_login_page
 from src.ui.shared import render_sidebar
 

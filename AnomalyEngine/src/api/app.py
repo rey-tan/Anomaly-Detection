@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import List
 from pathlib import Path
+import math
 
 from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -15,6 +16,7 @@ from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS
 from fastapi.responses import FileResponse
 from src.utils.io import write_result_artifact, read_result_artifact
+from src.utils.paths import ARTIFACTS
 from . import crud, database, models, schemas, security
 
 app = FastAPI(title="Anomaly Engine API")
@@ -37,7 +39,10 @@ def convert_numpy_types(obj):
     if isinstance(obj, (np.integer,)):
         return int(obj)
     elif isinstance(obj, (np.floating,)):
-        return float(obj)
+        value = float(obj)
+        return value if math.isfinite(value) else None
+    elif isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
     elif isinstance(obj, (np.ndarray,)):
         return obj.tolist()
     elif isinstance(obj, (np.datetime64,)):
@@ -112,6 +117,11 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@app.get("/symbols", response_model=List[str])
+def read_symbols():
+    return load_json(ARTIFACTS / "test_symbols.json")
+
+
 @app.get("/me", response_model=schemas.UserRead)
 def read_current_user(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
     return current_user
@@ -143,6 +153,13 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         results = run_pipeline(config, best_params)
     else:
         results = run_realtime_pipeline(config, best_params)
+
+    if results is None:
+        crud.log_user_activity(db, current_user.id, "analysis_error", resource=config["stock"], details={"config_hash": cache_key})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Analysis pipeline failed — check server logs for details",
+        )
 
     df = results["data"].reset_index()
     if "transaction_time" in df.columns:
@@ -268,7 +285,12 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_
 
 
 @app.patch("/users/{user_id}/role", response_model=schemas.UserRead, dependencies=[Depends(require_role(["admin"]))])
-def update_user_role(user_id: int, request: schemas.UserRoleUpdate, db: Session = Depends(database.get_db)):
+def update_user_role(
+    user_id: int,
+    request: schemas.UserRoleUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     allowed_roles = {"analyst", "admin"}
     if request.role not in allowed_roles:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Role must be analyst or admin")
@@ -276,14 +298,26 @@ def update_user_role(user_id: int, request: schemas.UserRoleUpdate, db: Session 
     user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot update your own account")
+    if user.role == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin accounts cannot be modified")
     return crud.update_user_role(db, user, request.role)
 
 
 @app.delete("/users/{user_id}", dependencies=[Depends(require_role(["admin"]))])
-def delete_user(user_id: int, db: Session = Depends(database.get_db)):
+def delete_user(
+    user_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
     user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot delete your own account")
+    if user.role == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin accounts cannot be deleted")
     crud.delete_user(db, user)
     return {"message": "User deleted"}
 
@@ -348,7 +382,11 @@ def get_analysis_data(
     path = Path(analysis.data_path)
     if not path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artifact file not found")
-    return FileResponse(str(path), media_type="application/json", filename=path.name)
+
+    artifact = read_result_artifact(str(path))
+    if artifact is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artifact file not found")
+    return convert_numpy_types(artifact)
 
 
 @app.post("/me/analyses/{analysis_id}/favorite", response_model=schemas.UserAnalysisRead)

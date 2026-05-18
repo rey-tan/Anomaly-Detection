@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 
 from src.components.data_loader import load_data, DataLoader
 from src.components.evaluation import Evaluator
-from src.components.feature_engineering import build_features, FeatureEngineering
+from src.components.feature_engineering import FeatureEngineering
 from src.components.scaling import FeatureScaler
 from src.components.preprocessing import preprocess, Preprocessor
 from src.models.dbscan import DBSCAN
@@ -105,7 +105,6 @@ class BaseAnalysisPipeline(ABC):
         self.best_params = best_params or {}
         self.data_loader = data_loader or DataLoader()
         self.preprocessor = preprocessor or Preprocessor()
-        # feature_engineer may be provided as an object with `transform(df, features)`
         self.feature_engineer = feature_engineer or FeatureEngineering()
         self.scaler = scaler or FeatureScaler()
         self.detector = detector or AnomalyDetectorService()

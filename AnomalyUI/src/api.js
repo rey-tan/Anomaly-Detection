@@ -38,6 +38,11 @@ export async function fetchProfile(token) {
   return unwrapResponse(response);
 }
 
+export async function fetchSymbols() {
+  const response = await fetch(`${BASE_URL}/symbols`);
+  return unwrapResponse(response);
+}
+
 export async function analyze(token, payload) {
   const response = await fetch(`${BASE_URL}/analyze`, {
     method: "POST",

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { fetchSymbols } from "../api";
 
 const defaultFeatures = [
   "close",
@@ -12,14 +13,51 @@ const defaultFeatures = [
 ];
 
 export default function AnalysisPanel({ onSubmit, loading }) {
+  const [symbols, setSymbols] = useState([]);
+  const [symbolsLoading, setSymbolsLoading] = useState(true);
   const [form, setForm] = useState({
-    stock: "API",
-    timeframe: "1D",
+    stock: "",
+    timeframe: "5min",
     mode: "Static",
-    start_date: "2025-01-01",
-    end_date: "2025-12-31",
-    features: ["close", "volume", "volatility", "returns"],
+    start_date: "2026-01-01",
+    end_date: "2026-01-31",
+    features: ["bb_width", "volume", "volatility", "returns"],
   });
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSymbols() {
+      try {
+        const availableSymbols = await fetchSymbols();
+        if (!active) return;
+
+        const normalized = Array.isArray(availableSymbols) ? availableSymbols : [];
+        setSymbols(normalized);
+        setForm((prev) => ({
+          ...prev,
+          stock: prev.stock || normalized[0] || "",
+        }));
+      } catch {
+        if (!active) return;
+        setSymbols(["API"]);
+        setForm((prev) => ({
+          ...prev,
+          stock: prev.stock || "API",
+        }));
+      } finally {
+        if (active) {
+          setSymbolsLoading(false);
+        }
+      }
+    }
+
+    loadSymbols();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const canSubmit = useMemo(() => {
     return form.stock.trim() && form.start_date && form.end_date && form.features.length > 0;
@@ -53,11 +91,18 @@ export default function AnalysisPanel({ onSubmit, loading }) {
       <div className="field-grid">
         <label className="field-group">
           <span>Symbol</span>
-          <input
+          <select
             value={form.stock}
             onChange={(event) => setForm((prev) => ({ ...prev, stock: event.target.value }))}
-            placeholder="AAPL, API, BTC"
-          />
+            disabled={symbolsLoading && symbols.length === 0}
+          >
+            {symbolsLoading && symbols.length === 0 ? <option value="">Loading symbols...</option> : null}
+            {symbols.map((symbol) => (
+              <option key={symbol} value={symbol}>
+                {symbol}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="field-group">
           <span>Mode</span>
@@ -103,7 +148,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
         </label>
       </div>
 
-      <div className="feature-panel">
+      {/* <div className="feature-panel">
         <div className="feature-heading">
           <span>Feature selection</span>
           <p>Active features power the anomaly model.</p>
@@ -120,7 +165,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             </button>
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div className="form-footer">
         <button type="submit" className="primary-button" disabled={!canSubmit || loading}>

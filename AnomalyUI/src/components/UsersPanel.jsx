@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUserRole, deleteUser } from "../api";
 
-export default function UsersPanel({ token }) {
+export default function UsersPanel({ token, currentUser }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "analyst" });
@@ -84,40 +84,54 @@ export default function UsersPanel({ token }) {
   };
 
   return (
-    <div className="panel-card" style={{ padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0 }}>Users</h3>
-        <div style={{ color: "#94a3b8" }}>{loading ? "Loading…" : `${users.length} users`}</div>
+    <div className="admin-panel">
+      <div className="admin-panel-head">
+        <div>
+          <p className="eyebrow">Admin dashboard</p>
+          <h3>Users</h3>
+        </div>
+        <div className="admin-count">{loading ? "Loading…" : `${users.length} users`}</div>
       </div>
 
-      {error ? <div className="form-error" style={{ marginTop: 12 }}>{error}</div> : null}
+      {error ? <div className="form-error admin-error">{error}</div> : null}
 
-      <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+      <div className="admin-list">
         {users.map((u) => (
-          <div key={u.id} style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between", padding: 10, borderRadius: 12, background: "rgba(15,23,42,0.6)" }}>
-            <div>
-              <div style={{ fontWeight: 700 }}>{u.username}</div>
-              <div style={{ color: "#94a3b8", fontSize: 12 }}>{u.role}</div>
+          <div key={u.id} className={u.role === "admin" || u.id === currentUser?.id ? "admin-user-card protected" : "admin-user-card"}>
+            <div className="admin-user-copy">
+              <div className="admin-user-name">{u.username}</div>
+              <div className="admin-user-role">{u.role}</div>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <select value={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)} style={{ padding: 8, borderRadius: 10 }}>
+            <div className="admin-user-actions">
+              <select
+                value={u.role}
+                onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                className="admin-select"
+                disabled={u.role === "admin" || u.id === currentUser?.id}
+              >
                 <option value="analyst">analyst</option>
                 <option value="admin">admin</option>
               </select>
-              <button className="text-button" onClick={() => handleDelete(u.id)} style={{ color: "#fb7185" }}>Delete</button>
+              {u.role === "admin" || u.id === currentUser?.id ? null : (
+                <button className="text-button danger" onClick={() => handleDelete(u.id)} type="button">
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleCreate} style={{ marginTop: 16, display: "grid", gap: 8 }}>
-        <input placeholder="username" value={newUser.username} onChange={(e) => setNewUser((p) => ({ ...p, username: e.target.value }))} required />
-        <input placeholder="password" type="password" value={newUser.password} onChange={(e) => setNewUser((p) => ({ ...p, password: e.target.value }))} required />
-        <select value={newUser.role} onChange={(e) => setNewUser((p) => ({ ...p, role: e.target.value }))}>
-          <option value="analyst">analyst</option>
-          <option value="admin">admin</option>
-        </select>
-        <button className="primary-button" type="submit">Create user</button>
+      <form onSubmit={handleCreate} className="admin-form">
+        <div className="admin-form-grid">
+          <input className="admin-input" placeholder="username" value={newUser.username} onChange={(e) => setNewUser((p) => ({ ...p, username: e.target.value }))} required />
+          <input className="admin-input" placeholder="password" type="password" value={newUser.password} onChange={(e) => setNewUser((p) => ({ ...p, password: e.target.value }))} required />
+          <select className="admin-select" value={newUser.role} onChange={(e) => setNewUser((p) => ({ ...p, role: e.target.value }))}>
+            <option value="analyst">analyst</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+        <button className="primary-button admin-submit" type="submit">Create user</button>
       </form>
     </div>
   );

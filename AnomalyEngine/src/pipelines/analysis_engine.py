@@ -178,6 +178,7 @@ class RealtimeAnalysisPipeline(BaseAnalysisPipeline):
         result_df = feature_df.copy()
         result_df["cluster"] = labels
         result_df["anomaly"] = result_df["cluster"] == -1
+        
 
         evaluator = Evaluator()
         metrics = {"dbscan": evaluator.compute(result_df, result_df["cluster"]) }

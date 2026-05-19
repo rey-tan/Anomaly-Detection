@@ -1,0 +1,67 @@
+{
+  "1min": {
+    "isolation_forest": {
+      "n_estimators": 300,
+      "contamination": 0.02
+    },
+    "dbscan": {
+      "eps": 2.385474915642707,
+      "min_pts": 8
+    },
+    "z_score": {
+      "threshold": 1.5
+    }
+  },
+  "5min": {
+    "isolation_forest": {
+      "n_estimators": 300,
+      "contamination": 0.01
+    },
+    "dbscan": {
+      "eps": 2.015356719116605,
+      "min_pts": 8
+    },
+    "z_score": {
+      "threshold": 3.0
+    }
+  },
+  "15min": {
+    "isolation_forest": {
+      "n_estimators": 100,
+      "contamination": 0.02
+    },
+    "dbscan": {
+      "eps": 2.5180237973534547,
+      "min_pts": 8
+    },
+    "z_score": {
+      "threshold": 2.5
+    }
+  },
+  "1H": {
+    "isolation_forest": {
+      "n_estimators": 300,
+      "contamination": 0.02
+    },
+    "dbscan": {
+      "eps": 1.9933851714284365,
+      "min_pts": 8
+    },
+    "z_score": {
+      "threshold": 1.5
+    }
+  },
+  "1D": {
+    "isolation_forest": {
+      "n_estimators": 100,
+      "contamination": 0.02
+    },
+    "dbscan": {
+      "eps": 1.8039098863565362,
+      "min_pts": 8
+    },
+    "z_score": {
+      "threshold": 1.5
+    }
+  }
+}

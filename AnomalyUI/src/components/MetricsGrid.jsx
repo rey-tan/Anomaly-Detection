@@ -9,7 +9,8 @@ function MetricCard({ title, value, description }) {
 }
 
 export default function MetricsGrid({ metrics = {}, bestParams = {} }) {
-  const metricEntries = Object.entries(metrics || {});
+  const metricEntries = Object.entries(metrics || {})
+    .filter(([model]) => model.toLowerCase() != "zscore");
   return (
     <div className="metrics-wrapper">
       <div className="section-heading">
@@ -33,21 +34,16 @@ export default function MetricsGrid({ metrics = {}, bestParams = {} }) {
                 value="Anomaly count"
                 description="Total outlier observations"
               />
-              <MetricCard
-                title={`${summary.n_clusters ?? 0}`}
-                value="Clusters"
-                description="Unique normal clusters detected"
-              />
             </div>
           </div>
         ))}
       </div>
-      {bestParams && Object.keys(bestParams).length > 0 ? (
+      {/* {bestParams && Object.keys(bestParams).length > 0 ? (
         <div className="best-params-card">
           <h3>Tuned parameters</h3>
           <pre>{JSON.stringify(bestParams, null, 2)}</pre>
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

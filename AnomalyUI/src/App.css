@@ -976,6 +976,7 @@ img.aside-graphic{
   object-fit: cover;
   border-radius: 26px;
 }
+
 @media (max-width: 1180px) {
   .workspace-grid,
   .dashboard-grid,

@@ -381,6 +381,8 @@ function App() {
                 </div>
                 {results ? <ResultStats data={results.data || []} metrics={results.metrics} /> : null}
                 {results ? <MetricsGrid metrics={results.metrics} bestParams={results.best_params} /> : <section className="empty-state-card"><h2>No results yet</h2><p>Run an analysis from the Analysis page to populate this view.</p></section>}
+                <AnalysisHistory token={token} onSelect={(payload, analysis) => { setResults(payload); setSelectedAnalysis(analysis); setPage('results'); }} />
+
               </div>
 
               <div className="page-panel">
@@ -388,9 +390,7 @@ function App() {
                 {null}
               </div>
 
-              <aside className="page-panel">
-                <AnalysisHistory token={token} onSelect={(payload, analysis) => { setResults(payload); setSelectedAnalysis(analysis); setPage('results'); }} />
-              </aside>
+             
             </section>
           ) : null}
 

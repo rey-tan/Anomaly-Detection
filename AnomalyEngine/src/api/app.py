@@ -15,7 +15,7 @@ from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS
 from fastapi.responses import FileResponse
-from src.utils.io import write_result_artifact, read_result_artifact
+from src.utils.io import write_result_artifact, read_result_artifact, get_symbols
 from src.utils.paths import ARTIFACTS
 from . import crud, database, models, schemas, security
 
@@ -119,7 +119,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 @app.get("/symbols", response_model=List[str])
 def read_symbols():
-    return load_json(ARTIFACTS / "test_symbols.json")
+    return get_symbols()
 
 
 @app.get("/me", response_model=schemas.UserRead)
@@ -162,8 +162,8 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         )
 
     df = results["data"].reset_index()
-    if "transaction_time" in df.columns:
-        df["transaction_time"] = df["transaction_time"].astype(str)
+    if "date" in df.columns:
+        df["date"] = df["date"].astype(str)
 
     data = df.to_dict(orient="records")
     metrics = results.get("metrics", {})

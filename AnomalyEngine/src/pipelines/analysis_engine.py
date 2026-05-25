@@ -7,12 +7,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-
-from src.components.data_loader import load_data, DataLoader
+from src.components.data_loader import DataLoader
 from src.components.evaluation import Evaluator
 from src.components.feature_engineering import FeatureEngineering
 from src.components.scaling import FeatureScaler
-from src.components.preprocessing import preprocess, Preprocessor
+from src.components.preprocessing import Preprocessor
 from src.models.dbscan import DBSCAN
 from src.models.isolation_forest import IsolationForest
 from src.models.zscore import zscore

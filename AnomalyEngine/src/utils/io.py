@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import gzip
 from typing import Any
-
 from src.utils.paths import ARTIFACTS
 
 
@@ -21,3 +20,12 @@ def read_result_artifact(path: str) -> Any:
         return None
     with gzip.open(p, "rt", encoding="utf-8") as f:
         return json.load(f)
+
+def get_symbols():
+    symbols = []
+    with open(ARTIFACTS / "symbols.json", "r") as f:
+        data = json.load(f)
+        for category in data.values():
+            symbols.extend(category.keys())
+
+    return sorted(symbols)

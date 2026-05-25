@@ -1,13 +1,6 @@
 from sklearn.preprocessing import RobustScaler
 import pandas as pd
 
-def scale_features(df:pd.DataFrame, features:list[str]):
-    scaler = RobustScaler()
-
-    X = scaler.fit_transform(df[features])
-
-    return X
-
 
 class FeatureScaler:
     """Class-based feature scaler service.
@@ -18,4 +11,8 @@ class FeatureScaler:
         self.scaler = RobustScaler()
 
     def fit_transform(self, df: pd.DataFrame, features: list[str]):
-        return self.scaler.fit_transform(df[features])
+        scaler = RobustScaler()
+
+        X = scaler.fit_transform(df[features])
+
+        return X

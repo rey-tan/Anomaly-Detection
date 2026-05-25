@@ -25,6 +25,25 @@ def test_preprocessor_resamples_and_shapes():
     assert set(["open", "high", "low", "close", "volume"]).issubset(out.columns)
 
 
+def test_preprocessor_handles_ohlcv_input():
+    rng = pd.date_range("2023-01-01", periods=120, freq="D")
+    df = pd.DataFrame({
+        "date": rng,
+        "open": np.linspace(100, 140, len(rng)),
+        "high": np.linspace(101, 141, len(rng)),
+        "low": np.linspace(99, 139, len(rng)),
+        "close": np.linspace(100.5, 140.5, len(rng)),
+        "volume": np.random.randint(1, 1000, size=len(rng)),
+        "amount": np.random.randint(1000, 5000, size=len(rng)),
+    })
+
+    pre = Preprocessor()
+    out = pre.transform(df, timeframe="1D")
+
+    assert not out.empty
+    assert set(["open", "high", "low", "close", "volume", "amount"]).issubset(out.columns)
+
+
 def test_feature_engineering_adds_indicators():
     n = 100
     dates = pd.date_range(end=pd.Timestamp.today(), periods=n)

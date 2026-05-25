@@ -17,32 +17,33 @@ class FeatureEngineering:
     def transform(self,df:pd.DataFrame,features:list)->pd.DataFrame :
         df = df.copy()
         # Compute features
-        df["returns"] = df["close"].pct_change()
+        df["returns"] = df["close"].pct_change().replace([np.inf, -np.inf], np.nan).fillna(0)
         df["close"] = df["close"].replace(0, np.nan)
-        df["volatility"] = df["returns"].rolling(window=20).std()
+        df["volatility"] = df["returns"].rolling(window=self.vol_window, min_periods=1).std().fillna(0)
 
 
         #Calculate additional features
 
         # 1. Calculate Simple moving averages of last N days
-        df["SMA_10"] = df["close"].rolling(window=10).mean()
-        df["SMA_20"] = df["close"].rolling(window=20).mean()
-        df["SMA_50"] = df["close"].rolling(window=50).mean()
+        df["SMA_10"] = df["close"].rolling(window=self.sma_windows[0], min_periods=1).mean()
+        df["SMA_20"] = df["close"].rolling(window=self.sma_windows[1], min_periods=1).mean()
+        df["SMA_50"] = df["close"].rolling(window=self.sma_windows[2], min_periods=1).mean()
 
 
         # 2. Calculate Relative Strength Index
         def calculate_rsi(data, periods=14):
             delta = data.diff()
-            gain = (delta.where(delta > 0, 0)).rolling(window=periods).mean()
-            loss = (-delta.where(delta < 0, 0)).rolling(window=periods).mean()
+            gain = (delta.where(delta > 0, 0)).rolling(window=periods, min_periods=1).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(window=periods, min_periods=1).mean()
             rs = gain / loss
-            return 100 - (100 / (1 + rs))
+            return (100 - (100 / (1 + rs))).fillna(50)
         df["RSI"] = calculate_rsi(df["close"])
 
 
         # 3. Calculate Boilinger bands
-        df["Upper_BB"] = df["SMA_20"] + (df["close"].rolling(window=20).std() * 2)
-        df["Lower_BB"] = df["SMA_20"] - (df["close"].rolling(window=20).std() * 2)
+        rolling_std = df["close"].rolling(window=self.sma_windows[1], min_periods=1).std().fillna(0)
+        df["Upper_BB"] = df["SMA_20"] + (rolling_std * 2)
+        df["Lower_BB"] = df["SMA_20"] - (rolling_std * 2)
 
         df["bb_width"] = (df["Upper_BB"] - df["Lower_BB"]) / df["close"]
 

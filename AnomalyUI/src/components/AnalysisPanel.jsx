@@ -111,7 +111,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             onChange={(event) => setForm((prev) => ({ ...prev, mode: event.target.value }))}
           >
             <option value="Static">Static</option>
-            {/* <option value="Realtime">Realtime</option> */}
+            <option value="Realtime">Realtime</option>
           </select>
         </label>
         <label className="field-group">
@@ -120,11 +120,8 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             value={form.timeframe}
             onChange={(event) => setForm((prev) => ({ ...prev, timeframe: event.target.value }))}
           >
-            <option value="1min">1 minute</option>
-            <option value="5min">5 minutes</option>
-            <option value="15min">15 minutes</option>
-            <option value="1H">1 hour</option>
             <option value="1D">1 day</option>
+            <option value="2D">2 days</option>
           </select>
         </label>
       </div>

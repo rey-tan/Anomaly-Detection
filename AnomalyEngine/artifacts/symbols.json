@@ -4,7 +4,6 @@
     "SBL": 2,
     "NCCB": 3,
     "KBL": 5,
-    "LBL": 6,
     "MBL": 7,
     "EBL": 10,
     "NBB": 11,
@@ -19,13 +18,10 @@
     "ADBL": 24,
     "SANIMA": 166,
     "MEGA": 301,
-    "CBL": 325,
-    "CCBL": 335,
     "NBL": 341,
     "GBIME": 404,
     "NICA": 446,
-    "PRVU": 509,
-    "BOKL": 634
+    "PRVU": 509
   },
   "development_banks": {
     "CORBL": 309,
@@ -42,15 +38,12 @@
     "NABBC": 167,
     "SADBL": 298,
     "SAPDBL": 999,
-    "SHBL": 343,
     "SHINE": 440,
     "SINDU": 313
   },
   "finance": {
     "BFC": 40,
     "CFCL": 54,
-    "CFL": 88,
-    "CMB": 66,
     "GFCL": 43,
     "GMFIL": 71,
     "GUFL": 603,
@@ -77,7 +70,6 @@
     "AKPL": 514,
     "API": 527,
     "BARUN": 493,
-    "BNHC": 782,
     "BPCL": 119,
     "CHCL": 120,
     "CHL": 628,
@@ -91,7 +83,6 @@
     "KKHC": 578,
     "KPCL": 701,
     "LEC": 874,
-    "MBJC": 505,
     "MEN": 844,
     "MHNL": 678,
     "MKJC": 535,
@@ -129,8 +120,6 @@
   },
   "life_insurance": {
     "ALICL": 143,
-    "GLICL": 305,
-    "JLI": 741,
     "LICN": 138,
     "NLIC": 137,
     "NLICL": 128,
@@ -138,7 +127,6 @@
     "PLIC": 144,
     "RLI": 764,
     "SLI": 736,
-    "SLICL": 145,
-    "ULI": 717
+    "SLICL": 145
   }
 }

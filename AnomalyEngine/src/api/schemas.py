@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 
 from pydantic import BaseModel
 
@@ -113,3 +113,48 @@ class CacheCreate(BaseModel):
     best_params: Dict[str, Any]
     metrics: Dict[str, Any]
     data: List[Dict[str, Any]]
+
+
+class AdminDataAssetRead(BaseModel):
+    name: str
+    source: str
+    path: str
+    rows: int
+    columns: List[str]
+    size_bytes: int
+    modified_at: Optional[datetime]
+    first_date: Optional[str] = None
+    last_date: Optional[str] = None
+    preview: Optional[List[Dict[str, Any]]] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AdminScrapeRequest(BaseModel):
+    source: Literal["sharesansar"] = "sharesansar"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    max_pages: Optional[int] = None
+    output_format: Literal["csv"] = "csv"
+
+
+class AdminScrapeRunRead(BaseModel):
+    date: str
+    success: bool
+    records_count: Optional[int] = None
+    files: Optional[Dict[str, Any]] = None
+    statistics: Optional[Dict[str, Any]] = None
+    created_count: Optional[int] = None
+    updated_count: Optional[int] = None
+    created_symbols: Optional[List[str]] = None
+    updated_symbols: Optional[List[str]] = None
+    error: Optional[str] = None
+
+
+class AdminScrapeResponse(BaseModel):
+    source: str
+    start_date: str
+    end_date: str
+    total_records: int
+    runs: List[AdminScrapeRunRead]

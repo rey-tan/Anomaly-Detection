@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { login, fetchProfile, analyze, toggleFavorite } from "./api";
+import { login, fetchProfile, analyze, toggleFavorite, fetchAnalyses, fetchAnalysisData } from "./api";
 import AnalysisPanel from "./components/AnalysisPanel";
 import AnomalyChart from "./components/AnomalyChart";
 import MetricsGrid from "./components/MetricsGrid";
 import UsersPanel from "./components/UsersPanel";
 import AnalysisHistory from "./components/AnalysisHistory";
+import FavoritesPanel from "./components/FavoritesPanel";
+import AdminDataPanel from "./components/AdminDataPanel";
 
 const STORAGE_KEY = "anomalyui_token";
 const DEFAULT_PAGE = "dashboard";
@@ -14,6 +16,7 @@ const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", description: "Overview" },
   { id: "analysis", label: "Analysis", description: "Run model" },
   { id: "results", label: "Results", description: "Charts & metrics" },
+  { id: "data", label: "Data", description: "Admin only" },
   { id: "users", label: "Users", description: "Admin only" },
 ];
 
@@ -214,10 +217,30 @@ function App() {
     }
   };
 
+  const handleOpenLastRun = async () => {
+    setError("");
+    try {
+      const analyses = await fetchAnalyses(token);
+      const latest = analyses?.[0];
+
+      if (!latest) {
+        setError("No saved analyses found yet.");
+        return;
+      }
+
+      const payload = await fetchAnalysisData(token, latest.id);
+      setResults(payload);
+      setSelectedAnalysis(latest);
+      setPage("results");
+    } catch (err) {
+      setError(err.message || "Could not open the latest analysis");
+    }
+  };
+
   const anomalyCount = useMemo(() => results?.data?.filter((item) => item.cluster === -1).length || 0, [results]);
   const activeMetricCount = useMemo(() => Object.keys(results?.metrics || {}).length, [results]);
   const navItems = useMemo(() => {
-    return NAV_ITEMS.filter((item) => item.id !== "users" || user?.role === "admin");
+    return NAV_ITEMS.filter((item) => item.id === "dashboard" || item.id === "analysis" || item.id === "results" || user?.role === "admin");
   }, [user]);
 
   if (!token) {
@@ -246,11 +269,19 @@ function App() {
             ))}
           </nav>
 
-          <div className="side-rail-card side-rail-footer">
+          <FavoritesPanel token={token} onSelect={(payload, analysis) => { setResults(payload); setSelectedAnalysis(analysis); setPage('results'); }} />
+
+          <button
+            className="side-rail-card side-rail-footer side-rail-action"
+            type="button"
+            onClick={handleOpenLastRun}
+            disabled={!lastConfig}
+            aria-label="Open the latest saved analysis"
+          >
             <span>Last run</span>
             <strong>{lastConfig?.stock || "No analysis yet"}</strong>
             <p>{lastConfig ? `${lastConfig.timeframe} • ${lastConfig.mode}` : "Run an analysis to populate charts and metrics."}</p>
-          </div>
+          </button>
         </aside>
 
         <main className="page-stage">
@@ -369,6 +400,7 @@ function App() {
                           try {
                             const updated = await toggleFavorite(token, selectedAnalysis.id, !selectedAnalysis.is_favorite);
                             setSelectedAnalysis(updated);
+                            try { window.dispatchEvent(new CustomEvent("favorites:changed")); } catch (e) {}
                           } catch (err) {
                             console.error(err);
                           }
@@ -398,7 +430,7 @@ function App() {
             <section className="page-split single-column">
               <div className="page-panel">
                 <div className="page-intro">
-                  <p className="eyebrow">Admin page</p>
+                  <p className="eyebrow">Admin dashboard</p>
                   <h2>Manage users separately from analysis work</h2>
                   <p></p>
                 </div>
@@ -407,10 +439,23 @@ function App() {
             </section>
           ) : null}
 
+          {page === "data" && user?.role === "admin" ? (
+            <section className="page-split">
+              <AdminDataPanel token={token} />
+            </section>
+          ) : null}
+
           {page === "users" && user?.role !== "admin" ? (
             <section className="empty-state-card">
               <h2>Admin access required</h2>
               <p>Only admin users can open the user management page.</p>
+            </section>
+          ) : null}
+
+          {page === "data" && user?.role !== "admin" ? (
+            <section className="empty-state-card">
+              <h2>Admin access required</h2>
+              <p>Only admin users can open the data management page.</p>
             </section>
           ) : null}
         </main>

@@ -107,6 +107,50 @@ export async function fetchAnalyses(token) {
   return unwrapResponse(response);
 }
 
+export async function fetchAdminSymbols(token) {
+  const response = await fetch(`${BASE_URL}/admin/data/symbols`, {
+    headers: buildHeaders(token),
+  });
+  return unwrapResponse(response);
+}
+
+export async function fetchAdminPreview(token, symbol, preview_limit = 10) {
+  const response = await fetch(`${BASE_URL}/admin/data/preview/${encodeURIComponent(symbol)}?preview_limit=${encodeURIComponent(preview_limit)}`, {
+    headers: buildHeaders(token),
+  });
+  return unwrapResponse(response);
+}
+
+export async function runAdminScrape(token, payload) {
+  const response = await fetch(`${BASE_URL}/admin/scrape`, {
+    method: "POST",
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+  return unwrapResponse(response);
+}
+
+export async function downloadAdminFile(token, filename) {
+  const response = await fetch(`${BASE_URL}/admin/data/file/${encodeURIComponent(filename)}`, {
+    headers: buildHeaders(token),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.detail || response.statusText || "Failed to download file");
+  }
+  const blob = await response.blob();
+  // trigger download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  return { success: true };
+}
+
 export async function fetchAnalysisData(token, analysisId) {
   const response = await fetch(`${BASE_URL}/me/analyses/${analysisId}/data`, {
     headers: buildHeaders(token),

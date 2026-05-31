@@ -95,6 +95,14 @@ export default function UsersPanel({ token, currentUser }) {
 
       {error ? <div className="form-error admin-error">{error}</div> : null}
 
+      <div className="admin-panel-head" style={{ marginTop: 8 }}>
+        <div>
+          <p className="eyebrow">Users</p>
+          <h3>User management</h3>
+        </div>
+        <div className="admin-count">{loading ? "…" : `${users.length} users`}</div>
+      </div>
+
       <div className="admin-list">
         {users.map((u) => (
           <div key={u.id} className={u.role === "admin" || u.id === currentUser?.id ? "admin-user-card protected" : "admin-user-card"}>

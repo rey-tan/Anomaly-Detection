@@ -347,6 +347,7 @@ class FloorsheeetScraper:
         
         df = pd.DataFrame(records)
         filepath = Path(filename)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         
         try:
             df.to_csv(filepath, index=False)
@@ -375,6 +376,7 @@ class FloorsheeetScraper:
         
         
         filepath = Path(filename)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         
         try:
             with open(filepath, 'w', encoding='utf-8') as f:
@@ -404,6 +406,7 @@ class FloorsheeetScraper:
         
         df = pd.DataFrame(records)
         filepath = Path(filename)
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         
         try:
             df.to_excel(filepath, index=False, sheet_name='Floorsheet')

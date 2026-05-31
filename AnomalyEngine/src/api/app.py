@@ -1,5 +1,5 @@
-from datetime import date, datetime
-from typing import List
+from datetime import date, datetime, timedelta
+from typing import Any, Dict, List, Optional
 from pathlib import Path
 import math
 
@@ -13,10 +13,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.pipelines.anomaly_detection_pipeline import run_pipeline
 from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_json
-from src.utils.paths import HYPERPARAMS
+from src.utils.paths import HYPERPARAMS, DATA
 from fastapi.responses import FileResponse
 from src.utils.io import write_result_artifact, read_result_artifact, get_symbols
 from src.utils.paths import ARTIFACTS
+from src.components.sharesansar_scraper import ShareSansarScraper
 from . import crud, database, models, schemas, security
 
 app = FastAPI(title="Anomaly Engine API")
@@ -104,7 +105,10 @@ def require_role(allowed_roles: List[str]):
 
 
 @app.post("/login", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(database.get_db),
+):
     user = crud.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -112,15 +116,147 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    crud.log_user_activity(db, user.id, "login", resource="/login", details={"status": "success"})
+
     access_token = security.create_access_token(data={"sub": user.username, "role": user.role})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+def _iter_date_range(start_date: datetime, end_date: datetime):
+    current = start_date
+    while current <= end_date:
+        yield current.strftime("%Y-%m-%d")
+        current += timedelta(days=1)
+
+
+def _safe_line_count(path: Path) -> int:
+    try:
+        with path.open("r", encoding="utf-8", errors="ignore") as handle:
+            total_lines = sum(1 for _ in handle)
+        return max(total_lines - 1, 0)
+    except Exception:
+        return 0
+
+
+def _summarize_csv_file(path: Path, preview_limit: int) -> schemas.AdminDataAssetRead:
+    
+    # cheap sample to discover column names
+    try:
+        sample = pd.read_csv(path, nrows=1)
+    except Exception:
+        sample = pd.DataFrame()
+
+    cols_lower = [c.lower() for c in sample.columns] if not sample.empty else []
+    date_col = None
+
+    for candidate in ("date", "transaction_time"):
+        if candidate in cols_lower:
+            date_col = sample.columns[cols_lower.index(candidate)]
+            break
+    if date_col is None:
+        for i, cl in enumerate(cols_lower):
+            if 'date' in cl or 'time' in cl or 'timestamp' in cl:
+                date_col = sample.columns[i]
+                break
+
+    preview = []
+    if preview_limit and preview_limit > 0:
+        try:
+            preview = pd.read_csv(path).tail(preview_limit).to_dict(orient="records")
+        except Exception:
+            preview = []
+
+    # All data files are treated as market data (no raw/floorsheet sources)
+    source = "market"
+
+    stat = path.stat()
+    first_date = None
+    last_date = None
+    if date_col:
+        try:
+            dates = pd.read_csv(path, usecols=[date_col], parse_dates=[date_col])[date_col]
+            if not dates.empty:
+                first_date = str(pd.to_datetime(dates.min()).date())
+                last_date = str(pd.to_datetime(dates.max()).date())
+                print(f"[admin] summarized {path.name} -> date_col={date_col}, first_date={first_date}, last_date={last_date}")
+        except Exception:
+            first_date = None
+            last_date = None
+
+    columns = list(sample.columns) if not sample.empty else []
+
+    return schemas.AdminDataAssetRead(
+        name=path.name,
+        source=source,
+        path=str(path),
+        rows=_safe_line_count(path),
+        columns=columns,
+        size_bytes=stat.st_size,
+        modified_at=datetime.fromtimestamp(stat.st_mtime),
+        first_date=first_date,
+        last_date=last_date,
+        preview=preview,
+    )
+
+
+def _list_admin_data_files() -> List[schemas.AdminDataAssetRead]:
+    datasets = []
+    root = DATA
+    if root.exists():
+        for path in sorted(root.glob("*.csv")):
+            try:
+                datasets.append(_summarize_csv_file(path, preview_limit=0))
+            except Exception:
+                continue
+    return datasets
+
+
+def _list_admin_data_symbols() -> List[str]:
+    return [item.name.replace(".csv", "") for item in _list_admin_data_files()]
+
+
+def _find_admin_data_asset(symbol: str, preview_limit: int) -> Optional[schemas.AdminDataAssetRead]:
+    path = DATA / f"{symbol}.csv"
+  
+    if path.exists():
+        asset = _summarize_csv_file(path, preview_limit=preview_limit)
+        if preview_limit > 0:
+            asset.preview = pd.read_csv(path, nrows=preview_limit).to_dict(orient="records")
+        else:
+            asset.preview = []
+        return asset
+    return None
+
+
+
+
+
+def _run_scrape_job(source: str, scrape_date: str, max_pages: Optional[int], output_format: str) -> Dict[str, Any]:
+    """Run a scrape job. Currently only `sharesansar` is supported.
+
+    Raises HTTPException for unsupported sources.
+    """
+    if source == "sharesansar":
+        scraper = ShareSansarScraper()
+        return scraper.scrape(scrape_date)
+
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported scrape source: {source}")
 
 
 @app.get("/symbols", response_model=List[str])
 def read_symbols():
     return get_symbols()
 
+@app.get("/admin/data/symbols", response_model=List[str], dependencies=[Depends(require_role(["admin"]))])
+def read_admin_data_symbols():
+    return _list_admin_data_symbols()
+
+
+@app.get("/admin/data/preview/{symbol}", response_model=schemas.AdminDataAssetRead, dependencies=[Depends(require_role(["admin"]))])
+def read_admin_data_preview(symbol: str, preview_limit: int = 10):
+    selected = _find_admin_data_asset(symbol, preview_limit=preview_limit)
+    if selected is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Data not found for {symbol}")
+    return selected
 
 @app.get("/me", response_model=schemas.UserRead)
 def read_current_user(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
@@ -146,6 +282,8 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Hyperparameters not found for symbol {config['stock']}"
         )
+
+    print(config)
 
     best_params = load_json(hyperparams_file)[config["timeframe"]]
 
@@ -325,6 +463,63 @@ def delete_user(
 @app.get("/users/{user_id}/activity", response_model=List[schemas.UserActivityRead], dependencies=[Depends(require_role(["admin"]))])
 def read_user_activity(user_id: int, db: Session = Depends(database.get_db)):
     return crud.get_user_activity(db, user_id)
+
+
+@app.post("/admin/scrape", response_model=schemas.AdminScrapeResponse, dependencies=[Depends(require_role(["admin"]))])
+def run_admin_scrape(
+    request: schemas.AdminScrapeRequest,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    start_raw = request.start_date or datetime.now().strftime("%Y-%m-%d")
+    end_raw = request.end_date or start_raw
+
+    try:
+        start_date = datetime.strptime(start_raw, "%Y-%m-%d")
+        end_date = datetime.strptime(end_raw, "%Y-%m-%d")
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Dates must use YYYY-MM-DD") from exc
+
+    if end_date < start_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="end_date must be on or after start_date")
+
+    runs = []
+    total_records = 0
+    for scrape_date in _iter_date_range(start_date, end_date):
+        try:
+            result = _run_scrape_job(request.source, scrape_date, request.max_pages, request.output_format)
+            records_count = int(result.get("records_count") or 0)
+            total_records += records_count
+            runs.append({"date": scrape_date, "success": bool(result.get("success", True)), **result})
+        except Exception as exc:
+            runs.append({"date": scrape_date, "success": False, "error": str(exc)})
+
+    crud.log_user_activity(
+        db,
+        current_user.id,
+        "admin_scrape",
+        resource=request.source,
+        details={"start_date": start_raw, "end_date": end_raw, "max_pages": request.max_pages},
+    )
+
+    return {
+        "source": request.source,
+        "start_date": start_raw,
+        "end_date": end_raw,
+        "total_records": total_records,
+        "runs": runs,
+    }
+
+
+@app.get("/admin/data/file/{filename}", dependencies=[Depends(require_role(["admin"]))])
+def admin_download_file(filename: str):
+    # Only allow files under DATA
+    path = DATA / filename
+  
+    if path.exists() and path.is_file():
+        return FileResponse(path, media_type="text/csv", filename=path.name)
+    
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
 
 
 @app.get("/me/analyses", response_model=List[schemas.UserAnalysisRead])

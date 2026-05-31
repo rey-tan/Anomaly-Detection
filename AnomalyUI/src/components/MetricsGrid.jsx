@@ -9,8 +9,7 @@ function MetricCard({ title, value, description }) {
 }
 
 export default function MetricsGrid({ metrics = {}, bestParams = {} }) {
-  const metricEntries = Object.entries(metrics || {})
-    .filter(([model]) => model.toLowerCase() != "zscore");
+  const metricEntries = Object.entries(metrics || {}).filter(([model]) => model.toLowerCase() != "zscore");
   return (
     <div className="metrics-wrapper">
       <div className="section-heading">
@@ -18,6 +17,18 @@ export default function MetricsGrid({ metrics = {}, bestParams = {} }) {
           <h2>Analysis feedback</h2>
           <p>Review model metrics, event counts, and tuning parameters.</p>
         </div>
+      </div>
+      <div className="detector-summary">
+        {metricEntries.map(([model, summary]) => (
+          <div className="detector-summary-card" key={model}>
+            <strong>{model.replace(/_/g, " ")}</strong>
+            <span>{((summary.anomaly_rate ?? 0) * 100).toFixed(1)}% anomalies</span>
+            <small>
+              {summary.n_noise ?? 0} flagged points
+              {summary.anomaly_rate === 0 ? " · no anomalies detected with current params" : ""}
+            </small>
+          </div>
+        ))}
       </div>
       <div className="metric-grid">
         {metricEntries.map(([model, summary]) => (

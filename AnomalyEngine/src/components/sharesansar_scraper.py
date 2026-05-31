@@ -37,7 +37,11 @@ class ShareSansarScraper:
         token = self.get_token()
         if not token:
             print("Could not get CSRF token")
-            return
+            return {
+                "success": False,
+                "date": date,
+                "error": "Could not get CSRF token",
+            }
 
         payload = {
             '_token': token,
@@ -48,12 +52,16 @@ class ShareSansarScraper:
         response = self.session.post(self.ajax_url, data=payload)
 
         print(response.text)
-        self.save_data(response.text)
+        return self.save_data(response.text)
 
 
     def save_data(self, html):
         bs = BeautifulSoup(html,"lxml")
         today = bs.select_one("span.text-org").text       
+
+        updated_symbols = []
+        created_symbols = []
+        skipped_symbols = []
 
         #read html tables and convert to dataframe
         tables = pd.read_html(StringIO(html))
@@ -98,8 +106,9 @@ class ShareSansarScraper:
 
                 last_date = existing_df.iloc[-1]["date"]
 
-                if str(last_date) == str(today):
+                if str(last_date) >= str(today):
                     print(f"{symbol} already updated")
+                    skipped_symbols.append(symbol)
                     continue
 
                 print(f"Appending data for {symbol}")
@@ -107,6 +116,7 @@ class ShareSansarScraper:
                 df = pd.DataFrame(data_row, columns=columns)
 
                 df.to_csv(file, mode="a", header=False, index=False)
+                updated_symbols.append(symbol)
 
             else:
                 print(f"Creating file for {symbol}")
@@ -114,6 +124,18 @@ class ShareSansarScraper:
                 df = pd.DataFrame(data_row, columns=columns)
 
                 df.to_csv(file, index=False)
+                created_symbols.append(symbol)
+
+        return {
+            "success": True,
+            "date": today,
+            "updated_count": len(updated_symbols),
+            "created_count": len(created_symbols),
+            "skipped_count": len(skipped_symbols),
+            "updated_symbols": updated_symbols,
+            "created_symbols": created_symbols,
+            "skipped_symbols": skipped_symbols,
+        }
 
 
 if __name__ == '__main__':

@@ -1,15 +1,13 @@
 from datetime import date, timedelta
 
-VALID_TIMEFRAMES = ["1min", "5min", "15min", "1H", "1D"]
+VALID_TIMEFRAMES = ["1D"]
 
 #days
 WINDOW_MAP = {
-    "2D": 72 * 30,
-    "1D": 36 * 30,
-    # "1H": 6 * 30,
-    # "15min": 3 * 30,
-    # "5min": 2 * 30,
-    # "1min": 30
+    "1min": 30,
+    "5min": 6*30,
+    "1H": 12*30,
+    "1D": 5*12*30,
 }
 
 

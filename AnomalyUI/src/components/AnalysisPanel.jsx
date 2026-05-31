@@ -17,7 +17,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
   const [symbolsLoading, setSymbolsLoading] = useState(true);
   const [form, setForm] = useState({
     stock: "",
-    timeframe: "5min",
+    timeframe: "1D",
     mode: "Static",
     start_date: "2026-01-01",
     end_date: "2026-01-31",
@@ -121,7 +121,6 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             onChange={(event) => setForm((prev) => ({ ...prev, timeframe: event.target.value }))}
           >
             <option value="1D">1 day</option>
-            <option value="2D">2 days</option>
           </select>
         </label>
       </div>

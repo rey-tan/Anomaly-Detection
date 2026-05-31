@@ -29,6 +29,9 @@ export default function AnalysisHistory({ token, onSelect }) {
     try {
       const updated = await toggleFavorite(token, analysis.id, !analysis.is_favorite);
       setItems((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      try {
+        window.dispatchEvent(new CustomEvent("favorites:changed"));
+      } catch (e) {}
     } catch (err) {
       setError(err.message || "Failed to update favorite");
     }

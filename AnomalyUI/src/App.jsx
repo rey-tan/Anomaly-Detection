@@ -8,6 +8,8 @@ import UsersPanel from "./components/UsersPanel";
 import AnalysisHistory from "./components/AnalysisHistory";
 import FavoritesPanel from "./components/FavoritesPanel";
 import AdminDataPanel from "./components/AdminDataPanel";
+import NotificationsPanel from "./components/NotificationsPanel";
+import ActivityPage from "./components/ActivityPage";
 
 const STORAGE_KEY = "anomalyui_token";
 const DEFAULT_PAGE = "dashboard";
@@ -15,7 +17,9 @@ const DEFAULT_PAGE = "dashboard";
 const NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", description: "Overview" },
   { id: "analysis", label: "Analysis", description: "Run model" },
+  { id: "activity", label: "Activity", description: "Audit log" },
   { id: "results", label: "Results", description: "Charts & metrics" },
+  { id: "notifications", label: "Notifications", description: "Alerts" },
   { id: "data", label: "Data", description: "Admin only" },
   { id: "users", label: "Users", description: "Admin only" },
 ];
@@ -164,6 +168,7 @@ function App() {
   const [results, setResults] = useState(null);
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
   const [lastConfig, setLastConfig] = useState(null);
+  const [activityUser, setActivityUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [page, setPage] = useState(DEFAULT_PAGE);
@@ -240,7 +245,7 @@ function App() {
   const anomalyCount = useMemo(() => results?.data?.filter((item) => item.cluster === -1).length || 0, [results]);
   const activeMetricCount = useMemo(() => Object.keys(results?.metrics || {}).length, [results]);
   const navItems = useMemo(() => {
-    return NAV_ITEMS.filter((item) => item.id === "dashboard" || item.id === "analysis" || item.id === "results" || user?.role === "admin");
+    return NAV_ITEMS.filter((item) => item.id === "dashboard" || item.id === "analysis" || item.id === "results" || item.id === "activity" || user?.role === "admin");
   }, [user]);
 
   if (!token) {
@@ -255,7 +260,6 @@ function App() {
           <div className="side-rail-card">
             <p className="eyebrow">Workspace</p>
             <h2>Pages</h2>
-            <p></p>
           </div>
           <nav className="nav-stack" aria-label="Primary">
             {navItems.map((item) => (
@@ -426,6 +430,10 @@ function App() {
             </section>
           ) : null}
 
+          {page === "activity" ? (
+            <ActivityPage token={token} initialUserId={activityUser} onBack={() => setPage(DEFAULT_PAGE)} />
+          ) : null}
+
           {page === "users" && user?.role === "admin" ? (
             <section className="page-split single-column">
               <div className="page-panel">
@@ -434,7 +442,15 @@ function App() {
                   <h2>Manage users separately from analysis work</h2>
                   <p></p>
                 </div>
-                <UsersPanel token={token} currentUser={user} />
+                <UsersPanel token={token} currentUser={user} onOpenActivity={(userId) => { setActivityUser(userId); setPage('activity'); }} />
+              </div>
+            </section>
+          ) : null}
+
+          {page === "notifications" ? (
+            <section className="page-split single-column">
+              <div className="page-panel">
+                <NotificationsPanel token={token} />
               </div>
             </section>
           ) : null}

@@ -131,6 +131,12 @@ class AdminDataAssetRead(BaseModel):
         from_attributes = True
 
 
+class AdminDataSymbolRead(BaseModel):
+    name:str
+    first_date: Optional[str] = None
+    last_date: Optional[str] = None
+
+
 class AdminScrapeRequest(BaseModel):
     source: Literal["sharesansar"] = "sharesansar"
     start_date: Optional[str] = None

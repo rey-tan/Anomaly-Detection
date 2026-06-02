@@ -5,7 +5,7 @@
       "contamination": 0.02
     },
     "dbscan": {
-      "eps": 3.6649136789508225,
+      "eps": 3.7600945614165315,
       "min_pts": 5
     },
     "z_score": {

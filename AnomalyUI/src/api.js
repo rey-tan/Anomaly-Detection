@@ -169,3 +169,25 @@ export async function toggleFavorite(token, analysisId, favorite) {
   });
   return unwrapResponse(response);
 }
+
+export async function fetchNotifications(token, unreadOnly = false) {
+  const url = new URL(`${BASE_URL}/me/notifications`);
+  if (unreadOnly) url.searchParams.append("unread_only", "1");
+  const response = await fetch(url.toString(), { headers: buildHeaders(token) });
+  return unwrapResponse(response);
+}
+
+export async function markNotificationRead(token, notificationId) {
+  const response = await fetch(`${BASE_URL}/me/notifications/${notificationId}/read`, {
+    method: "POST",
+    headers: buildHeaders(token),
+  });
+  return unwrapResponse(response);
+}
+
+export async function fetchUserActivity(token, userId) {
+  const response = await fetch(`${BASE_URL}/users/${userId}/activity`, {
+    headers: buildHeaders(token),
+  });
+  return unwrapResponse(response);
+}

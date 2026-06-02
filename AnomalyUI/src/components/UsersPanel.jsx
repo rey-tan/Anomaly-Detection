@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUserRole, deleteUser } from "../api";
+import AdminActivityPanel from "./AdminActivityPanel";
 
-export default function UsersPanel({ token, currentUser }) {
+export default function UsersPanel({ token, currentUser, onOpenActivity }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "analyst" });
   const [error, setError] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   useEffect(() => {
     if (!token) return;
@@ -85,15 +87,7 @@ export default function UsersPanel({ token, currentUser }) {
 
   return (
     <div className="admin-panel">
-      <div className="admin-panel-head">
-        <div>
-          <p className="eyebrow">Admin dashboard</p>
-          <h3>Users</h3>
-        </div>
-        <div className="admin-count">{loading ? "Loading…" : `${users.length} users`}</div>
-      </div>
-
-      {error ? <div className="form-error admin-error">{error}</div> : null}
+      
 
       <div className="admin-panel-head" style={{ marginTop: 8 }}>
         <div>
@@ -103,6 +97,9 @@ export default function UsersPanel({ token, currentUser }) {
         <div className="admin-count">{loading ? "…" : `${users.length} users`}</div>
       </div>
 
+      {error ? <div className="form-error admin-error">{error}</div> : null}
+
+
       <div className="admin-list">
         {users.map((u) => (
           <div key={u.id} className={u.role === "admin" || u.id === currentUser?.id ? "admin-user-card protected" : "admin-user-card"}>
@@ -110,7 +107,7 @@ export default function UsersPanel({ token, currentUser }) {
               <div className="admin-user-name">{u.username}</div>
               <div className="admin-user-role">{u.role}</div>
             </div>
-            <div className="admin-user-actions">
+              <div className="admin-user-actions">
               <select
                 value={u.role}
                 onChange={(e) => handleRoleChange(u.id, e.target.value)}
@@ -120,6 +117,7 @@ export default function UsersPanel({ token, currentUser }) {
                 <option value="analyst">analyst</option>
                 <option value="admin">admin</option>
               </select>
+              <button className="text-button" onClick={() => { if (onOpenActivity) { onOpenActivity(u.id); } else { setSelectedUserId(u.id); } }} type="button">Activity</button>
               {u.role === "admin" || u.id === currentUser?.id ? null : (
                 <button className="text-button danger" onClick={() => handleDelete(u.id)} type="button">
                   Delete
@@ -129,6 +127,10 @@ export default function UsersPanel({ token, currentUser }) {
           </div>
         ))}
       </div>
+
+      {selectedUserId ? (
+        <AdminActivityPanel token={token} userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
+      ) : null}
 
       <form onSubmit={handleCreate} className="admin-form">
         <div className="admin-form-grid">

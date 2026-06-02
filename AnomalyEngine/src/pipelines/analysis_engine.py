@@ -153,8 +153,6 @@ class StaticAnalysisPipeline(BaseAnalysisPipeline):
         result_df = self._attach_labels(feature_df, label_sets)
         return PipelineResult(data=result_df, labels=label_sets, metrics=metrics, best_params=self.best_params)
 
-
-class RealtimeAnalysisPipeline(BaseAnalysisPipeline):
     def __init__(self, config: dict[str, Any] | AnalysisRequest, best_params: dict[str, Any], window_size: int = 500, **kwargs: Any) -> None:
         super().__init__(config, best_params, **kwargs)
         self.window_size = window_size

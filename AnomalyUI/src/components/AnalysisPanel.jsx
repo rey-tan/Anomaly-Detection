@@ -111,7 +111,6 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             onChange={(event) => setForm((prev) => ({ ...prev, mode: event.target.value }))}
           >
             <option value="Static">Static</option>
-            <option value="Realtime">Realtime</option>
           </select>
         </label>
         <label className="field-group">

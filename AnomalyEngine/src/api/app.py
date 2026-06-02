@@ -11,7 +11,6 @@ import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.pipelines.anomaly_detection_pipeline import run_pipeline
-from src.pipelines.realtime_detection_pipeline import run_realtime_pipeline
 from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS, DATA
 from fastapi.responses import FileResponse
@@ -210,8 +209,17 @@ def _list_admin_data_files() -> List[schemas.AdminDataAssetRead]:
     return datasets
 
 
-def _list_admin_data_symbols() -> List[str]:
-    return [item.name.replace(".csv", "") for item in _list_admin_data_files()]
+def _list_admin_data_symbols() -> List[schemas.AdminDataSymbolRead]:
+    res = []
+    for item in _list_admin_data_files():
+        res.append(
+            {
+                "name": item.name.replace(".csv", ""),
+                "first_date": item.first_date,
+                "last_date": item.last_date,
+            }
+        )
+    return res
 
 
 def _find_admin_data_asset(symbol: str, preview_limit: int) -> Optional[schemas.AdminDataAssetRead]:
@@ -246,10 +254,11 @@ def _run_scrape_job(source: str, scrape_date: str, max_pages: Optional[int], out
 def read_symbols():
     return get_symbols()
 
-@app.get("/admin/data/symbols", response_model=List[str], dependencies=[Depends(require_role(["admin"]))])
+@app.get("/admin/data/symbols", response_model=List[schemas.AdminDataSymbolRead], dependencies=[Depends(require_role(["admin"]))])
 def read_admin_data_symbols():
-    return _list_admin_data_symbols()
-
+    res = _list_admin_data_symbols()
+    print("Returning from API", res)
+    return res
 
 @app.get("/admin/data/preview/{symbol}", response_model=schemas.AdminDataAssetRead, dependencies=[Depends(require_role(["admin"]))])
 def read_admin_data_preview(symbol: str, preview_limit: int = 10):
@@ -289,8 +298,7 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
 
     if config["mode"] == "Static":
         results = run_pipeline(config, best_params)
-    else:
-        results = run_realtime_pipeline(config, best_params)
+   
 
     if results is None:
         crud.log_user_activity(db, current_user.id, "analysis_error", resource=config["stock"], details={"config_hash": cache_key})

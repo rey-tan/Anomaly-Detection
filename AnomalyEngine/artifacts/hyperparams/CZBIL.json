@@ -2,11 +2,11 @@
   "1D": {
     "isolation_forest": {
       "n_estimators": 100,
-      "contamination": 0.04
+      "contamination": 0.05
     },
     "dbscan": {
-      "eps": 2.0699008691136305,
-      "min_pts": 5
+      "eps": 1.818225478197582,
+      "min_pts": 8
     },
     "z_score": {
       "threshold": 3

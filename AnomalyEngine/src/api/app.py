@@ -13,6 +13,7 @@ import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.pipelines.anomaly_detection_pipeline import run_pipeline
+import time
 from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS, DATA
 from fastapi.responses import FileResponse
@@ -446,8 +447,18 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
 
     best_params = load_json(hyperparams_file)[config["timeframe"]]
 
+    results = None
     if config["mode"] == "Static":
-        results = run_pipeline(config, best_params)
+        start_ts = time.time()
+        try:
+            print(f"Starting pipeline for {config['stock']} with timeframe {config['timeframe']}", flush=True)
+            results = run_pipeline(config, best_params)
+        except Exception as exc:
+            print(f"Pipeline raised exception: {exc}", flush=True)
+            results = None
+        finally:
+            end_ts = time.time()
+            print(f"Pipeline execution time: {end_ts - start_ts:.2f}s", flush=True)
    
 
     if results is None:

@@ -147,6 +147,13 @@ class BaseAnalysisPipeline(ABC):
 class StaticAnalysisPipeline(BaseAnalysisPipeline):
     def run(self) -> PipelineResult:
         feature_df = self._prepare_features()
+        # Diagnostic info
+        try:
+            print(f"StaticAnalysisPipeline.run: feature_df.shape={feature_df.shape}", flush=True)
+            print(f"StaticAnalysisPipeline.run: features={self.config.features}", flush=True)
+            print(f"StaticAnalysisPipeline.run: best_params={self.best_params}", flush=True)
+        except Exception:
+            pass
         X_scaled = self.scaler.fit_transform(feature_df, self.config.features)
         label_sets = self.detector.predict(X_scaled, feature_df, self.best_params)
         metrics = self._build_metrics(feature_df, label_sets)

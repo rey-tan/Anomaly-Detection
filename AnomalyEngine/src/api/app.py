@@ -1,6 +1,8 @@
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional
 from pathlib import Path
+import json
+import os
 import math
 
 from fastapi import Depends, FastAPI, HTTPException, status, Body
@@ -14,6 +16,7 @@ from src.pipelines.anomaly_detection_pipeline import run_pipeline
 from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS, DATA
 from fastapi.responses import FileResponse
+import requests
 from src.utils.io import write_result_artifact, read_result_artifact, get_symbols
 from src.utils.paths import ARTIFACTS
 from src.components.sharesansar_scraper import ShareSansarScraper
@@ -65,6 +68,138 @@ def convert_numpy_types(obj):
         return [convert_numpy_types(item) for item in obj]
     else:
         return obj
+
+
+def _extract_anomaly_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for row in data:
+        cluster = row.get("cluster")
+        is_anomaly = row.get("anomaly") is True or cluster == -1 or row.get("cluster_dbscan") == -1 or row.get("cluster_isolation_forest") == -1
+        if not is_anomaly:
+            continue
+        rows.append(
+            {
+                "date": row.get("date") or row.get("transaction_time"),
+                "close": row.get("close") or row.get("price") or row.get("adj_close"),
+                "volume": row.get("volume"),
+                "z_score": row.get("Anomaly_Z_Score") or row.get("z_score") or row.get("Z_Score"),
+                "cluster": cluster,
+                "dbscan": row.get("Anomaly_DBSCAN") or row.get("cluster_dbscan"),
+                "isolation_forest": row.get("Anomaly_Isolation_Forest") or row.get("cluster_isolation_forest"),
+            }
+        )
+    return rows
+
+
+def _build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
+    anomaly_rows = _extract_anomaly_rows(payload.data)
+    compact_rows = anomaly_rows[:15]
+    summary = {
+        "stock": payload.stock,
+        "mode": payload.mode,
+        "timeframe": payload.timeframe,
+        "window": {"start_date": payload.start_date, "end_date": payload.end_date},
+        "metrics": payload.metrics or {},
+        "best_params": payload.best_params or {},
+        "total_rows": len(payload.data),
+        "anomaly_count": len(anomaly_rows),
+        "anomaly_samples": compact_rows,
+    }
+    return (
+        "You are an equity market analyst explaining anomaly detection results to an analyst user. "
+        "Write a concise, practical explanation of why the flagged points were likely anomalies. "
+        "Focus on observable signals in the data such as sudden price deviation, volume spikes, extreme z-scores, "
+        "or model disagreement. Avoid claiming certainty. Use 3-6 short bullet points followed by a one-paragraph summary. "
+        "If the data is too sparse, say so clearly.\n\n"
+        f"Analysis context:\n{json.dumps(summary, ensure_ascii=False, indent=2, default=str)}"
+    )
+
+
+def _heuristic_anomaly_explanation(payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
+    anomaly_rows = _extract_anomaly_rows(payload.data)
+    if not anomaly_rows:
+        return {
+            "summary": "No rows in the result set were marked as anomalies, so there is nothing to explain.",
+            "highlights": ["The current run did not produce anomaly flags."],
+            "anomaly_count": 0,
+            "source": "heuristic",
+        }
+
+    price_moves = [row["close"] for row in anomaly_rows if isinstance(row.get("close"), (int, float))]
+    volumes = [row["volume"] for row in anomaly_rows if isinstance(row.get("volume"), (int, float))]
+    z_scores = [abs(float(row["z_score"])) for row in anomaly_rows if row.get("z_score") is not None and str(row.get("z_score")).replace(".", "", 1).replace("-", "", 1).isdigit()]
+
+    highlights = [
+        f"{len(anomaly_rows)} rows were flagged as anomalies in this run.",
+    ]
+    if price_moves:
+        highlights.append("Flagged rows show price levels that stand apart from the rest of the series.")
+    if volumes:
+        highlights.append("Several anomalies also occur alongside unusual volume, which often strengthens the signal.")
+    if z_scores:
+        max_z = max(z_scores)
+        highlights.append(f"The strongest standardized deviation in the flagged set is about {max_z:.2f}σ from the local baseline.")
+
+    summary = (
+        f"The model flagged {len(anomaly_rows)} points as unusual. These points likely stand out because they combine "
+        f"abrupt movement in price or volume with a pattern that differs from the surrounding window. "
+        f"Review the highlighted dates for spikes, reversals, or sustained breaks away from the moving baseline."
+    )
+    return {
+        "summary": summary,
+        "highlights": highlights[:5],
+        "anomaly_count": len(anomaly_rows),
+        "source": "heuristic",
+    }
+
+
+def _call_ai_explanation(payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        return _heuristic_anomaly_explanation(payload)
+
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    prompt = _build_ai_prompt(payload)
+    response = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": model,
+            "temperature": 0.2,
+            "messages": [
+                {"role": "system", "content": "You explain anomaly detection results in concise analyst-friendly language."},
+                {"role": "user", "content": prompt},
+            ],
+        },
+        timeout=45,
+    )
+
+    if not response.ok:
+        return _heuristic_anomaly_explanation(payload)
+
+    payload_json = response.json()
+    summary = ""
+    try:
+        summary = payload_json["choices"][0]["message"]["content"].strip()
+    except Exception:
+        summary = ""
+
+    if not summary:
+        return _heuristic_anomaly_explanation(payload)
+
+    highlights = [line.lstrip("-• ").strip() for line in summary.splitlines() if line.strip().startswith(("-", "•"))]
+    if not highlights:
+        highlights = ["AI explanation generated successfully."]
+
+    return {
+        "summary": summary,
+        "highlights": highlights[:6],
+        "anomaly_count": len(_extract_anomaly_rows(payload.data)),
+        "source": model,
+    }
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
@@ -278,7 +413,22 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     cache_key = crud.get_config_hash(config)
     cache_entry = crud.get_cache_entry(db, cache_key)
     if cache_entry:
-        crud.log_user_activity(db, current_user.id, "analysis_cache_hit", resource=config["stock"], details={"config_hash": cache_key})
+        crud.log_user_activity(
+            db,
+            current_user.id,
+            "analysis_cache_hit",
+            resource=config["stock"],
+            details={
+                "config_hash": cache_key,
+                "stock": config["stock"],
+                "mode": config["mode"],
+                "timeframe": config["timeframe"],
+                "start_date": config["start_date"],
+                "end_date": config["end_date"],
+                "features": config["features"],
+                "cache_hit": True,
+            },
+        )
         return {
             "metrics": cache_entry.metrics or {},
             "data": cache_entry.data or [],
@@ -301,7 +451,22 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
    
 
     if results is None:
-        crud.log_user_activity(db, current_user.id, "analysis_error", resource=config["stock"], details={"config_hash": cache_key})
+        crud.log_user_activity(
+            db,
+            current_user.id,
+            "analysis_error",
+            resource=config["stock"],
+            details={
+                "config_hash": cache_key,
+                "stock": config["stock"],
+                "mode": config["mode"],
+                "timeframe": config["timeframe"],
+                "start_date": config["start_date"],
+                "end_date": config["end_date"],
+                "features": config["features"],
+                "cache_hit": False,
+            },
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Analysis pipeline failed — check server logs for details",
@@ -340,7 +505,22 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         data=data,
     )
 
-    crud.log_user_activity(db, current_user.id, "analysis_run", resource=config["stock"], details={"config_hash": cache_key, "mode": config["mode"]})
+    crud.log_user_activity(
+        db,
+        current_user.id,
+        "analysis_run",
+        resource=config["stock"],
+        details={
+            "config_hash": cache_key,
+            "stock": config["stock"],
+            "mode": config["mode"],
+            "timeframe": config["timeframe"],
+            "start_date": config["start_date"],
+            "end_date": config["end_date"],
+            "features": config["features"],
+            "rows": len(data),
+        },
+    )
     crud.create_user_analysis(
         db=db,
         user_id=current_user.id,
@@ -366,6 +546,17 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     )
 
     return {"metrics": metrics, "data": data, "best_params": best_params}
+
+
+@app.post("/analyze/explain", response_model=schemas.AnomalyExplanationResponse)
+def explain_analysis(request: schemas.AnomalyExplanationRequest, current_user: models.User = Depends(get_current_user)):
+    explanation = _call_ai_explanation(request)
+    return {
+        "summary": explanation.get("summary", ""),
+        "highlights": explanation.get("highlights", []),
+        "anomaly_count": explanation.get("anomaly_count", 0),
+        "source": explanation.get("source", "heuristic"),
+    }
 
 
 @app.get("/cache/{config_hash}", response_model=schemas.AnalyzeResponse)
@@ -471,6 +662,12 @@ def delete_user(
 @app.get("/users/{user_id}/activity", response_model=List[schemas.UserActivityRead], dependencies=[Depends(require_role(["admin"]))])
 def read_user_activity(user_id: int, db: Session = Depends(database.get_db)):
     return crud.get_user_activity(db, user_id)
+
+
+@app.get("/activity", dependencies=[Depends(require_role(["admin"]))])
+def read_activity(q: Optional[str] = None, start: Optional[str] = None, end: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None, db: Session = Depends(database.get_db)):
+    result = crud.get_activity(db, user_id=None, q=q, start=start, end=end, page=page, page_size=page_size)
+    return {"items": result.get("items", []), "total": result.get("total", 0)}
 
 
 @app.post("/admin/scrape", response_model=schemas.AdminScrapeResponse, dependencies=[Depends(require_role(["admin"]))])

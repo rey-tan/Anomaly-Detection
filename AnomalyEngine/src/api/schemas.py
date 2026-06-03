@@ -43,6 +43,8 @@ class UserPermissionsUpdate(BaseModel):
 
 class UserActivityRead(BaseModel):
     id: int
+    user_id: int
+    username: Optional[str] = None
     action: str
     resource: Optional[str]
     details: Optional[Dict[str, Any]]
@@ -106,6 +108,24 @@ class AnalyzeResponse(BaseModel):
     metrics: Dict[str, Any]
     data: List[Dict[str, Any]]
     best_params: Optional[Dict[str, Any]]
+
+
+class AnomalyExplanationRequest(BaseModel):
+    stock: Optional[str] = None
+    mode: Optional[str] = None
+    timeframe: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    metrics: Optional[Dict[str, Any]] = None
+    best_params: Optional[Dict[str, Any]] = None
+    data: List[Dict[str, Any]]
+
+
+class AnomalyExplanationResponse(BaseModel):
+    summary: str
+    highlights: List[str]
+    anomaly_count: int
+    source: str
 
 
 class CacheCreate(BaseModel):

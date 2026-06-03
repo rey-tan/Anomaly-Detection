@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { login, fetchProfile, analyze, toggleFavorite, fetchAnalyses, fetchAnalysisData } from "./api";
+import { login, fetchProfile, analyze, toggleFavorite, fetchAnalyses, fetchAnalysisData, explainAnalysis } from "./api";
 import AnalysisPanel from "./components/AnalysisPanel";
 import AnomalyChart from "./components/AnomalyChart";
 import MetricsGrid from "./components/MetricsGrid";
@@ -9,6 +9,7 @@ import AnalysisHistory from "./components/AnalysisHistory";
 import FavoritesPanel from "./components/FavoritesPanel";
 import AdminDataPanel from "./components/AdminDataPanel";
 import NotificationsPanel from "./components/NotificationsPanel";
+import NotificationsDropdown from "./components/NotificationsDropdown";
 import ActivityPage from "./components/ActivityPage";
 
 const STORAGE_KEY = "anomalyui_token";
@@ -19,12 +20,11 @@ const NAV_ITEMS = [
   { id: "analysis", label: "Analysis", description: "Run model" },
   { id: "activity", label: "Activity", description: "Audit log" },
   { id: "results", label: "Results", description: "Charts & metrics" },
-  { id: "notifications", label: "Notifications", description: "Alerts" },
   { id: "data", label: "Data", description: "Admin only" },
   { id: "users", label: "Users", description: "Admin only" },
 ];
 
-function Header({ user, onLogout }) {
+function Header({ user, token, onLogout, onOpenNotifications }) {
   return (
     <header className="topbar">
       <div className="topbar-copy">
@@ -34,14 +34,17 @@ function Header({ user, onLogout }) {
           Analyze your data for unusual patterns and potential risks.
         </p>
       </div>
-      <div className="user-chip">
-        <div>
-          <span>Signed in as</span>
-          <strong>{user?.username || "Guest"}</strong>
+      <div className="topbar-actions">
+        <NotificationsDropdown token={token} onOpenAll={onOpenNotifications} />
+        <div className="user-chip">
+          <div>
+            <span>Signed in as</span>
+            <strong>{user?.username || "Guest"}</strong>
+          </div>
+          <button className="text-button" onClick={onLogout}>
+            Sign out
+          </button>
         </div>
-        <button className="text-button" onClick={onLogout}>
-          Sign out
-        </button>
       </div>
     </header>
   );
@@ -169,6 +172,9 @@ function App() {
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
   const [lastConfig, setLastConfig] = useState(null);
   const [activityUser, setActivityUser] = useState(null);
+  const [aiExplanation, setAiExplanation] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [page, setPage] = useState(DEFAULT_PAGE);
@@ -203,6 +209,9 @@ function App() {
     setUser(null);
     setResults(null);
     setLastConfig(null);
+    setAiExplanation(null);
+    setAiLoading(false);
+    setAiError("");
     setError("");
     setPage(DEFAULT_PAGE);
   };
@@ -214,6 +223,8 @@ function App() {
       const response = await analyze(token, payload);
       setResults(response);
       setLastConfig(payload);
+      setAiExplanation(null);
+      setAiError("");
       setPage("results");
     } catch (err) {
       setError(err.message || "Analysis failed");
@@ -236,6 +247,8 @@ function App() {
       const payload = await fetchAnalysisData(token, latest.id);
       setResults(payload);
       setSelectedAnalysis(latest);
+      setAiExplanation(null);
+      setAiError("");
       setPage("results");
     } catch (err) {
       setError(err.message || "Could not open the latest analysis");
@@ -244,6 +257,7 @@ function App() {
 
   const anomalyCount = useMemo(() => results?.data?.filter((item) => item.cluster === -1).length || 0, [results]);
   const activeMetricCount = useMemo(() => Object.keys(results?.metrics || {}).length, [results]);
+  const anomalyRows = useMemo(() => (results?.data || []).filter((item) => item.cluster === -1 || item.anomaly === true || item.cluster_dbscan === -1 || item.cluster_isolation_forest === -1), [results]);
   const navItems = useMemo(() => {
     return NAV_ITEMS.filter((item) => item.id === "dashboard" || item.id === "analysis" || item.id === "results" || item.id === "activity" || user?.role === "admin");
   }, [user]);
@@ -252,9 +266,38 @@ function App() {
     return <LoginPage onSuccess={handleLogin} />;
   }
 
+  const handleExplainWithAI = async () => {
+    if (!results?.data?.length) return;
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const payload = {
+        stock: lastConfig?.stock || selectedAnalysis?.stock || "",
+        mode: lastConfig?.mode || selectedAnalysis?.mode || "",
+        timeframe: lastConfig?.timeframe || selectedAnalysis?.timeframe || "",
+        start_date: lastConfig?.start_date || selectedAnalysis?.start_date || "",
+        end_date: lastConfig?.end_date || selectedAnalysis?.end_date || "",
+        metrics: results?.metrics || {},
+        best_params: results?.best_params || selectedAnalysis?.best_params || {},
+        data: results?.data || [],
+      };
+      const explanation = await explainAnalysis(token, payload);
+      setAiExplanation(explanation);
+    } catch (err) {
+      setAiError(err.message || "Failed to generate AI explanation");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <div className="app-shell">
-      <Header user={user} onLogout={handleLogout} />
+      <Header
+        user={user}
+        token={token}
+        onLogout={handleLogout}
+        onOpenNotifications={() => setPage("notifications")}
+      />
       <section className="workspace-grid">
         <aside className="side-rail">
           <div className="side-rail-card">
@@ -414,7 +457,45 @@ function App() {
                       </button>
                     </div>
                   ) : null}
+                  {results ? (
+                    <div className="favorite-row results-ai-actions">
+                      <button
+                        className="primary-button"
+                        type="button"
+                        onClick={handleExplainWithAI}
+                        disabled={aiLoading || !anomalyRows.length}
+                      >
+                        {aiLoading ? "Analyzing with AI…" : "Analyze with AI"}
+                      </button>
+                      <span className="results-ai-note">
+                        {anomalyRows.length ? `${anomalyRows.length} flagged points available for explanation` : "No flagged points to explain"}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
+                {aiError ? <div className="alert-box">{aiError}</div> : null}
+                {aiExplanation ? (
+                  <section className="dashboard-card results-ai-card">
+                    <div className="section-heading compact">
+                      <div>
+                        <p className="eyebrow">AI explanation</p>
+                        <h3>Why these points were flagged</h3>
+                        <p>Generated from the latest analyzed result set.</p>
+                      </div>
+                      <div className="results-ai-source">Source: {aiExplanation.source}</div>
+                    </div>
+                    <p className="results-ai-summary">{aiExplanation.summary}</p>
+                    {Array.isArray(aiExplanation.highlights) && aiExplanation.highlights.length ? (
+                      <div className="results-ai-highlights">
+                        {aiExplanation.highlights.map((item, index) => (
+                          <div key={index} className="results-ai-highlight-item">
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </section>
+                ) : null}
                 {results ? <ResultStats data={results.data || []} metrics={results.metrics} /> : null}
                 {results ? <MetricsGrid metrics={results.metrics} bestParams={results.best_params} /> : <section className="empty-state-card"><h2>No results yet</h2><p>Run an analysis from the Analysis page to populate this view.</p></section>}
                 <AnalysisHistory token={token} onSelect={(payload, analysis) => { setResults(payload); setSelectedAnalysis(analysis); setPage('results'); }} />
@@ -431,15 +512,15 @@ function App() {
           ) : null}
 
           {page === "activity" ? (
-            <ActivityPage token={token} initialUserId={activityUser} onBack={() => setPage(DEFAULT_PAGE)} />
+            <ActivityPage token={token} initialUserId={activityUser} />
           ) : null}
 
           {page === "users" && user?.role === "admin" ? (
-            <section className="page-split single-column">
+            <section className="page-split">
               <div className="page-panel">
                 <div className="page-intro">
                   <p className="eyebrow">Admin dashboard</p>
-                  <h2>Manage users separately from analysis work</h2>
+                  <h2>Manage users</h2>
                   <p></p>
                 </div>
                 <UsersPanel token={token} currentUser={user} onOpenActivity={(userId) => { setActivityUser(userId); setPage('activity'); }} />

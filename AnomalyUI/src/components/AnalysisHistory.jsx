@@ -38,7 +38,7 @@ export default function AnalysisHistory({ token, onSelect }) {
   };
 
   return (
-    <aside className="history-panel" style={{ marginTop: "40px" }}>
+    <aside className="history-panel analysis-history-panel">
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Past analyses</p>

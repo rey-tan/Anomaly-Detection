@@ -1,6 +1,8 @@
 import hashlib
 import json
 from datetime import datetime
+from sqlalchemy.sql import func
+from sqlalchemy import String
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
@@ -76,11 +78,96 @@ def log_user_activity(db: Session, user_id: int, action: str, resource: Optional
     return entry
 
 
+def _serialize_activity(activity: models.UserActivity, username: Optional[str] = None, cache_entry: Optional[models.PipelineCache] = None):
+    details = dict(activity.details or {}) if isinstance(activity.details, dict) else (activity.details or {})
+    if cache_entry is not None and isinstance(details, dict):
+        details.setdefault("stock", cache_entry.stock)
+        details.setdefault("mode", cache_entry.mode)
+        details.setdefault("timeframe", cache_entry.timeframe)
+        details.setdefault("start_date", cache_entry.start_date)
+        details.setdefault("end_date", cache_entry.end_date)
+        details.setdefault("features", cache_entry.features)
+        details.setdefault("rows", len(cache_entry.data or []))
+    return {
+        "id": activity.id,
+        "user_id": activity.user_id,
+        "username": username,
+        "action": activity.action,
+        "resource": activity.resource,
+        "details": details,
+        "created_at": activity.created_at,
+    }
+
+
 def get_user_activity(db: Session, user_id: int, limit: Optional[int] = None):
-    query = db.query(models.UserActivity).filter(models.UserActivity.user_id == user_id).order_by(models.UserActivity.created_at.desc())
+    query = (
+        db.query(models.UserActivity, models.User.username)
+        .join(models.User, models.User.id == models.UserActivity.user_id)
+        .filter(models.UserActivity.user_id == user_id)
+        .order_by(models.UserActivity.created_at.desc())
+    )
     if limit is not None:
         query = query.limit(limit)
-    return query.all()
+    rows = query.all()
+    cache_hashes = [activity.details.get("config_hash") for activity, _ in rows if isinstance(activity.details, dict) and activity.details.get("config_hash")]
+    cache_entries = {
+        cache.config_hash: cache
+        for cache in db.query(models.PipelineCache).filter(models.PipelineCache.config_hash.in_(cache_hashes)).all()
+    }
+    return [_serialize_activity(activity, username, cache_entries.get(activity.details.get("config_hash")) if isinstance(activity.details, dict) else None) for activity, username in rows]
+
+
+def get_activity(db: Session, user_id: Optional[int] = None, q: Optional[str] = None, start: Optional[str] = None, end: Optional[str] = None, page: Optional[int] = None, page_size: Optional[int] = None):
+    query = db.query(models.UserActivity)
+    if user_id is not None:
+        query = query.filter(models.UserActivity.user_id == user_id)
+    if q:
+        pattern = f"%{q}%"
+        query = query.filter((models.UserActivity.action.ilike(pattern)) | (models.UserActivity.resource.ilike(pattern)))
+    if start:
+        try:
+            start_dt = datetime.strptime(start, "%Y-%m-%d")
+            query = query.filter(models.UserActivity.created_at >= start_dt)
+        except Exception:
+            pass
+    if end:
+        try:
+            end_dt = datetime.strptime(end, "%Y-%m-%d")
+            query = query.filter(models.UserActivity.created_at <= end_dt)
+        except Exception:
+            pass
+
+    total = query.count()
+    query = query.order_by(models.UserActivity.created_at.desc())
+    if page is not None and page_size is not None:
+        try:
+            p = max(1, int(page))
+            ps = max(1, int(page_size))
+            query = query.offset((p - 1) * ps).limit(ps)
+        except Exception:
+            pass
+
+    items = query.all()
+    usernames = {
+        user.id: user.username
+        for user in db.query(models.User).filter(models.User.id.in_([activity.user_id for activity in items])).all()
+    }
+    cache_hashes = [activity.details.get("config_hash") for activity in items if isinstance(activity.details, dict) and activity.details.get("config_hash")]
+    cache_entries = {
+        cache.config_hash: cache
+        for cache in db.query(models.PipelineCache).filter(models.PipelineCache.config_hash.in_(cache_hashes)).all()
+    }
+    return {
+        "items": [
+            _serialize_activity(
+                activity,
+                usernames.get(activity.user_id),
+                cache_entries.get(activity.details.get("config_hash")) if isinstance(activity.details, dict) else None,
+            )
+            for activity in items
+        ],
+        "total": total,
+    }
 
 
 def create_user_analysis(

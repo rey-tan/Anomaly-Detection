@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUserRole, deleteUser } from "../api";
-import AdminActivityPanel from "./AdminActivityPanel";
 
 export default function UsersPanel({ token, currentUser, onOpenActivity }) {
   const [users, setUsers] = useState([]);
@@ -128,9 +127,7 @@ export default function UsersPanel({ token, currentUser, onOpenActivity }) {
         ))}
       </div>
 
-      {selectedUserId ? (
-        <AdminActivityPanel token={token} userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
-      ) : null}
+      {/* Per-user quick panel removed in favor of global Activity page */}
 
       <form onSubmit={handleCreate} className="admin-form">
         <div className="admin-form-grid">

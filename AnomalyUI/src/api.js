@@ -52,6 +52,15 @@ export async function analyze(token, payload) {
   return unwrapResponse(response);
 }
 
+export async function explainAnalysis(token, payload) {
+  const response = await fetch(`${BASE_URL}/analyze/explain`, {
+    method: "POST",
+    headers: buildHeaders(token),
+    body: JSON.stringify(payload),
+  });
+  return unwrapResponse(response);
+}
+
 export async function saveCache(token, config, results) {
   const body = {
     config,
@@ -185,9 +194,28 @@ export async function markNotificationRead(token, notificationId) {
   return unwrapResponse(response);
 }
 
-export async function fetchUserActivity(token, userId) {
-  const response = await fetch(`${BASE_URL}/users/${userId}/activity`, {
+export async function fetchUserActivity(token, userId, opts = {}) {
+  const url = new URL(`${BASE_URL}/users/${userId}/activity`);
+  if (opts.q) url.searchParams.append("q", opts.q);
+  if (opts.start) url.searchParams.append("start", opts.start);
+  if (opts.end) url.searchParams.append("end", opts.end);
+  if (opts.page) url.searchParams.append("page", String(opts.page));
+  if (opts.page_size) url.searchParams.append("page_size", String(opts.page_size));
+
+  const response = await fetch(url.toString(), {
     headers: buildHeaders(token),
   });
+  return unwrapResponse(response);
+}
+
+export async function fetchActivity(token, opts = {}) {
+  const url = new URL(`${BASE_URL}/activity`);
+  if (opts.q) url.searchParams.append("q", opts.q);
+  if (opts.start) url.searchParams.append("start", opts.start);
+  if (opts.end) url.searchParams.append("end", opts.end);
+  if (opts.page) url.searchParams.append("page", String(opts.page));
+  if (opts.page_size) url.searchParams.append("page_size", String(opts.page_size));
+
+  const response = await fetch(url.toString(), { headers: buildHeaders(token) });
   return unwrapResponse(response);
 }

@@ -34,6 +34,89 @@ export default function AdminDataPanel({ token }) {
         return d;
     };
 
+    const renderPreviewValue = (value) => {
+        if (value === null || value === undefined || value === "") {
+            return "—";
+        }
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+            return String(value);
+        }
+        if (Array.isArray(value)) {
+            return value.map(renderPreviewValue).join(", ");
+        }
+        return JSON.stringify(value);
+    };
+
+    const renderPreviewTable = (preview) => {
+        if (Array.isArray(preview) && preview.length) {
+            const columns = Array.from(
+                new Set(
+                    preview.flatMap((row) => (row && typeof row === "object" && !Array.isArray(row) ? Object.keys(row) : []))
+                )
+            );
+
+            if (columns.length) {
+                return (
+                    <div className="admin-table-scroll">
+                        <table className="admin-table">
+                            <thead>
+                                <tr>
+                                    {columns.map((column) => (
+                                        <th
+                                            key={column}
+                                            className="table-header"
+                                        >
+                                            {column}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {preview.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        {columns.map((column) => (
+                                            <td
+                                                key={column}
+                                                className = "table-cell"
+                                            >
+                                                {renderPreviewValue(row?.[column])}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                );
+            }
+        }
+
+        if (preview && typeof preview === "object" && !Array.isArray(preview)) {
+            return (
+                <div className="admin-table-scroll">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th className="table-header">Field</th>
+                                <th className="table-header">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.entries(preview).map(([key, value]) => (
+                                <tr key={key}>
+                                    <td className="table-cell">{key}</td>
+                                    <td className="table-cell">{renderPreviewValue(value)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        return <div className="admin-muted">No preview rows available.</div>;
+    };
+
     const todayDate = fmtDate(new Date());
     const minDate = adminSymbols ? fmtDate(addDays(adminSymbols[0]?.last_date, 1)) : "";
     const maxDate = todayDate;
@@ -55,12 +138,12 @@ export default function AdminDataPanel({ token }) {
     const loadPreview = async (symbol) => {
         if (!token || !symbol) return;
         setAdminState((prev) => ({ ...prev, loadingPreview: true }));
-        setScrapeState((prev) => ({ ...prev, error: "" }));
         try {
             const payload = await fetchAdminPreview(token, symbol, 10);
+            console.log("Preview data for", symbol, payload);
             setAdminState((prev) => ({ ...prev, previewData: payload, openPreview: symbol }));
         } catch (err) {
-            setScrapeState((prev) => ({ ...prev, error: err.message || "Failed to load preview data" }));
+            console.log("Failed to load preview data", err);
         } finally {
             setAdminState((prev) => ({ ...prev, loadingPreview: false }));
         }
@@ -116,8 +199,8 @@ export default function AdminDataPanel({ token }) {
                     <h3>Dataset inventory</h3>
                     <div className="admin-count">{adminState.loadingList ? "…" : `${adminSymbols.length} symbols`}</div>
                 </div>
-                <div style={{ display: "grid", gap: 12 }}>
-                    <div style={{ display: "flex", gap: 8 }}>
+                <div className="admin-section-stack">
+                    <div className="admin-search-row">
                         <input
                             placeholder="Symbol"
                             id="admin-symbol-input"
@@ -125,7 +208,7 @@ export default function AdminDataPanel({ token }) {
                             onChange={(e) => setSymbolQuery(e.target.value)}
                             className="admin-input"
                         />
-                        <button className="primary-button" onClick={() => loadAdminSymbols()} type="button" style={{ width: "190px", flexShrink: 0 }}>
+                        <button className="primary-button admin-refresh-button" onClick={() => loadAdminSymbols()} type="button">
                             Refresh inventory
                         </button>
                     </div>
@@ -136,7 +219,7 @@ export default function AdminDataPanel({ token }) {
                             (() => {
                                 const query = (symbolQuery || "").toLowerCase().trim();
                                 const filtered = query
-                                    ? adminSymbols.filter((name) => name.toLowerCase().includes(query))
+                                    ? adminSymbols.filter((symbol) => symbol.name.toLowerCase().includes(query))
                                     : adminSymbols;
 
                                 if (!filtered.length) {
@@ -146,16 +229,17 @@ export default function AdminDataPanel({ token }) {
                                 return filtered.map((item,index) => (
                                     <div key={index} className="admin-user-card">
                                         <div className="data-content">
-                                            <div style={{ display: "flex", flexDirection: "column" }}>
-                                                <div style={{ fontWeight: 700 }}>{item.name}</div>
-                                                <div style={{ color: "rgb(148, 163, 184)", fontSize: "12px", marginTop: "6px" }}>
+                                            <div className="admin-dataset-meta">
+                                                <div className="admin-dataset-name">{item.name}</div>
+                                                <div className="admin-dataset-range">
                                                     {item.first_date} → {item.last_date}
                                                 </div>
                                             </div>
-                                            <div style={{ display: "flex", gap: 8 }}>
+                                                <div className="admin-action-row">
                                                 <button
                                                     className="text-button"
                                                     onClick={async () => {
+                                                        console.log("Loading preview for", item.name);
                                                         await loadPreview(item.name);
                                                     }}
                                                     type="button"
@@ -168,8 +252,9 @@ export default function AdminDataPanel({ token }) {
                                                     onClick={async () => {
                                                         try {
                                                             await downloadAdminFile(token, `${item.name}.csv`);
-                                                        } catch (err) {
-                                                            setScrapeState((prev) => ({ ...prev, error: err.message || "Download failed" }));
+                                                        }
+                                                        catch (err) {
+                                                            console.error("Download failed:", err);
                                                         }
                                                     }}
                                                     type="button"
@@ -178,17 +263,17 @@ export default function AdminDataPanel({ token }) {
                                                 </button>
                                             </div>
                                         </div>
-                                        {adminState.openPreview === name && adminState.previewData ? (
-                                            <div style={{ marginTop: 10, width: "100%" }}>
+                                        {adminState.openPreview === item.name && adminState.previewData ? (
+                                            <div className="admin-preview-wrap">
                                                 <div className="dashboard-card">
-                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <div className="admin-preview-head">
                                                         <strong>Preview: {adminState.previewData.name}</strong>
-                                                        <div style={{ color: "#94a3b8" }}>
+                                                        <div className="admin-muted">
                                                             {adminState.previewData.rows} rows · last updated {adminState.previewData.last_date || adminState.previewData.modified_at}
                                                         </div>
                                                     </div>
-                                                    <div style={{ maxHeight: 260, overflow: "auto", marginTop: 8 }}>
-                                                        <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(adminState.previewData.preview, null, 2)}</pre>
+                                                    <div className="admin-preview-table-wrap">
+                                                        {renderPreviewTable(adminState.previewData.preview)}
                                                     </div>
                                                 </div>
                                             </div>
@@ -200,11 +285,11 @@ export default function AdminDataPanel({ token }) {
                             <div className="admin-user-card">No datasets found</div>
                         )}
                     </div>
-                    {adminState.loadingPreview ? <div style={{ color: "#94a3b8" }}>Loading preview…</div> : null}
+                    {adminState.loadingPreview ? <div className="admin-muted">Loading preview…</div> : null}
                 </div>
             </div>
         </div>
-        <div className="page-panel" style={{ height: "max-content" }}>
+        <div className="page-panel admin-page-panel">
             <div className="admin-panel">
                 <div className="admin-panel-head">
                     <div>
@@ -226,8 +311,8 @@ export default function AdminDataPanel({ token }) {
                             <option value="both">both</option>
                         </select>
                     </div>
-                    {(minDate || maxDate) ? <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 6 }}>{`Available range: ${minDate || "—"} → ${maxDate || "—"}`}</div> : null}
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    {(minDate || maxDate) ? <div className="admin-muted admin-range-note">{`Available range: ${minDate || "—"} → ${maxDate || "—"}`}</div> : null}
+                    <div className="admin-submit-row">
                         <button className="primary-button admin-submit" type="submit" disabled={scrapeState.loading}>
                             {scrapeState.loading ? "Scraping..." : "Run scrape"}
                         </button>

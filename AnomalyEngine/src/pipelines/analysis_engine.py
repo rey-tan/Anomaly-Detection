@@ -147,73 +147,9 @@ class BaseAnalysisPipeline(ABC):
 class StaticAnalysisPipeline(BaseAnalysisPipeline):
     def run(self) -> PipelineResult:
         feature_df = self._prepare_features()
-        # Diagnostic info
-        try:
-            print(f"StaticAnalysisPipeline.run: feature_df.shape={feature_df.shape}", flush=True)
-            print(f"StaticAnalysisPipeline.run: features={self.config.features}", flush=True)
-            print(f"StaticAnalysisPipeline.run: best_params={self.best_params}", flush=True)
-        except Exception:
-            pass
         X_scaled = self.scaler.fit_transform(feature_df, self.config.features)
         label_sets = self.detector.predict(X_scaled, feature_df, self.best_params)
         metrics = self._build_metrics(feature_df, label_sets)
         result_df = self._attach_labels(feature_df, label_sets)
         return PipelineResult(data=result_df, labels=label_sets, metrics=metrics, best_params=self.best_params)
 
-    def __init__(self, config: dict[str, Any] | AnalysisRequest, best_params: dict[str, Any], window_size: int = 500, **kwargs: Any) -> None:
-        super().__init__(config, best_params, **kwargs)
-        self.window_size = window_size
-
-    def run(self) -> PipelineResult:
-        feature_df = self._prepare_features()
-
-        if feature_df.empty:
-            raise ValueError("Feature engineering produced an empty dataset")
-
-        warmup = min(max(100, self.window_size), len(feature_df))
-
-        dbscan_labels = pd.Series(1, index=feature_df.index, dtype=int)
-        iso_labels = pd.Series(1, index=feature_df.index, dtype=int)
-        zscore_labels = pd.Series(1, index=feature_df.index, dtype=int)
-
-        for index in range(max(warmup - 1, 0), len(feature_df)):
-            window_df = feature_df.iloc[: index + 1].tail(self.window_size)
-            X_scaled = self.scaler.fit_transform(window_df, self.config.features)
-            window_label_sets = self.detector.predict(X_scaled, window_df, self.best_params)
-
-            dbscan_labels.iloc[index] = int(window_label_sets["dbscan"][-1])
-            iso_labels.iloc[index] = int(window_label_sets["isolation_forest"][-1])
-            zscore_labels.iloc[index] = int(window_label_sets["zscore"][-1])
-
-        result_df = feature_df.copy()
-        result_df["cluster_dbscan"] = dbscan_labels
-        result_df["cluster_isolation_forest"] = iso_labels
-        result_df["cluster_zscore"] = zscore_labels
-
-        combined = pd.Series(1, index=feature_df.index, dtype=int)
-        combined[(dbscan_labels == -1) | (iso_labels == -1) | (zscore_labels == -1)] = -1
-
-        result_df["cluster"] = combined
-        result_df["anomaly"] = result_df["cluster"] == -1
-
-        evaluator = Evaluator()
-        metrics = {
-            "dbscan": evaluator.compute(result_df, result_df["cluster_dbscan"]),
-            "isolation_forest": evaluator.compute(result_df, result_df["cluster_isolation_forest"]),
-            "zscore": evaluator.compute(result_df, result_df["cluster_zscore"]),
-            "combined": evaluator.compute(result_df, result_df["cluster"]),
-        }
-
-        labels = {
-            "dbscan": dbscan_labels.to_numpy(),
-            "isolation_forest": iso_labels.to_numpy(),
-            "zscore": zscore_labels.to_numpy(),
-            "combined": combined.to_numpy(),
-        }
-
-        return PipelineResult(
-            data=result_df,
-            labels=labels,
-            metrics=metrics,
-            best_params=self.best_params,
-        )

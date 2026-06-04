@@ -271,6 +271,37 @@ function App() {
     setAiLoading(true);
     setAiError("");
     try {
+      const contextualRows = anomalyRows.map((row) => {
+        const index = results.data.findIndex((item) => item.date === row.date);
+        const previousRows = index > 0 ? results.data.slice(Math.max(0, index - 3), index) : [];
+        const nextRows = index < results.data.length - 1 ? results.data.slice(index + 1, index + 4) : [];
+        const windowStart = Math.max(0, index - 20);
+        const window = results.data.slice(windowStart, index);
+        const averageVolume = window.length
+          ? window.reduce((sum, item) => sum + (item.volume || 0), 0) / window.length
+          : null;
+
+        return {
+          ...row,
+          previous_close: previousRows.length ? previousRows[previousRows.length - 1].close : null,
+          adjacent_rows: [...previousRows, ...nextRows].map((item) => ({
+            date: item.date,
+            close: item.close,
+            volume: item.volume,
+            change: item.change,
+          })),
+          rolling_mean: row.SMA_20 ?? row.SMA_10 ?? null,
+          rolling_std: row.volatility ?? null,
+          average_volume: averageVolume,
+          detector_flags: [
+            row.cluster === -1 ? "combined" : null,
+            row.cluster_dbscan === -1 ? "DBSCAN" : null,
+            row.cluster_isolation_forest === -1 ? "Isolation Forest" : null,
+          ].filter(Boolean),
+          z_score: row.z_score ?? row.Anomaly_Z_Score ?? null,
+        };
+      });
+
       const payload = {
         stock: lastConfig?.stock || selectedAnalysis?.stock || "",
         mode: lastConfig?.mode || selectedAnalysis?.mode || "",
@@ -279,7 +310,7 @@ function App() {
         end_date: lastConfig?.end_date || selectedAnalysis?.end_date || "",
         metrics: results?.metrics || {},
         best_params: results?.best_params || selectedAnalysis?.best_params || {},
-        data: results?.data || [],
+        data: contextualRows,
       };
       const explanation = await explainAnalysis(token, payload);
       setAiExplanation(explanation);

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 import numpy as np
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from src.pipelines.anomaly_detection_pipeline import run_pipeline
 import time
@@ -22,6 +23,8 @@ from src.utils.io import write_result_artifact, read_result_artifact, get_symbol
 from src.utils.paths import ARTIFACTS
 from src.components.sharesansar_scraper import ShareSansarScraper
 from . import crud, database, models, schemas, security
+
+load_dotenv()
 
 app = FastAPI(title="Anomaly Engine API")
 
@@ -93,8 +96,76 @@ def _extract_anomaly_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def _build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
-    anomaly_rows = _extract_anomaly_rows(payload.data)
+    anomaly_rows = payload.data or []
     compact_rows = anomaly_rows[:15]
+
+    row_summaries = []
+    for index, row in enumerate(compact_rows, start=1):
+        flags = []
+        if row.get("cluster") == -1:
+            flags.append("combined")
+        if row.get("dbscan") == -1:
+            flags.append("DBSCAN")
+        if row.get("isolation_forest") == -1:
+            flags.append("Isolation Forest")
+        if row.get("anomaly") is True:
+            flags.append("anomaly")
+
+        z_score = row.get("z_score") if row.get("z_score") is not None else row.get("Anomaly_Z_Score")
+        z_score_text = f"{float(z_score):.2f}" if isinstance(z_score, (int, float)) else str(z_score)
+
+        detail_parts = [
+            f"date={row.get('date')}",
+            f"close={row.get('close')}",
+        ]
+        if row.get("previous_close") is not None:
+            detail_parts.append(f"previous_close={row.get('previous_close')}")
+        if row.get("rolling_mean") is not None:
+            detail_parts.append(f"rolling_mean={row.get('rolling_mean')}")
+        if row.get("rolling_std") is not None:
+            detail_parts.append(f"rolling_std={row.get('rolling_std')}")
+        if row.get("average_volume") is not None:
+            detail_parts.append(f"average_volume={row.get('average_volume')}")
+        if row.get("volume") is not None:
+            detail_parts.append(f"volume={row.get('volume')}")
+        if row.get("change") is not None:
+            detail_parts.append(f"change={row.get('change')}")
+        if z_score is not None:
+            detail_parts.append(f"z_score={z_score_text}")
+        if row.get("bb_width") is not None:
+            detail_parts.append(f"bb_width={row.get('bb_width')}")
+
+        if row.get("adjacent_rows"):
+            adjacent = []
+            for adj in row.get("adjacent_rows", [])[:6]:
+                adjacent_close = adj.get("close")
+                adjacent_volume = adj.get("volume")
+                adjacent_date = adj.get("date")
+                adjacent_change = adj.get("change")
+                adjacent.append(
+                    f"[{adjacent_date}: close={adjacent_close}, volume={adjacent_volume}, change={adjacent_change}]"
+                )
+            detail_parts.append(f"adjacent_rows={'; '.join(adjacent)}")
+
+        if row.get("detector_flags"):
+            detail_parts.append(f"detector_flags={', '.join(row.get('detector_flags'))}")
+        elif flags:
+            detail_parts.append(f"flagged_by={', '.join(flags)}")
+
+        row_summaries.append(f"  Row {index}: " + ", ".join(detail_parts))
+
+    params_lines = []
+    if payload.best_params:
+        for method, params in (payload.best_params or {}).items():
+            if isinstance(params, dict):
+                params_lines.append(f"- {method}:")
+                for key, value in params.items():
+                    params_lines.append(f"  - {key} = {value}")
+            else:
+                params_lines.append(f"- {method} = {params}")
+    if not params_lines:
+        params_lines.append("- No tuning parameters provided.")
+
     summary = {
         "stock": payload.stock,
         "mode": payload.mode,
@@ -102,17 +173,20 @@ def _build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
         "window": {"start_date": payload.start_date, "end_date": payload.end_date},
         "metrics": payload.metrics or {},
         "best_params": payload.best_params or {},
-        "total_rows": len(payload.data),
-        "anomaly_count": len(anomaly_rows),
-        "anomaly_samples": compact_rows,
+        "total_anomaly_rows": len(anomaly_rows),
     }
+
     return (
         "You are an equity market analyst explaining anomaly detection results to an analyst user. "
-        "Write a concise, practical explanation of why the flagged points were likely anomalies. "
-        "Focus on observable signals in the data such as sudden price deviation, volume spikes, extreme z-scores, "
-        "or model disagreement. Avoid claiming certainty. Use 3-6 short bullet points followed by a one-paragraph summary. "
-        "If the data is too sparse, say so clearly.\n\n"
-        f"Analysis context:\n{json.dumps(summary, ensure_ascii=False, indent=2, default=str)}"
+        "The rows below have already been flagged as anomalies by the detection system. "
+        "Explain why each point is unusual using the provided feature values and detector labels. "
+        "Mention relative price movement, volume behavior, z-score severity, and whether multiple detectors agree. "
+        "Do not invent facts or claim causal certainty. Use 3-6 short bullet points, then one concise summary paragraph.\n\n"
+        f"Analysis context:\n{json.dumps(summary, ensure_ascii=False, indent=2, default=str)}\n\n"
+        "Detection parameters:\n"
+        f"{chr(10).join(params_lines)}\n\n"
+        "Flagged anomaly rows with context:\n"
+        f"{chr(10).join(row_summaries)}"
     )
 
 
@@ -155,6 +229,46 @@ def _heuristic_anomaly_explanation(payload: schemas.AnomalyExplanationRequest) -
 
 
 def _call_ai_explanation(payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
+    github_token = os.getenv("GITHUB_TOKEN", "").strip()
+    if github_token:
+        endpoint = os.getenv("GITHUB_MODEL_ENDPOINT", "https://models.github.ai/inference")
+        model = os.getenv("GITHUB_MODEL_NAME", "openai/gpt-5")
+        prompt = _build_ai_prompt(payload)
+        try:
+            from azure.ai.inference import ChatCompletionsClient
+            from azure.ai.inference.models import SystemMessage, UserMessage
+            from azure.core.credentials import AzureKeyCredential
+        except ImportError:
+            return _heuristic_anomaly_explanation(payload)
+
+        try:
+            client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(github_token))
+            response = client.complete(
+                model=model,
+                messages=[
+                    SystemMessage("You explain anomaly detection results in concise analyst-friendly language."),
+                    UserMessage(prompt),
+                ],
+                temperature=0.2,
+            )
+            summary = str(response.choices[0].message.content).strip()
+        except Exception:
+            return _heuristic_anomaly_explanation(payload)
+
+        if not summary:
+            return _heuristic_anomaly_explanation(payload)
+
+        highlights = [line.lstrip("-• ").strip() for line in summary.splitlines() if line.strip().startswith(("-", "•"))]
+        if not highlights:
+            highlights = ["AI explanation generated successfully."]
+
+        return {
+            "summary": summary,
+            "highlights": highlights[:6],
+            "anomaly_count": len(_extract_anomaly_rows(payload.data)),
+            "source": model,
+        }
+
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         return _heuristic_anomaly_explanation(payload)

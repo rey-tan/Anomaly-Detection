@@ -18,6 +18,8 @@ pandas==2.2.3
 scipy==1.15.2
 scikit-learn==1.6.1
 lxml
+azure-ai-inference
+python-dotenv
 
 # Visualization
 matplotlib==3.10.0

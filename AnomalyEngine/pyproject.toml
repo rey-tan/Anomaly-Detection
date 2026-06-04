@@ -20,6 +20,8 @@ dependencies = [
     "scikit-learn",
     "scipy",
     "matplotlib",
+    "azure-ai-inference",
+    "python-dotenv",
     "flask>=3.0",
 ]
 

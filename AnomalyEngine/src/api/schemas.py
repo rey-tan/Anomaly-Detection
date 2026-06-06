@@ -104,10 +104,14 @@ class AnalyzeConfig(BaseModel):
     mode: str
 
 
-class AnalyzeResponse(BaseModel):
+class ModelResult(BaseModel):
     metrics: Dict[str, Any]
+    params: Dict[str, Any]
+
+
+class AnalyzeResponse(BaseModel):
     data: List[Dict[str, Any]]
-    best_params: Optional[Dict[str, Any]]
+    models: Dict[str, ModelResult]
 
 
 class AnomalyExplanationRequest(BaseModel):

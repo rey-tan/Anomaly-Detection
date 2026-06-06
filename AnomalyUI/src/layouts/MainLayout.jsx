@@ -1,0 +1,110 @@
+import React from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import NotificationsDropdown from '../components/NotificationsDropdown'
+import FavoritesPanel from '../components/FavoritesPanel'
+import NavButton from '../components/ui/NavButton'
+
+const NAV_ITEMS = [
+  { id: 'dashboard', path: '/dashboard', label: 'Dashboard', description: 'Overview' },
+  { id: 'analysis', path: '/analysis', label: 'Analysis', description: 'Run model' },
+  { id: 'activity', path: '/activity', label: 'Activity', description: 'Audit log' },
+  { id: 'results', path: '/results', label: 'Results', description: 'Charts & metrics' },
+  { id: 'data', path: '/data', label: 'Data', description: 'Admin only' },
+  { id: 'users', path: '/users', label: 'Users', description: 'Admin only' },
+]
+
+export default function MainLayout({
+  user,
+  token,
+  results,
+  selectedAnalysis,
+  setResults,
+  setSelectedAnalysis,
+  lastConfig,
+  onLogout,
+  onOpenNotifications,
+  handleOpenLastRun,
+  setActivityUser,
+}) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const latestRun = lastConfig?.config || lastConfig || {}
+  const latestStock = latestRun?.stock || latestRun?.symbol
+  const latestTimeframe = latestRun?.timeframe
+  const latestStart = latestRun?.start_date || latestRun?.startDate
+  const latestEnd = latestRun?.end_date || latestRun?.endDate
+  const latestMode = latestRun?.mode
+  const latestWindow = latestStart && latestEnd ? `${latestStart} – ${latestEnd}` : null
+
+  const navItems = NAV_ITEMS.filter(
+    (item) => item.id === 'dashboard' || item.id === 'analysis' || item.id === 'results' || item.id === 'activity' || user?.role === 'admin'
+  )
+
+  return (
+    <div className="app-shell">
+      <header className="topbar">
+        <div className="topbar-copy">
+          <p className="eyebrow">Anomaly Engine</p>
+          <h1>Detect hidden market risk with precision.</h1>
+          <p className="topbar-subtitle">
+            Analyze your data for unusual patterns and potential risks.
+          </p>
+        </div>
+        <div className="topbar-actions">
+          <NotificationsDropdown token={token} onOpenAll={onOpenNotifications} />
+          <div className="user-chip">
+            <div>
+              <span>Signed in as</span>
+              <strong>{user?.username || 'Guest'}</strong>
+            </div>
+            <button className="text-button" onClick={onLogout}>
+              Sign out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section className="workspace-grid">
+        <aside className="side-rail">
+          <div className="side-rail-card">
+            <p className="eyebrow">Workspace</p>
+            <h2>Pages</h2>
+          </div>
+
+          <nav className="nav-stack" aria-label="Primary">
+            {navItems.map((item) => (
+              <NavButton
+                key={item.id}
+                item={item}
+                active={location.pathname.startsWith(item.path)}
+                badge={item.id === 'results' && results ? 'Live' : null}
+              />
+            ))}
+          </nav>
+
+          
+
+          <button
+            className="side-rail-card side-rail-footer side-rail-action"
+            type="button"
+            onClick={handleOpenLastRun}
+            disabled={!lastConfig}
+            aria-label="Open the latest saved analysis"
+          >
+            <span>Last analysis</span>
+            <h3>{latestStock || 'No analysis yet'}</h3>
+            <p className="mt-5">
+              {latestRun
+                ? `${latestTimeframe} • ${latestWindow}`
+                : 'Run an analysis to populate charts and metrics.'}
+            </p>
+          </button>
+        </aside>
+
+        <main className="page-stage">
+          <Outlet />
+        </main>
+      </section>
+    </div>
+  )
+}

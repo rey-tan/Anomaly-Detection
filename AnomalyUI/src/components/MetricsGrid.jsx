@@ -8,53 +8,83 @@ function MetricCard({ title, value, description }) {
   );
 }
 
-export default function MetricsGrid({ metrics = {}, bestParams = {} }) {
-  const metricEntries = Object.entries(metrics || {}).filter(([model]) => model.toLowerCase() != "zscore");
+function formatParamValue(val) {
+  if (typeof val === "number") {
+    return Number.isInteger(val) ? val : val.toFixed(2);
+  }
+  if (Array.isArray(val) || typeof val === "object") {
+    return JSON.stringify(val);
+  }
+  return String(val);
+}
+
+export default function MetricsGrid({ results = {} ,selectedAnalysis = null,handleToggleFavorite = null}) {
+  const metricEntries = Object.entries(results || {}).filter(([model]) => model.toLowerCase() !== "zscore");
+  
   return (
     <div className="metrics-wrapper">
-      <div className="section-heading">
+      <div className="section-heading compact results-title">
         <div>
           <h2>Analysis feedback</h2>
           <p>Review model metrics, event counts, and tuning parameters.</p>
         </div>
+        {selectedAnalysis ? (
+            <div className="favorite-row">
+              <button className="favorite-button large" onClick={handleToggleFavorite}>
+                {selectedAnalysis.is_favorite ? '★ Favorite' : '☆ Save to favorites'}
+              </button>
+            </div>
+          ) : null}
       </div>
       <div className="detector-summary">
-        {metricEntries.map(([model, summary]) => (
+        {metricEntries.map(([model, modelData]) => (
           <div className="detector-summary-card" key={model}>
             <strong>{model.replace(/_/g, " ")}</strong>
-            <span>{((summary.anomaly_rate ?? 0) * 100).toFixed(1)}% anomalies</span>
+            <span>{((modelData.metrics?.anomaly_rate ?? 0) * 100).toFixed(1)}% anomalies</span>
             <small>
-              {summary.n_noise ?? 0} flagged points
-              {summary.anomaly_rate === 0 ? " · no anomalies detected with current params" : ""}
+              {modelData.metrics?.n_noise ?? 0} flagged points
+              {modelData.metrics?.anomaly_rate === 0 ? " · no anomalies detected with current params" : ""}
             </small>
           </div>
         ))}
       </div>
       <div className="metric-grid">
-        {metricEntries.map(([model, summary]) => (
-          <div className="analysis-block" key={model}>
-            <h3>{model.replace(/_/g, " ")}</h3>
-            <div className="metric-grid-inner">
-              <MetricCard
-                title={`${((summary.anomaly_rate ?? 0) * 100).toFixed(1)}%`}
-                value="Anomaly rate"
-                description="Percent of points flagged as anomalies"
-              />
-              <MetricCard
-                title={`${summary.n_noise ?? 0}`}
-                value="Anomaly count"
-                description="Total outlier observations"
-              />
+        {metricEntries.map(([model, modelData]) => {
+          const { metrics, params } = modelData || {};
+          
+          return (
+            <div className="analysis-block" key={model}>
+              <h3>{model.replace(/_/g, " ")}</h3>
+              <div className="metric-grid-inner">
+                <MetricCard
+                  title="Anomaly rate"
+                  value={`${((metrics?.anomaly_rate ?? 0) * 100).toFixed(1)}%`}
+                  description="Percent of points flagged as anomalies"
+                />
+                <MetricCard
+                  title="Anomaly count"
+                  value={`${metrics?.n_noise ?? 0}`}
+                  description="Total outlier observations"
+                />
+                <MetricCard
+                  title="Tuning parameters"
+                  description={
+                    Object.keys(params || {}).length > 0 ? (
+                      <div className="metric-params-list">
+                        {Object.entries(params).map(([key, val]) => (
+                          <div key={key}>{key}: {formatParamValue(val)}</div>
+                        ))}
+                      </div>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      {/* {bestParams && Object.keys(bestParams).length > 0 ? (
-        <div className="best-params-card">
-          <h3>Tuned parameters</h3>
-          <pre>{JSON.stringify(bestParams, null, 2)}</pre>
-        </div>
-      ) : null} */}
     </div>
   );
 }

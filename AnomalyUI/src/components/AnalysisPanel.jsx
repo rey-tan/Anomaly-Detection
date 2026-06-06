@@ -83,7 +83,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
     >
       <div className="section-heading">
         <div>
-          <h2>Run anomaly analysis</h2>
+          <h3>Run anomaly analysis</h3>
           <p>Choose the dataset, mode, timeframe, and features to uncover outlier events.</p>
         </div>
       </div>
@@ -104,7 +104,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             ))}
           </select>
         </label>
-        <label className="field-group">
+        {/* <label className="field-group">
           <span>Mode</span>
           <select
             value={form.mode}
@@ -112,7 +112,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
           >
             <option value="Static">Static</option>
           </select>
-        </label>
+        </label> */}
         <label className="field-group">
           <span>Timeframe</span>
           <select

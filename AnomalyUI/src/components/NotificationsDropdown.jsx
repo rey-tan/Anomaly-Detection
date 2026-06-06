@@ -13,29 +13,29 @@ export default function NotificationsDropdown({ token, onOpenAll }) {
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
+  // loadNotifications is called on mount and when an external update is signaled
+  const loadNotifications = async () => {
+    if (!token) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await fetchNotifications(token);
+      setNotifications(data || []);
+    } catch (err) {
+      setError(err.message || "Failed to load notifications");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!token) return;
-    let active = true;
-
-    const loadNotifications = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const data = await fetchNotifications(token);
-        if (active) setNotifications(data || []);
-      } catch (err) {
-        if (active) setError(err.message || "Failed to load notifications");
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-
     loadNotifications();
-
-    return () => {
-      active = false;
+    // listen for external updates (e.g. another page marked a notification read)
+    const handler = () => {
+      loadNotifications();
     };
+    window.addEventListener("notificationsUpdated", handler);
+    return () => window.removeEventListener("notificationsUpdated", handler);
   }, [token]);
 
   useEffect(() => {
@@ -108,9 +108,7 @@ export default function NotificationsDropdown({ token, onOpenAll }) {
               <p className="eyebrow">Notifications</p>
               <h3>Recent alerts</h3>
             </div>
-            <button className="text-button" type="button" onClick={handleOpenAll}>
-              See all
-            </button>
+          
           </div>
 
           {error ? <div className="notification-popover-error">{error}</div> : null}
@@ -152,7 +150,7 @@ export default function NotificationsDropdown({ token, onOpenAll }) {
           ) : null}
 
           <button className="notification-popover-footer" type="button" onClick={handleOpenAll}>
-            View all notifications
+            View All Notifications
           </button>
         </div>
       ) : null}

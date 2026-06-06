@@ -62,10 +62,30 @@ export async function explainAnalysis(token, payload) {
 }
 
 export async function saveCache(token, config, results) {
+  // Convert new response format (with models) to old format for cache storage
+  let best_params = {};
+  let metrics = {};
+  
+  if (results.models) {
+    // New format: extract metrics and params from models
+    Object.entries(results.models).forEach(([modelName, modelResult]) => {
+      if (modelResult.metrics) metrics[modelName] = modelResult.metrics;
+      if (modelResult.params) {
+        // Map zscore back to z_score for consistency
+        const paramKey = modelName === 'zscore' ? 'z_score' : modelName;
+        best_params[paramKey] = modelResult.params;
+      }
+    });
+  } else {
+    // Old format: use directly
+    best_params = results.best_params || {};
+    metrics = results.metrics || {};
+  }
+  
   const body = {
     config,
-    best_params: results.best_params || {},
-    metrics: results.metrics || {},
+    best_params,
+    metrics,
     data: results.data || [],
   };
   const response = await fetch(`${BASE_URL}/cache`, {

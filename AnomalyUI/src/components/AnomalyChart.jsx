@@ -156,6 +156,8 @@ function TechnicalChart({ data }) {
   const sma10 = data.map((row) => row.SMA_10 ?? null);
   const sma20 = data.map((row) => row.SMA_20 ?? null);
   const sma50 = data.map((row) => row.SMA_50 ?? null);
+  const upperBB = data.map((row) => row.Upper_BB ?? null);
+  const lowerBB = data.map((row) => row.Lower_BB ?? null);
 
   const chartData = {
     labels,
@@ -164,6 +166,8 @@ function TechnicalChart({ data }) {
       { label: "SMA 10", data: sma10, borderColor: "#fcbf49", borderDash: [6, 4], pointRadius: 0, tension: 0.2 },
       { label: "SMA 20", data: sma20, borderColor: "#8be9fd", borderDash: [6, 4], pointRadius: 0, tension: 0.2 },
       { label: "SMA 50", data: sma50, borderColor: "#a855f7", borderDash: [10, 6], pointRadius: 0, tension: 0.2 },
+      { label: "Upper BB", data: upperBB, borderColor: "#f97316", borderDash: [4, 2], pointRadius: 0, tension: 0.2 },
+      { label: "Lower BB", data: lowerBB, borderColor: "#f97316", borderDash: [4, 2], pointRadius: 0, tension: 0.2 },
     ].filter((dataset) => dataset.data.some((value) => value !== null && value !== undefined)),
   };
 
@@ -376,6 +380,7 @@ function AnomalyOverlayChart({ data }) {
         dbscan: state.dbscan,
         isolationForest: state.isolationForest,
         index,
+        ifScore: row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? null,
       };
     })
     .filter(Boolean);
@@ -453,19 +458,21 @@ function AnomalyOverlayChart({ data }) {
           label: (context) => {
             const raw = context.raw || {};
             const value = raw.y != null ? Number(raw.y).toFixed(2) : "n/a";
-            const detector =
-              raw.dbscan === -1 && raw.isolationForest === -1
-                ? "IF + DBSCAN"
-                : raw.dbscan === -1
-                  ? "DBSCAN"
-                  : "Isolation Forest";
-            const zText = raw.z != null && Number.isFinite(raw.z) ? `${Number(raw.z).toFixed(2)} z-score` : "z-score unavailable";
-            return [
-              `${context.dataset.label}: Rs.${value}`,
-              `Reason: ${raw.reason || "Anomalous model signal"}`,
-              `Reference: ${zText}`,
-              `Detector: ${detector}`,
-            ];
+              const detector =
+                raw.dbscan === -1 && raw.isolationForest === -1
+                  ? "IF + DBSCAN"
+                  : raw.dbscan === -1
+                    ? "DBSCAN"
+                    : "Isolation Forest";
+              const zText = raw.z != null && Number.isFinite(raw.z) ? `${Number(raw.z).toFixed(2)} z-score` : "z-score unavailable";
+              const ifScoreText = raw.ifScore != null ? `IF score: ${Number(raw.ifScore).toFixed(3)}` : raw.ifScore === null ? "IF score: n/a" : "IF score: n/a";
+              return [
+                `${context.dataset.label}: Rs.${value}`,
+                `Reason: ${raw.reason || "Anomalous model signal"}`,
+                `Reference: ${zText}`,
+                `Detector: ${detector}`,
+                ifScoreText,
+              ];
           },
         },
       },
@@ -516,6 +523,7 @@ function AnomalyRowsReport({ data }) {
           : state.dbscan === -1
             ? "DBSCAN"
             : "Isolation Forest";
+      const ifScore = row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? "n/a";
 
       return {
         index: index + 1,
@@ -524,6 +532,7 @@ function AnomalyRowsReport({ data }) {
         z,
         sigmaText,
         detector,
+        ifScore: typeof ifScore === "number" ? ifScore.toFixed(3) : ifScore,
       };
     })
     .filter(Boolean);
@@ -548,7 +557,7 @@ function AnomalyRowsReport({ data }) {
                 <th>Time</th>
                 <th>Close</th>
                 <th>Z-Score</th>
-                <th>Why anomalous</th>
+                <th>IF Score</th>
                 <th>Detector</th>
               </tr>
             </thead>
@@ -558,8 +567,8 @@ function AnomalyRowsReport({ data }) {
                   <td>{row.index}</td>
                   <td>{row.time || "—"}</td>
                   <td>{row.close.toFixed(2)}</td>
-                  <td>{row.z == null ? "n/a" : row.z.toFixed(2)}</td>
-                  <td>{row.sigmaText}</td>
+                  <td>{row.z == null ? "n/a" : Number(row.z).toFixed(2)}</td>
+                  <td>{row.ifScore}</td>
                   <td>{row.detector}</td>
                 </tr>
               ))}

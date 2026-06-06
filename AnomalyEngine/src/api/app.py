@@ -73,6 +73,19 @@ def convert_numpy_types(obj):
         return obj
 
 
+def format_analyze_response(metrics: Dict[str, Any], data: List[Dict[str, Any]], best_params: Dict[str, Any]) -> Dict[str, Any]:
+    """Format analysis response by embedding params with their corresponding metrics."""
+    models = {}
+    for model_name, model_metrics in metrics.items():
+        # Handle both 'zscore' and 'z_score' keys for consistency
+        param_key = model_name if model_name in best_params else ('z_score' if model_name == 'zscore' else model_name)
+        models[model_name] = {
+            "metrics": model_metrics,
+            "params": best_params.get(param_key, {}),
+        }
+    return {"data": data, "models": models}
+
+
 
 
 
@@ -303,11 +316,11 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
                 "cache_hit": True,
             },
         )
-        return {
-            "metrics": cache_entry.metrics or {},
-            "data": cache_entry.data or [],
-            "best_params": cache_entry.best_params or {},
-        }
+        return format_analyze_response(
+            cache_entry.metrics or {},
+            cache_entry.data or [],
+            cache_entry.best_params or {},
+        )
 
     hyperparams_file = HYPERPARAMS / f"{config['stock']}.json"
     if not hyperparams_file.exists():
@@ -429,7 +442,7 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         type="analysis",
     )
 
-    return {"metrics": metrics, "data": data, "best_params": best_params}
+    return format_analyze_response(metrics, data, best_params)
 
 
 @app.post("/analyze/explain", response_model=schemas.AnomalyExplanationResponse)
@@ -463,11 +476,11 @@ def get_cache(config_hash: str, db: Session = Depends(database.get_db), current_
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Cache entry not found",
         )
-    return {
-        "metrics": cache_entry.metrics or {},
-        "data": cache_entry.data or [],
-        "best_params": cache_entry.best_params or {},
-    }
+    return format_analyze_response(
+        cache_entry.metrics or {},
+        cache_entry.data or [],
+        cache_entry.best_params or {},
+    )
 
 
 @app.post("/cache", response_model=schemas.AnalyzeResponse)
@@ -488,11 +501,11 @@ def save_cache(request: schemas.CacheCreate, db: Session = Depends(database.get_
         data=request.data,
     )
     crud.log_user_activity(db, current_user.id, "cache_save", resource=config["stock"], details={"config_hash": config_hash})
-    return {
-        "metrics": entry.metrics or {},
-        "data": entry.data or [],
-        "best_params": entry.best_params or {},
-    }
+    return format_analyze_response(
+        entry.metrics or {},
+        entry.data or [],
+        entry.best_params or {},
+    )
 
 
 @app.get("/users", response_model=List[schemas.UserRead], dependencies=[Depends(require_role(["admin"]))])
@@ -682,7 +695,14 @@ def get_analysis_data(
     artifact = read_result_artifact(str(path))
     if artifact is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Artifact file not found")
-    return convert_numpy_types(artifact)
+    
+    artifact = convert_numpy_types(artifact)
+    # Format the artifact response with params embedded in models
+    return format_analyze_response(
+        artifact.get("metrics", {}),
+        artifact.get("data", []),
+        artifact.get("best_params", {}),
+    )
 
 
 @app.post("/me/analyses/{analysis_id}/favorite", response_model=schemas.UserAnalysisRead)

@@ -45,7 +45,14 @@ export default function ActivityPage({ token, initialUserId }) {
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [expanded, setExpanded] = useState({});
+    const [expandedDetails, setExpandedDetails] = useState({});
+
+    const toggleDetails = (activityId) => {
+        setExpandedDetails((prev) => ({
+            ...prev,
+            [activityId]: !prev[activityId],
+        }));
+    };
 
     useEffect(() => {
         if (!token) return;
@@ -157,40 +164,49 @@ export default function ActivityPage({ token, initialUserId }) {
                                                 <>
                                                     <div className="activity-card-title">{a.action} <span className="activity-card-resource">on {summary.stock}</span></div>
                                                     <div className="activity-card-tags">
-                                                        {summary.mode && <span className="activity-tag activity-tag-mode">{summary.mode}</span>}
                                                         {summary.timeframe && <span className="activity-tag activity-tag-timeframe">{summary.timeframe}</span>}
                                                         {summary.period && <span className="activity-tag activity-tag-period">{summary.period}</span>}
                                                     </div>
-                                                    <div className="activity-card-date">{formatDateTime(a.created_at)}</div>
-                                                    {summary.features ? <div className="activity-card-features">Features: {summary.features}</div> : null}
                                                 </>
                                             );
                                         })()}
-                                        <div className="activity-card-details">
+                                        <div className="activity-card-actions">
                                             {a.details && typeof a.details === 'object' ? (
-                                                <div className="activity-details-grid">
+                                                <button
+                                                    type="button"
+                                                    className="text-button activity-toggle-button"
+                                                    onClick={() => toggleDetails(a.id)}
+                                                >
+                                                    {expandedDetails[a.id] ? 'Hide details' : 'Show details'}
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                        {
+                                            expandedDetails[a.id] && 
+                                            <div className={`hidden-details ${expandedDetails[a.id] ? 'visible' : ''}`}>
+                                            {expandedDetails[a.id] && a.details && typeof a.details === 'object' ? (
+                                                <div className="activity-card-details">
+                                                    <div className="activity-detail-row">
+                                                        <div className="activity-detail-label">Time:</div>
+                                                        <div className="activity-detail-value">{formatDateTime(a.created_at)}</div>
+                                                    </div>
                                                     {Object.entries(a.details).map(([k, v]) => (
                                                         <div key={k} className="activity-detail-row">
-                                                            <div className="activity-detail-label">{k.replace(/_/g, ' ')}</div>
+                                                            <div className="activity-detail-label">{k.replace(/_/g, ' ')}:  </div>
                                                             <div className="activity-detail-value">{renderDetailValue(v)}</div>
                                                         </div>
                                                     ))}
                                                 </div>
-                                            ) : (
-                                                <div className="activity-card-raw-details">{a.details || ''}</div>
-                                            )}
+                                            ) : null}
                                         </div>
+                                        }
+
+
                                     </div>
                                     <div className="activity-card-side">
                                         <div className="activity-card-user">{a.username || (a.user_id ? `User ${a.user_id}` : 'Unknown user')}</div>
-                                        <button className="text-button activity-card-toggle" onClick={() => setExpanded((s) => ({ ...s, [a.id]: !s[a.id] }))} type="button">{expanded[a.id] ? 'Hide' : 'Show'} details</button>
                                     </div>
                                 </div>
-                                {expanded[a.id] ? (
-                                    <div className="activity-card-expanded">
-                                        <pre>{a.details ? JSON.stringify(a.details, null, 2) : ''}</pre>
-                                    </div>
-                                ) : null}
                             </div>
                         ));
                     })()}

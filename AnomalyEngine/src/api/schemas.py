@@ -121,9 +121,17 @@ class AnomalyExplanationRequest(BaseModel):
     data: List[Dict[str, Any]]
 
 
+class AnomalyExplanationEntry(BaseModel):
+    row_number: int
+    date: Optional[str] = None
+    bullets: List[str]
+    summary: Optional[str] = None
+
+
 class AnomalyExplanationResponse(BaseModel):
     summary: str
     highlights: List[str]
+    entries: Optional[List[AnomalyExplanationEntry]] = None
     anomaly_count: int
     source: str
 

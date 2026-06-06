@@ -59,10 +59,15 @@ class PipelineResult:
 
 class AnomalyDetectorService:
     def predict(self, X: np.ndarray, df: pd.DataFrame, best_params: dict[str, Any]) -> dict[str, np.ndarray]:
+        db_labels = self._predict_dbscan(X, best_params.get("dbscan", {}))
+        if_labels, if_scores = self._predict_isolation_forest(X, best_params.get("isolation_forest", {}))
+        z_labels = self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 2.0))
+
         return {
-            "dbscan": self._predict_dbscan(X, best_params.get("dbscan", {})),
-            "isolation_forest": self._predict_isolation_forest(X, best_params.get("isolation_forest", {})),
-            "zscore": self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 2.0)),
+            "dbscan": db_labels,
+            "isolation_forest": if_labels,
+            "isolation_forest_score": if_scores,
+            "zscore": z_labels,
         }
 
     def _predict_dbscan(self, X: np.ndarray, params: dict[str, Any]) -> np.ndarray:
@@ -74,7 +79,13 @@ class AnomalyDetectorService:
             n_trees=params.get("n_estimators", 100),
             contamination=params.get("contamination", 0.01),
         )
-        return model.fit_predict(X)
+        labels = model.fit_predict(X)
+        # compute anomaly scores per sample (higher = more anomalous)
+        try:
+            scores = model.anomaly_score(X)
+        except Exception:
+            scores = None
+        return labels, scores
 
     def _predict_zscore(self, df: pd.DataFrame, threshold: float) -> np.ndarray:
         if "returns" not in df.columns:
@@ -137,6 +148,29 @@ class BaseAnalysisPipeline(ABC):
         result_df["cluster_isolation_forest"] = label_sets["isolation_forest"]
         result_df["cluster_zscore"] = label_sets["zscore"]
         result_df["cluster"] = label_sets["dbscan"]
+        # attach isolation forest anomaly scores if available
+        if "isolation_forest_score" in label_sets and label_sets["isolation_forest_score"] is not None:
+            try:
+                result_df["Anomaly_Score_IF"] = label_sets["isolation_forest_score"]
+                result_df["IF_Anomaly_Score"] = label_sets["isolation_forest_score"]
+            except Exception:
+                pass
+
+        # attach z-score numeric values for downstream visualization
+        try:
+            if "returns" not in result_df.columns:
+                if "close" not in result_df.columns:
+                    series = pd.Series([0] * len(result_df), index=result_df.index)
+                else:
+                    series = result_df["close"].ffill().fillna(0)
+            else:
+                series = result_df["returns"].fillna(0)
+
+            result_df["Anomaly_Z_Score"] = zscore(series)
+        except Exception:
+            # if anything fails, leave column absent
+            pass
+
         return result_df
 
     @abstractmethod

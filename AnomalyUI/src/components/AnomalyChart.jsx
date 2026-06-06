@@ -51,7 +51,7 @@ function getAnomalyZScore(row, value, mean, stdDev) {
   return (value - mean) / stdDev;
 }
 
-function chartOptions(yCallback) {
+function chartOptions(yCallback, xLabels = []) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -71,7 +71,22 @@ function chartOptions(yCallback) {
     },
     scales: {
       x: {
-        ticks: { color: "#cbd5e1", maxRotation: 0, autoSkip: true, maxTicksLimit: 10, display: false },
+        title: { display: true, text: "Date", color: "#cbd5e1" },
+        ticks: {
+          color: "#cbd5e1",
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: 8,
+          display: true,
+          callback: (value) => {
+            const index = Number(value);
+            if (index >= 0 && index < xLabels.length) {
+              const label = String(xLabels[index]);
+              return label.split("T")[0];
+            }
+            return value;
+          },
+        },
         grid: { display: false },
       },
       y: {
@@ -163,7 +178,7 @@ function TechnicalChart({ data }) {
       frameRef={frameRef}
     >
       <div className="chart-inner">
-        <Line data={chartData} options={chartOptions((value) => `Rs.${value}`)} />
+        <Line data={chartData} options={chartOptions((value) => `Rs.${value}`, labels)} />
       </div>
     </ChartShell>
   );
@@ -425,9 +440,9 @@ function AnomalyOverlayChart({ data }) {
   };
 
   const options = {
-    ...chartOptions((value) => `Rs.${value}`),
+    ...chartOptions((value) => `Rs.${value}`, labels),
     plugins: {
-      ...chartOptions(() => "").plugins,
+      ...chartOptions(() => "", labels).plugins,
       tooltip: {
         backgroundColor: "rgba(15, 23, 42, 0.96)",
         titleColor: "#f8fafc",

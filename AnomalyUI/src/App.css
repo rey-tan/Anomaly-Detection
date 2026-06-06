@@ -1078,6 +1078,49 @@ h3 {
   margin-top: 8px;
 }
 
+.results-ai-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.results-ai-card-item {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.results-ai-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.results-ai-card-label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.results-ai-card-bullets {
+  margin: 0;
+  padding-left: 18px;
+  color: #cbd5e1;
+  line-height: 1.7;
+}
+
+.results-ai-card-bullets li {
+  margin-bottom: 8px;
+}
+
+.results-ai-card-summary {
+  margin-top: 12px;
+  color: #e2e8f0;
+  line-height: 1.7;
+}
+
 .results-ai-highlights {
   margin-top: 12px;
   display: grid;

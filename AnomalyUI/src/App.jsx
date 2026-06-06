@@ -143,6 +143,37 @@ function ResultStats({ data = [] }) {
   );
 }
 
+function parseAiExplanationEntries(summary) {
+  if (!summary) return [];
+  const rowPattern = /^\*\*Row\s+(\d+):\s*([^*]+)\*\*/gm;
+  const matches = Array.from(summary.matchAll(rowPattern));
+  if (!matches.length) return [];
+
+  return matches.map((match, index) => {
+    const rowNumber = Number(match[1]);
+    const date = match[2].trim();
+    const start = match.index + match[0].length;
+    const end = index + 1 < matches.length ? matches[index + 1].index : summary.length;
+    const block = summary.slice(start, end).trim();
+    const trimmed = block.split("**Overall Summary:**")[0].trim();
+    const parts = trimmed.split("**Summary:**");
+    const bulletsText = parts[0].trim();
+    const rowSummary = parts[1] ? parts[1].trim() : "";
+    const bullets = bulletsText
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("-") || line.startsWith("*"))
+      .map((line) => line.replace(/^[-*]\s*/, ""));
+
+    return {
+      rowNumber,
+      date,
+      bullets,
+      summary: rowSummary,
+    };
+  });
+}
+
 function NavButton({ item, active, onClick, badge }) {
   return (
     <button className={active ? "nav-item active" : "nav-item"} onClick={onClick} type="button">
@@ -254,6 +285,20 @@ function App() {
       setError(err.message || "Could not open the latest analysis");
     }
   };
+
+  const aiExplanationEntries = useMemo(() => {
+    if (!aiExplanation) return [];
+    if (Array.isArray(aiExplanation.entries) && aiExplanation.entries.length) {
+      // Normalize entries from API (convert snake_case to camelCase)
+      return aiExplanation.entries.map((entry) => ({
+        rowNumber: entry.row_number || entry.rowNumber,
+        date: entry.date,
+        bullets: entry.bullets || [],
+        summary: entry.summary,
+      }));
+    }
+    return parseAiExplanationEntries(aiExplanation.summary || "");
+  }, [aiExplanation]);
 
   const anomalyCount = useMemo(() => results?.data?.filter((item) => item.cluster === -1).length || 0, [results]);
   const activeMetricCount = useMemo(() => Object.keys(results?.metrics || {}).length, [results]);
@@ -515,7 +560,26 @@ function App() {
                       </div>
                       <div className="results-ai-source">Source: {aiExplanation.source}</div>
                     </div>
-                    <p className="results-ai-summary">{aiExplanation.summary}</p>
+                    {aiExplanationEntries.length ? (
+                      <div className="results-ai-grid">
+                        {aiExplanationEntries.map((entry) => (
+                          <article key={`${entry.date}-${entry.rowNumber}`} className="results-ai-card-item">
+                            <div className="results-ai-card-header">
+                              <span className="results-ai-card-label">{entry.date}</span>
+                              <strong>{`Row ${entry.rowNumber}`}</strong>
+                            </div>
+                            <ul className="results-ai-card-bullets">
+                              {entry.bullets.map((bullet, bulletIndex) => (
+                                <li key={bulletIndex}>{bullet}</li>
+                              ))}
+                            </ul>
+                            {entry.summary ? <p className="results-ai-card-summary">{entry.summary}</p> : null}
+                          </article>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="results-ai-summary">{aiExplanation.summary}</p>
+                    )}
                     {Array.isArray(aiExplanation.highlights) && aiExplanation.highlights.length ? (
                       <div className="results-ai-highlights">
                         {aiExplanation.highlights.map((item, index) => (

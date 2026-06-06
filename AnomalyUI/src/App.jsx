@@ -48,7 +48,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [results, setResults] = useState(null);
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
-  const [lastConfig, setLastConfig] = useState(null);
   const [activityUser, setActivityUser] = useState(null);
   const [aiExplanation, setAiExplanation] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -70,20 +69,20 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    if (!token || lastConfig) return;
+    if (!token || selectedAnalysis) return;
 
     let active = true;
     fetchAnalyses(token)
       .then((analyses) => {
         if (!active || !analyses?.length) return;
-        setLastConfig(analyses[0]);
+        setSelectedAnalysis(analyses[0]);
       })
       .catch(() => {});
 
     return () => {
       active = false;
     };
-  }, [token, lastConfig]);
+  }, [token, selectedAnalysis]);
 
   const handleLogin = async (accessToken) => {
     localStorage.setItem(STORAGE_KEY, accessToken);
@@ -101,7 +100,7 @@ function App() {
     setToken("");
     setUser(null);
     setResults(null);
-    setLastConfig(null);
+    setSelectedAnalysis(null);
     setAiExplanation(null);
     setAiLoading(false);
     setAiError("");
@@ -114,9 +113,23 @@ function App() {
     try {
       const response = await analyze(token, payload);
       setResults(response);
-      setLastConfig(payload);
+      let selected = payload;
+      try {
+        const analyses = await fetchAnalyses(token);
+        if (analyses?.length) {
+          selected = analyses[0];
+        }
+      } catch (err) {
+        // If the history lookup fails, keep using the request payload as a fallback.
+      }
+      setSelectedAnalysis(selected);
       setAiExplanation(null);
       setAiError("");
+      try {
+        window.dispatchEvent(new CustomEvent('notificationsUpdated'));
+      } catch (e) {
+        // ignore if browser does not support CustomEvent in this environment
+      }
       navigate('/results');
     } catch (err) {
       setError(err.message || "Analysis failed");
@@ -131,7 +144,6 @@ function App() {
       if (payload && analysis) {
         setResults(payload);
         setSelectedAnalysis(analysis);
-        setLastConfig(analysis);
         setAiExplanation(null);
         setAiError("");
         navigate('/results');
@@ -149,7 +161,6 @@ function App() {
       const latestPayload = await fetchAnalysisData(token, latest.id);
       setResults(latestPayload);
       setSelectedAnalysis(latest);
-      setLastConfig(latest);
       setAiExplanation(null);
       setAiError("");
       navigate('/results');
@@ -220,11 +231,11 @@ function App() {
       const selectedAnalysisParams = extractMetricsAndParams(selectedAnalysis);
       
       const payload = {
-        stock: lastConfig?.stock || selectedAnalysis?.stock || "",
-        mode: lastConfig?.mode || selectedAnalysis?.mode || "",
-        timeframe: lastConfig?.timeframe || selectedAnalysis?.timeframe || "",
-        start_date: lastConfig?.start_date || selectedAnalysis?.start_date || "",
-        end_date: lastConfig?.end_date || selectedAnalysis?.end_date || "",
+        stock: selectedAnalysis?.stock || "",
+        mode: selectedAnalysis?.mode || "",
+        timeframe: selectedAnalysis?.timeframe || "",
+        start_date: selectedAnalysis?.start_date || "",
+        end_date: selectedAnalysis?.end_date || "",
         metrics: metrics,
         best_params: bestParams || selectedAnalysisParams.bestParams || {},
         data: contextualRows,
@@ -256,7 +267,6 @@ function App() {
       handleAnalyze={handleAnalyze}
       loading={loading}
       error={error}
-      lastConfig={lastConfig}
       onLogout={handleLogout}
       onOpenNotifications={() => navigate('/notifications')}
       setActivityUser={setActivityUser}

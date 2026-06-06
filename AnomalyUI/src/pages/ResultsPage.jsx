@@ -44,7 +44,7 @@ export default function ResultsPage({
     <section className="page-split results-layout">
       <div className="page-panel">
         <div className="page-intro">
-          <p className="eyebrow">Results page</p>
+          <p className="eyebrow">Results</p>
           <h2>Inspect the latest analysis outputs</h2>
           <p>Chart, metrics, and tuned parameters:</p>
 

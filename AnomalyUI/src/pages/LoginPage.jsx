@@ -48,6 +48,7 @@ export default function LoginPage({ onSuccess }) {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               autoComplete="username"
+              placeholder="Username or email"
               required
             />
           </label>
@@ -65,6 +66,9 @@ export default function LoginPage({ onSuccess }) {
             {loading ? "Authenticating…" : "Sign in"}
           </button>
           {error ? <div className="form-error">{error}</div> : null}
+          <p className="auth-footer">
+            Don't have an account? <a href="/register">Create one</a>
+          </p>
         </form>
       </div>
     </main>

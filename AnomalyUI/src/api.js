@@ -31,6 +31,28 @@ export async function login(username, password) {
   return unwrapResponse(response);
 }
 
+export async function register(username, email, password) {
+  return registerRequest(username, email, password);
+}
+
+export async function registerRequest(username, email, password) {
+  const response = await fetch(`${BASE_URL}/register/request`, {
+    method: "POST",
+    headers: buildHeaders(),
+    body: JSON.stringify({ username, email, password, role: "analyst" }),
+  });
+  return unwrapResponse(response);
+}
+
+export async function verifyOTP(email, otp_code) {
+  const response = await fetch(`${BASE_URL}/register/verify`, {
+    method: "POST",
+    headers: buildHeaders(),
+    body: JSON.stringify({ email, otp_code }),
+  });
+  return unwrapResponse(response);
+}
+
 export async function fetchProfile(token) {
   const response = await fetch(`${BASE_URL}/me`, {
     headers: buildHeaders(token),

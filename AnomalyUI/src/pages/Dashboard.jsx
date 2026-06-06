@@ -2,17 +2,17 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import FavoritesPanel from '../components/FavoritesPanel'
 
-export default function DashboardPage({ user, lastConfig, results, onOpenLastRun }) {
+export default function DashboardPage({ user, selectedAnalysis, results, onOpenLastRun }) {
   const navigate = useNavigate();
-  const lastAnalysis = lastConfig?.config || lastConfig || {};
-  const stock = lastAnalysis?.stock || lastAnalysis?.symbol;
+  const lastAnalysis = selectedAnalysis || {};
+  const stock = lastAnalysis?.stock ;
   const timeframe = lastAnalysis?.timeframe;
-  const startDate = lastAnalysis?.start_date || lastAnalysis?.startDate;
-  const endDate = lastAnalysis?.end_date || lastAnalysis?.endDate;
+  const startDate = lastAnalysis?.start_date;
+  const endDate = lastAnalysis?.end_date;
   const mode = lastAnalysis?.mode;
   const featureCount = lastAnalysis?.features?.length || 0;
-  const anomalyCount = results?.data?.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length || 0;
-  const activeMetricCount = Object.keys(results?.models || {}).length;
+  const anomalyCount = results?.data ? results.data.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length : lastAnalysis?.anomaly_count??0;
+  const activeMetricCount = results?.models ? Object.keys(results?.models || {}).length - 1 : (lastAnalysis?.metrics? Object.keys(lastAnalysis.metrics).length-1 : 0);
   const isAdmin = user?.role === 'admin';
   return (
     <>
@@ -20,7 +20,7 @@ export default function DashboardPage({ user, lastConfig, results, onOpenLastRun
         <div>
           <p className="eyebrow">Live insights</p>
           <h2>Overview of the current anomaly workspace</h2>
-          <p>Track model health, see the last analyzed symbol, and move into a dedicated page for the next task.</p>
+          <div>Track model health, see the last analyzed symbol, and move into a dedicated page for the next task.</div>
         </div>
         <div className="hero-footer">
           <span>{user?.role ? `Role: ${user.role}` : "Analyst dashboard"}</span>
@@ -30,7 +30,7 @@ export default function DashboardPage({ user, lastConfig, results, onOpenLastRun
 
       <section className="stats-grid">
         <article className="stat-card"><span>Current page</span><h3>Dashboard</h3><p>Use the sidebar to switch to analysis, results, or admin pages.</p></article>
-        <article className="stat-card"><span>Latest symbol</span><h3>{lastConfig?.stock || '—'}</h3><p>Most recent analysis target.</p></article>
+        <article className="stat-card"><span>Latest symbol</span><h3>{stock || '—'}</h3><p>Most recent analysis target.</p></article>
         <article className="stat-card"><span>Flagged anomalies</span><h3>{anomalyCount}</h3><p>Count from the latest result set.</p></article>
         <article className="stat-card"><span>Metrics groups</span><h3>{activeMetricCount}</h3><p>How many models are currently summarized.</p></article>
       </section>

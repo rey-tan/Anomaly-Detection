@@ -591,7 +591,7 @@ function AnomalyRowsReport({ data }) {
 
 export default function AnomalyChart({ data = [] }) {
   return (
-    <div className="chart-stack">
+    <>
       <TechnicalChart data={data} />
       <DensityChart data={data} />
       <AnomalyOverlayChart data={data} />
@@ -599,6 +599,6 @@ export default function AnomalyChart({ data = [] }) {
       <div className="chart-card-footer">
         <p>The views are ordered for interpretation: technical baseline, density distribution, explainable anomalies, and anomalous rows.</p>
       </div>
-    </div>
+    </>
   );
 }

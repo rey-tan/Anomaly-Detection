@@ -9,8 +9,8 @@ const NAV_ITEMS = [
   { id: 'analysis', path: '/analysis', label: 'Analysis', description: 'Run model' },
   { id: 'activity', path: '/activity', label: 'Activity', description: 'Audit log' },
   { id: 'results', path: '/results', label: 'Results', description: 'Charts & metrics' },
-  { id: 'data', path: '/data', label: 'Data', description: 'Admin only' },
-  { id: 'users', path: '/users', label: 'Users', description: 'Admin only' },
+  { id: 'data', path: '/data', label: 'Data', description: 'Data management' },
+  { id: 'users', path: '/users', label: 'Users', description: 'User management' },
 ]
 
 export default function MainLayout({
@@ -20,7 +20,6 @@ export default function MainLayout({
   selectedAnalysis,
   setResults,
   setSelectedAnalysis,
-  lastConfig,
   onLogout,
   onOpenNotifications,
   handleOpenLastRun,
@@ -28,7 +27,7 @@ export default function MainLayout({
 }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const latestRun = lastConfig?.config || lastConfig || {}
+  const latestRun = selectedAnalysis || {}
   const latestStock = latestRun?.stock || latestRun?.symbol
   const latestTimeframe = latestRun?.timeframe
   const latestStart = latestRun?.start_date || latestRun?.startDate
@@ -37,7 +36,7 @@ export default function MainLayout({
   const latestWindow = latestStart && latestEnd ? `${latestStart} – ${latestEnd}` : null
 
   const navItems = NAV_ITEMS.filter(
-    (item) => item.id === 'dashboard' || item.id === 'analysis' || item.id === 'results' || item.id === 'activity' || user?.role === 'admin'
+    (item) => item.id === 'dashboard' || item.id === 'analysis' || item.id === 'results' || user?.role === 'admin'
   )
 
   return (
@@ -88,16 +87,18 @@ export default function MainLayout({
             className="side-rail-card side-rail-footer side-rail-action"
             type="button"
             onClick={handleOpenLastRun}
-            disabled={!lastConfig}
+            disabled={!selectedAnalysis}
             aria-label="Open the latest saved analysis"
           >
             <span>Last analysis</span>
             <h3>{latestStock || 'No analysis yet'}</h3>
+            { latestRun ?
             <p className="mt-5">
-              {latestRun
-                ? `${latestTimeframe} • ${latestWindow}`
-                : 'Run an analysis to populate charts and metrics.'}
-            </p>
+                <div>{latestTimeframe}</div> • <div>{latestWindow}</div>
+            </p> 
+            : 
+            <p className="mt-5">Run an analysis to see details here</p>
+          }
           </button>
         </aside>
 

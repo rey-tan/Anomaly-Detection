@@ -9,6 +9,7 @@ import NotificationsPage from '../pages/NotificationsPage'
 import DataPage from '../pages/DataPage'
 import ActivityPage from '../pages/ActivityPage'
 import LoginPage from '../pages/LoginPage'
+import RegisterPage from '../pages/RegisterPage'
 
 export default function AppRoutes(props) {
   const navigate = useNavigate();
@@ -29,7 +30,6 @@ export default function AppRoutes(props) {
     handleAnalyze,
     loading,
     error,
-    lastConfig,
     onLogout,
     onOpenNotifications,
     setActivityUser,
@@ -43,6 +43,10 @@ export default function AppRoutes(props) {
         element={token ? <Navigate to="/dashboard" replace /> : <LoginPage onSuccess={handleLogin} />}
       />
       <Route
+        path="/register"
+        element={token ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+      />
+      <Route
         path="/"
         element={token ? (
           <MainLayout
@@ -52,7 +56,6 @@ export default function AppRoutes(props) {
             selectedAnalysis={selectedAnalysis}
             setResults={setResults}
             setSelectedAnalysis={setSelectedAnalysis}
-            lastConfig={lastConfig}
             onLogout={onLogout}
             onOpenNotifications={onOpenNotifications}
             handleOpenLastRun={handleOpenLastRun}
@@ -62,10 +65,19 @@ export default function AppRoutes(props) {
         )}
       >
         <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage user={user} lastConfig={lastConfig} results={results} onOpenLastRun={handleOpenLastRun} />} />
+        <Route path="dashboard" element={<DashboardPage user={user} selectedAnalysis={selectedAnalysis} results={results} onOpenLastRun={handleOpenLastRun} />} />
         <Route path="analysis" element={<AnalysisPage onSubmit={handleAnalyze} loading={loading} error={error} />} />
         <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} aiExplanation={aiExplanation} aiExplanationMarkdown={aiExplanationMarkdown} aiError={aiError} aiLoading={aiLoading} handleExplainWithAI={handleExplainWithAI} navigate={navigate} />} />
-        <Route path="activity" element={<ActivityPage token={token} initialUserId={activityUser} />} />
+        <Route path="activity" element={
+          user?.role === 'admin' ? (
+            <ActivityPage token={token} initialUserId={activityUser} />
+          ) : (
+            <section className="empty-state-card">
+              <h2>Admin access required</h2>
+              <p>Only admin users can open the activity page.</p>
+            </section>
+          )
+        } />
         <Route
           path="users"
           element={

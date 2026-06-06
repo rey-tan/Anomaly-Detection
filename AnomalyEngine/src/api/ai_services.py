@@ -124,6 +124,8 @@ def build_search_context(stock: str, anomaly_rows: List[Dict[str, Any]]) -> str:
     
     return "\n".join(search_context_parts) if len(search_context_parts) > 1 else ""
 
+
+def build_ai_prompt(payload: schemas.AnomalyExplanationRequest, search_context: str = "") -> str:
     """Build a detailed prompt for AI model to explain anomalies."""
     anomaly_rows = payload.data or []
     compact_rows = anomaly_rows[:15]

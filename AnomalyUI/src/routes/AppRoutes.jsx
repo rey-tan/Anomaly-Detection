@@ -20,7 +20,7 @@ export default function AppRoutes(props) {
     setResults,
     setSelectedAnalysis,
     aiExplanation,
-    aiExplanationEntries,
+    aiExplanationMarkdown,
     aiError,
     aiLoading,
     handleExplainWithAI,
@@ -64,7 +64,7 @@ export default function AppRoutes(props) {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage user={user} lastConfig={lastConfig} results={results} onOpenLastRun={handleOpenLastRun} />} />
         <Route path="analysis" element={<AnalysisPage onSubmit={handleAnalyze} loading={loading} error={error} />} />
-        <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} aiExplanation={aiExplanation} aiExplanationEntries={aiExplanationEntries} aiError={aiError} aiLoading={aiLoading} handleExplainWithAI={handleExplainWithAI} navigate={navigate} />} />
+        <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} aiExplanation={aiExplanation} aiExplanationMarkdown={aiExplanationMarkdown} aiError={aiError} aiLoading={aiLoading} handleExplainWithAI={handleExplainWithAI} navigate={navigate} />} />
         <Route path="activity" element={<ActivityPage token={token} initialUserId={activityUser} />} />
         <Route
           path="users"

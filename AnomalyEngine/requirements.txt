@@ -28,3 +28,7 @@ plotly>=5.0.0
 # Development (optional)
 jupyterlab>=4.3.5
 flask==3.1.0
+alembic>=1.11.1
+pytest>=7.4.0
+pytest-asyncio>=0.22.0
+httpx>=0.24.0

@@ -131,6 +131,12 @@ The dashboard opens at `http://localhost:8501`
 - Users can mark important analyses as favorites via `POST /me/analyses/{id}/favorite` (body `{ "favorite": true }`).
 - The React frontend (`AnomalyUI`) includes an analysis history panel and a favorite toggle to quickly revisit or highlight notable runs.
 
+### Explanation artifacts & history (AI explanations)
+
+- AI-generated explanations are written to disk as immutable JSON artifacts under `artifacts/explanations/{user_id}`. Each artifact is serialized deterministically and hashed using SHA256. The backend stores a lightweight history record in the `explanations` table containing `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `user_id`, and `created_at`.
+- The UI surfaces only the history entries (summary/highlights). Full explanation content is retrieved from the artifact on-demand and is not stored in the DB to avoid bloating SQLite with large AI outputs.
+- For auditability, duplicate artifact detection can be performed by comparing `artifact_hash` values. Consider retention policies for artifact cleanup.
+
 ### Visualizations
 
 - Time series with anomaly markers

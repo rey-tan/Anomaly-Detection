@@ -525,6 +525,9 @@ function AnomalyRowsReport({ data }) {
             : "Isolation Forest";
       const ifScore = row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? "n/a";
 
+      const rsiVal = row.RSI ?? row.rsi ?? null;
+      const bbwVal = row.bb_width ?? row.BB_width ?? row.bbWidth ?? null;
+
       return {
         index: index + 1,
         time: getLabel(row),
@@ -533,6 +536,8 @@ function AnomalyRowsReport({ data }) {
         sigmaText,
         detector,
         ifScore: typeof ifScore === "number" ? ifScore.toFixed(3) : ifScore,
+        rsi: rsiVal != null && Number.isFinite(Number(rsiVal)) ? Number(rsiVal) : null,
+        bbWidth: bbwVal != null && Number.isFinite(Number(bbwVal)) ? Number(bbwVal) : null,
       };
     })
     .filter(Boolean);
@@ -557,6 +562,8 @@ function AnomalyRowsReport({ data }) {
                 <th>Time</th>
                 <th>Close</th>
                 <th>Z-Score</th>
+                <th>RSI</th>
+                <th>BB width</th>
                 <th>IF Score</th>
                 <th>Detector</th>
               </tr>
@@ -568,6 +575,8 @@ function AnomalyRowsReport({ data }) {
                   <td>{row.time || "—"}</td>
                   <td>{row.close.toFixed(2)}</td>
                   <td>{row.z == null ? "n/a" : Number(row.z).toFixed(2)}</td>
+                  <td>{row.rsi == null ? '—' : Number(row.rsi).toFixed(2)}</td>
+                  <td>{row.bbWidth == null ? '—' : Number(row.bbWidth).toFixed(2)}</td>
                   <td>{row.ifScore}</td>
                   <td>{row.detector}</td>
                 </tr>

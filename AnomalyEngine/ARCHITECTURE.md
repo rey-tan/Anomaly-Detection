@@ -374,6 +374,20 @@ erDiagram
         json data
         datetime created_at
     }
+
+    User ||--o{ Explanation : "creates"
+    Explanation {
+        int id PK
+        int analysis_id FK
+        int user_id FK
+        string artifact_path
+        string artifact_hash
+        string summary
+        json highlights
+        int anomaly_count
+        json meta
+        datetime created_at
+    }
 ```
 
 ```
@@ -425,6 +439,18 @@ erDiagram
     │            │  │  Notifications)      │
     └────────────┘  └──────────────────────┘
 ```
+
+### Explanation Artifacts & History (June 2026)
+
+The system records AI-generated explanations as immutable JSON artifacts on disk and keeps a lightweight history entry in the database for auditing and user history. Key details:
+
+- Artifact location: `artifacts/explanations/{user_id}/explanation_<uuid>.json`
+- Artifact content: full request context + AI response (raw markdown, parsed entries, highlights)
+- Hashing: artifacts are serialized with stable JSON (`sort_keys=True`) and hashed with SHA256; the digest is stored in the DB as `artifact_hash` to support integrity checks and deduplication
+- DB history: `explanations` table (new) contains `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `user_id`, `created_at`, and optional `analysis_id` foreign key
+- UI behavior: UI surfaces only the history list (summary/highlights); full artifact content is retrieved from file on-demand and not persisted in the DB to avoid storing large AI outputs in SQLite
+
+Operational note: Keep an artifact retention policy to control disk usage (e.g., purge artifacts older than N days unless `is_favorite` or otherwise flagged).
 
 ## Security Considerations
 

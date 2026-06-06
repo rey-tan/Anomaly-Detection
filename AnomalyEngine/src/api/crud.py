@@ -263,6 +263,40 @@ def mark_notification_read(db: Session, notification_id: int):
     return notification
 
 
+def create_explanation(db: Session, user_id: int, explanation: Dict[str, Any], analysis_id: Optional[int] = None, metadata: Optional[Dict[str, Any]] = None, artifact_path: Optional[str] = None, artifact_hash: Optional[str] = None):
+    # Store only compact metadata and artifact reference to keep DB lightweight
+    entry = models.Explanation(
+        analysis_id=analysis_id,
+        user_id=user_id,
+        model=explanation.get("source") or explanation.get("model"),
+        model_version=explanation.get("model_version"),
+        artifact_path=artifact_path,
+        artifact_hash=artifact_hash,
+        summary=explanation.get("summary") or explanation.get("raw_summary"),
+        highlights=explanation.get("highlights"),
+        anomaly_count=explanation.get("anomaly_count"),
+        meta=metadata,
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return entry
+
+
+def get_explanations_by_analysis(db: Session, analysis_id: int, limit: Optional[int] = None):
+    query = db.query(models.Explanation).filter(models.Explanation.analysis_id == analysis_id).order_by(models.Explanation.created_at.desc())
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
+
+
+def get_explanations_by_user(db: Session, user_id: int, limit: Optional[int] = None):
+    query = db.query(models.Explanation).filter(models.Explanation.user_id == user_id).order_by(models.Explanation.created_at.desc())
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
+
+
 def get_config_hash(config: dict) -> str:
     normalized = json.dumps(config, sort_keys=True)
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()

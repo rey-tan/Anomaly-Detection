@@ -31,36 +31,6 @@ function extractMetricsAndParams(data) {
   };
 }
 
-function parseAiExplanationEntries(summary) {
-  if (!summary) return [];
-  const rowPattern = /^\*\*Row\s+(\d+):\s*([^*]+)\*\*/gm;
-  const matches = Array.from(summary.matchAll(rowPattern));
-  if (!matches.length) return [];
-
-  return matches.map((match, index) => {
-    const rowNumber = Number(match[1]);
-    const date = match[2].trim();
-    const start = match.index + match[0].length;
-    const end = index + 1 < matches.length ? matches[index + 1].index : summary.length;
-    const block = summary.slice(start, end).trim();
-    const trimmed = block.split("**Overall Summary:**")[0].trim();
-    const parts = trimmed.split("**Summary:**");
-    const bulletsText = parts[0].trim();
-    const rowSummary = parts[1] ? parts[1].trim() : "";
-    const bullets = bulletsText
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line.startsWith("-") || line.startsWith("*"))
-      .map((line) => line.replace(/^[-*]\s*/, ""));
-
-    return {
-      rowNumber,
-      date,
-      bullets,
-      summary: rowSummary,
-    };
-  });
-}
 
 function isAnomalyRow(row) {
   return (
@@ -188,18 +158,9 @@ function App() {
     }
   };
 
-  const aiExplanationEntries = useMemo(() => {
-    if (!aiExplanation) return [];
-    if (Array.isArray(aiExplanation.entries) && aiExplanation.entries.length) {
-      
-      return aiExplanation.entries.map((entry) => ({
-        rowNumber: entry.row_number || entry.rowNumber,
-        date: entry.date,
-        bullets: entry.bullets || [],
-        summary: entry.summary,
-      }));
-    }
-    return parseAiExplanationEntries(aiExplanation.summary || "");
+  const aiExplanationMarkdown = useMemo(() => {
+    if (!aiExplanation) return "";
+    return aiExplanation.raw_summary || aiExplanation.summary || "";
   }, [aiExplanation]);
 
   const anomalyRows = useMemo(
@@ -286,7 +247,7 @@ function App() {
       setResults={setResults}
       setSelectedAnalysis={setSelectedAnalysis}
       aiExplanation={aiExplanation}
-      aiExplanationEntries={aiExplanationEntries}
+      aiExplanationMarkdown={aiExplanationMarkdown}
       aiError={aiError}
       aiLoading={aiLoading}
       handleExplainWithAI={handleExplainWithAI}

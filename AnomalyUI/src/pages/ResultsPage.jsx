@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactMarkdown from 'react-markdown'
 import AnomalyChart from '../components/AnomalyChart'
 import MetricsGrid from '../components/MetricsGrid'
 import AnalysisHistory from '../components/AnalysisHistory'
@@ -12,7 +13,7 @@ export default function ResultsPage({
   setResults,
   setSelectedAnalysis,
   aiExplanation,
-  aiExplanationEntries,
+  aiExplanationMarkdown,
   aiError,
   aiLoading,
   handleExplainWithAI,
@@ -30,7 +31,13 @@ export default function ResultsPage({
     }
   };
 
-  const flaggedCount = (results?.data || []).filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length;
+  const dataRows = Array.isArray(results?.data) ? results.data : [];
+  const flaggedCount = dataRows.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length;
+
+  const rsiValues = dataRows.map((r) => r.RSI ?? r.rsi).filter((v) => Number.isFinite(Number(v))).map(Number);
+  const avgRsi = rsiValues.length ? rsiValues.reduce((a, b) => a + b, 0) / rsiValues.length : null;
+  const bbValues = dataRows.map((r) => r.bb_width ?? r.BB_width ?? r.bbWidth).filter((v) => Number.isFinite(Number(v))).map(Number);
+  const avgBb = bbValues.length ? bbValues.reduce((a, b) => a + b, 0) / bbValues.length : null;
 
 
   return (
@@ -53,6 +60,14 @@ export default function ResultsPage({
               <span>Anomalies flagged</span>
               <strong>{flaggedCount}</strong>
             </div>
+            <div className="summary-card">
+              <span>Avg RSI</span>
+              <strong>{avgRsi != null ? Number(avgRsi).toFixed(2) : '—'}</strong>
+            </div>
+            <div className="summary-card">
+              <span>Avg BB width</span>
+              <strong>{avgBb != null ? Number(avgBb).toFixed(2) : '—'}</strong>
+            </div>
           </div>
 
           : null}
@@ -66,7 +81,7 @@ export default function ResultsPage({
           <div className="ai-explanation-section">
             {results ? (
               <div className="results-ai-actions">
-                <button className="primary-button" type="button" onClick={handleExplainWithAI} disabled={aiLoading || !flaggedCount}>
+                <button className="primary-button ai-button" type="button" onClick={handleExplainWithAI} disabled={aiLoading || !flaggedCount}>
                   {aiLoading ? 'Analyzing with AI…' : 'Analyze with AI'}
                 </button>
                 <span className="results-ai-note">{flaggedCount ? `${flaggedCount} flagged points available for explanation` : 'No flagged points to explain'}</span>
@@ -81,28 +96,11 @@ export default function ResultsPage({
                     <h3>Why these points were flagged</h3>
                     <p>Generated from the latest analyzed result set.</p>
                   </div>
-                  <div className="results-ai-source">Source: {aiExplanation.source}</div>
+                  <div className="results-ai-source">Source: {aiExplanation?.source || 'AI'}</div>
                 </div>
-                {aiExplanationEntries.length ? (
-                  <div className="results-ai-grid">
-                    {aiExplanationEntries.map((entry) => (
-                      <article key={`${entry.date}-${entry.rowNumber}`} className="results-ai-card-item">
-                        <div className="results-ai-card-header">
-                          <span className="results-ai-card-label">{entry.date}</span>
-                          <strong>{`Row ${entry.rowNumber}`}</strong>
-                        </div>
-                        <ul className="results-ai-card-bullets">
-                          {entry.bullets.map((bullet, bulletIndex) => (
-                            <li key={bulletIndex}>{bullet}</li>
-                          ))}
-                        </ul>
-                        {entry.summary ? <p className="results-ai-card-summary">{entry.summary}</p> : null}
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="results-ai-summary">{aiExplanation.summary}</p>
-                )}
+                <div className="results-ai-markdown">
+                  <ReactMarkdown>{aiExplanationMarkdown}</ReactMarkdown>
+                </div>
               </section>
             ) : null}
           </div>

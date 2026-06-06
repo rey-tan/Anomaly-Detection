@@ -120,7 +120,7 @@ def build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
         "The rows below have already been flagged as anomalies by the detection system. "
         "Explain why each point is unusual using the provided feature values and detector labels. "
         "Mention relative price movement, volume behavior, z-score severity, and whether multiple detectors agree. "
-        "Do not invent facts or claim causal certainty. Use 3-6 short bullet points, then one concise summary paragraph.\n\n"
+        "Do not invent facts or claim causal certainty. Return only markdown. Use bold headings like **Row 1:**, bullet lists for each anomaly, and finish with a bold **Overall Summary:** section. Do not wrap the response in code fences.\n\n"
         f"Analysis context:\n{json.dumps(summary, ensure_ascii=False, indent=2, default=str)}\n\n"
         "Detection parameters:\n"
         f"{chr(10).join(params_lines)}\n\n"
@@ -131,8 +131,12 @@ def build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
 
 def extract_overall_summary(summary: str) -> str:
     """Extract the overall summary section from AI markdown response."""
-    overall_match = re.search(r"\*\*Overall Summary:\*\*\s*(.*)", summary, re.S)
-    return overall_match.group(1).strip() if overall_match else summary.strip()
+    overall_match = re.search(r"\*\*(?:Overall\s+)?Summary:\*\*\s*(.*)", summary, re.S)
+    if overall_match:
+        overall_text = overall_match.group(1).strip()
+        overall_text = re.split(r"^-{3,}$", overall_text, maxsplit=1, flags=re.MULTILINE)[0].strip()
+        return overall_text
+    return re.split(r"^-{3,}$", summary, maxsplit=1, flags=re.MULTILINE)[0].strip()
 
 
 def parse_ai_explanation_entries(summary: str) -> List[Dict[str, Any]]:
@@ -140,7 +144,7 @@ def parse_ai_explanation_entries(summary: str) -> List[Dict[str, Any]]:
     if not summary:
         return []
 
-    row_pattern = re.compile(r"^\*\*Row\s+(\d+):\s*([^*]+)\*\*", re.MULTILINE)
+    row_pattern = re.compile(r"^\*\*Row\s+(\d+)(?:\s*\(([^)]+)\))?:\s*\*\*", re.MULTILINE)
     matches = list(row_pattern.finditer(summary))
     if not matches:
         return []
@@ -150,21 +154,27 @@ def parse_ai_explanation_entries(summary: str) -> List[Dict[str, Any]]:
         start = match.end()
         end = matches[idx + 1].start() if idx + 1 < len(matches) else len(summary)
         block = summary[start:end].strip()
-        block = re.split(r"\*\*Overall Summary:\*\*", block, maxsplit=1)[0].strip()
 
-        parts = re.split(r"\*\*Summary:\*\*", block, maxsplit=1)
-        bullets_text = parts[0].strip()
-        row_summary = parts[1].strip() if len(parts) > 1 else ""
+        # Remove any section after the row bullets that belongs to the global summary
+        block = re.split(r"\*\*Overall Summary:\*\*", block, maxsplit=1)[0].strip()
+        block = re.split(r"\*\*Summary:\*\*", block, maxsplit=1)[0].strip()
+        block = re.split(r"^-{3,}$", block, maxsplit=1, flags=re.MULTILINE)[0].strip()
 
         bullets = []
-        for line in bullets_text.splitlines():
+        row_summary = ""
+        for line in block.splitlines():
             normalized = line.strip()
             if normalized.startswith("-") or normalized.startswith("*"):
-                bullets.append(re.sub(r"^[-*]\s*", "", normalized))
+                text = re.sub(r"^[-*]\s*", "", normalized)
+                if text and text != "--":
+                    bullets.append(text)
+            elif normalized and not row_summary:
+                # If there's a paragraph after bullets, treat it as the row summary.
+                row_summary = normalized
 
         entries.append({
             "row_number": int(match.group(1)),
-            "date": match.group(2).strip(),
+            "date": match.group(2).strip() if match.group(2) else None,
             "bullets": bullets,
             "summary": row_summary,
         })
@@ -201,16 +211,15 @@ def extract_meaningful_highlights(entries: List[Dict[str, Any]]) -> List[str]:
 
 def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
     """Call GitHub Models endpoint for AI explanation."""
-    github_token = os.getenv("GITHUB_TOKEN", "").strip()
-    endpoint = os.getenv("GITHUB_MODEL_ENDPOINT")
-    model = os.getenv("GITHUB_MODEL_NAME", "openai/gpt-4.1")
+    endpoint = os.getenv("MODEL_ENDPOINT")
+    model = os.getenv("MODEL_NAME", "openai/gpt-4.1")
 
     print(f"Using GitHub model endpoint {endpoint} with model {model} for anomaly explanation")
 
     prompt = build_ai_prompt(payload)
 
     try:
-        client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(github_token))
+        client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(token))
         response = client.complete(
             model=model,
             messages=[
@@ -231,6 +240,7 @@ def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
     overall = extract_overall_summary(summary)
 
     return {
+        "raw_summary": summary,
         "summary": overall,
         "highlights": [],
         "entries": entries,
@@ -297,6 +307,7 @@ def call_openai_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
     overall = extract_overall_summary(summary)
 
     return {
+        "raw_summary": summary,
         "summary": overall,
         "highlights": [],
         "entries": entries,
@@ -311,6 +322,7 @@ def heuristic_anomaly_explanation(payload: schemas.AnomalyExplanationRequest) ->
     
     if not anomaly_rows:
         return {
+            "raw_summary": "No rows in the result set were marked as anomalies, so there is nothing to explain.",
             "summary": "No rows in the result set were marked as anomalies, so there is nothing to explain.",
             "highlights": ["The current run did not produce anomaly flags."],
             "entries": [],
@@ -415,14 +427,14 @@ def heuristic_anomaly_explanation(payload: schemas.AnomalyExplanationRequest) ->
 
 def call_ai_explanation(payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
 
-    # github_token = os.getenv("TOKEN", "").strip()
+    github_token = os.getenv("TOKEN", "").strip()
     
-    # if github_token:
-    #     return call_github_ai_explanation(github_token)
+    if github_token:
+        return call_github_ai_explanation(github_token,payload)
     
-    # openai_key = os.getenv("TOKEN", "").strip()
-    # if openai_key:
-    #     return call_openai_ai_explanation(openai_key,payload)
+    openai_key = os.getenv("TOKEN", "").strip()
+    if openai_key:
+        return call_openai_ai_explanation(openai_key,payload)
     
     # Fallback to heuristic
     return heuristic_anomaly_explanation(payload)

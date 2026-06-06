@@ -21,7 +21,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
     mode: "Static",
     start_date: "2024-01-01",
     end_date: "2026-01-01",
-    features: ["bb_width", "volume", "volatility", "returns"],
+    features: ["bb_width", "RSI", "volume", "volatility", "returns"],
   });
 
   useEffect(() => {

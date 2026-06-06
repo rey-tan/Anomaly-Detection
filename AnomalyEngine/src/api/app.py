@@ -446,7 +446,7 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
 
 
 @app.post("/analyze/explain", response_model=schemas.AnomalyExplanationResponse)
-def explain_analysis(request: schemas.AnomalyExplanationRequest, current_user: models.User = Depends(get_current_user)):
+def explain_analysis(request: schemas.AnomalyExplanationRequest, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
     explanation = ai_services.call_ai_explanation(request)
     try:
         artifact_payload = {
@@ -455,11 +455,29 @@ def explain_analysis(request: schemas.AnomalyExplanationRequest, current_user: m
             "request": request.dict(),
             "explanation": explanation,
         }
-        write_explanation_artifact(artifact_payload, current_user.id)
+        artifact_result = write_explanation_artifact(artifact_payload, current_user.id)
     except Exception:
+        artifact_result = None
+
+    # Persist explanation metadata to DB (store artifact hash/path, not full payload)
+    try:
+        artifact_path = artifact_result.get("path") if artifact_result else None
+        artifact_hash = artifact_result.get("hash") if artifact_result else None
+        crud.create_explanation(
+            db=db,
+            user_id=current_user.id,
+            explanation=explanation,
+            analysis_id=None,
+            metadata={"request_summary": {"stock": request.stock, "mode": request.mode}},
+            artifact_path=artifact_path,
+            artifact_hash=artifact_hash,
+        )
+    except Exception:
+        # don't break functionality if DB write fails
         pass
 
     return {
+        "raw_summary": explanation.get("raw_summary", explanation.get("summary", "")),
         "summary": explanation.get("summary", ""),
         "highlights": explanation.get("highlights", []),
         "entries": explanation.get("entries", []),

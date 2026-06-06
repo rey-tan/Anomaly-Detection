@@ -133,11 +133,31 @@ class AnomalyExplanationEntry(BaseModel):
 
 
 class AnomalyExplanationResponse(BaseModel):
+    raw_summary: Optional[str] = None
     summary: str
     highlights: List[str]
     entries: Optional[List[AnomalyExplanationEntry]] = None
     anomaly_count: int
     source: str
+
+
+class ExplanationRead(BaseModel):
+    id: int
+    analysis_id: Optional[int] = None
+    user_id: int
+    model: Optional[str] = None
+    model_version: Optional[str] = None
+    artifact_path: Optional[str] = None
+    artifact_hash: Optional[str] = None
+    summary: Optional[str] = None
+    highlights: Optional[List[str]] = None
+    entries: Optional[List[Dict[str, Any]]] = None
+    anomaly_count: Optional[int] = 0
+    meta: Optional[Dict[str, Any]] = None
+    created_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
 
 
 class CacheCreate(BaseModel):

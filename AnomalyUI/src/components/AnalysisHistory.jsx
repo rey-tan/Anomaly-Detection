@@ -50,8 +50,8 @@ export default function AnalysisHistory({ token, onSelect }) {
       {error ? <div className="alert-box">{error}</div> : null}
       <div className="analysis-list">
         {items.map((a) => (
-          <article key={a.id} className={a.is_favorite ? "analysis-list-item favorite" : "analysis-list-item"}>
-            <button type="button" className="analysis-entry" onClick={() => handleClick(a)}>
+          <article key={a.id} className={a.is_favorite ? "analysis-list-item favorite" : "analysis-list-item"} >
+            <div className="analysis-entry">
               <div className="analysis-row">
                 <strong>{a.stock}</strong>
                 <small>{new Date(a.executed_at).toLocaleString()}</small>
@@ -61,10 +61,14 @@ export default function AnalysisHistory({ token, onSelect }) {
                 <span>{a.timeframe}</span>
                 <span>{a.status}</span>
               </div>
-            </button>
+            </div>
+            <div className="button-row">
+ <button className="favorite-button view-button" type="button" onClick={() => handleClick(a)}>View</button>
             <button className="favorite-button" type="button" onClick={(ev) => handleFavorite(a, ev)} aria-label="Toggle favorite">
               {a.is_favorite ? "★ Favorite" : "☆ Favorite"}
             </button>
+            </div>
+           
           </article>
         ))}
       </div>

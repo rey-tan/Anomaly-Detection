@@ -64,332 +64,7 @@ It clarifies how information travels and where decisions are taken.
 
 ## 3. Sequence Diagram
 
-### Purpose
-
-Shows runtime interaction and ordering between components.
-
-### Recommended flows
-
-- Login flow with role assignment
-- User profile and notification retrieval
-- Analyze flow with cache hit
-- Analyze flow with cache miss (including activity logging)
-- Admin user creation/management flows
-- Cache management flows
-- Logout flow
-
-### Why it matters
-
-It makes the exact request/response sequence easy to understand.
-
----
-
-## 4. Activity Diagram
-
-### Purpose
-
-Shows the steps and decision points within a process.
-
-### Recommended processes
-
-- "Run Analysis" workflow
-- Cache decision path: hit vs miss
-- Realtime simulation flow
-
-### Why it matters
-
-It helps document conditional behavior and control flow.
-
----
-
-## 5. ER Diagram
-
-### Purpose
-
-Models the database entities and relationships.
-
-### What to include
-
-- `User` table
-  - `id` (PK)
-  - `username` (unique)
-  - `hashed_password`
-  - `role` (user/analyst/admin)
-  - `permissions` (JSON)
-  - `is_active`
-  - `created_at`
-- `UserActivity` table
-  - `id` (PK)
-  - `user_id` (FK to User)
-  - `action` (login, analyze, etc.)
-  - `resource` (endpoint affected)
-  - `details` (JSON metadata)
-  - `created_at`
-- `Notification` table
-  - `id` (PK)
-  - `user_id` (FK to User)
-  - `title`
-  - `message`
-  - `type`
-  - `is_read`
-  - `read_at`
-  - `created_at`
-- `UserAnalysis` table
-  - `id` (PK)
-  - `user_id` (FK to User)
-  - `config_hash`
-  - `stock`, `mode`, `timeframe`
-  - `start_date`, `end_date`
-  - `features` (JSON)
-  - `best_params` (JSON)
-  - `metrics` (JSON)
-  - `status` (success/error)
-  - `duration_seconds`
-  - `executed_at`
-- `PipelineCache` table
-  - `id` (PK)
-  - `config_hash` (unique)
-  - `stock`, `mode`, `timeframe`
-  - `start_date`, `end_date`
-  - `features` (JSON)
-  - `best_params` (JSON)
-  - `metrics` (JSON)
-  - `data` (JSON)
-  - `created_at`
-
-### Why it matters
-
-An ER diagram is about data, not object-oriented programming. It is appropriate because the project stores and retrieves structured data in a database.
-
-### Why it is not tied to OOP
-
-- ER diagrams describe entities, attributes, and relationships.
-- They are used for database design and data modeling.
-- You can use them for any system that persists data, regardless of whether the code uses classes or functional style.
-
-### Class Diagram
-
-```mermaid
-classDiagram
-  class AnalysisRequest {
-    +stock: str
-    +start_date: str
-    +end_date: str
-    +timeframe: str
-    +features: list[str]
-    +mode: str
-    +from_mapping(config)
-  }
-
-  class PipelineResult {
-    +data: DataFrame
-    +labels: dict
-    +metrics: dict
-    +best_params: dict
-    +model: Any
-    +as_response(include_model)
-  }
-
-  class BaseAnalysisPipeline {
-    <<abstract>>
-    #_prepare_features()
-    #_build_metrics(feature_df, label_sets)
-    #_attach_labels(feature_df, label_sets)
-    +run()*
-  }
-
-  class StaticAnalysisPipeline {
-    +run()
-  }
-
-  class RealtimeAnalysisPipeline {
-    +window_size: int
-    +run()
-  }
-
-  class DataLoader {
-    +load(stock, start_date, end_date)
-  }
-  class Preprocessor {
-    +transform(df, timeframe)
-  }
-
-  class FeatureEngineering {
-    +transform(df, features)
-  }
-
-  class FeatureScaler {
-    +fit_transform(df, features)
-  }
-
-  class Evaluator {
-    +compute(df, labels)
-  }
-
-  class AnomalyDetector {
-    +predict(X, df, best_params)
-  }
-
-  BaseAnalysisPipeline <|-- StaticAnalysisPipeline
-  BaseAnalysisPipeline <|-- RealtimeAnalysisPipeline
-  BaseAnalysisPipeline --> AnalysisRequest
-  BaseAnalysisPipeline --> DataLoader
-  BaseAnalysisPipeline --> Preprocessor
-  BaseAnalysisPipeline --> FeatureEngineering
-  BaseAnalysisPipeline --> FeatureScaler
-  BaseAnalysisPipeline --> AnomalyDetector
-  StaticAnalysisPipeline --> PipelineResult
-  RealtimeAnalysisPipeline --> PipelineResult
-```
-
----
-
-## 6. Deployment Diagram (optional)
-
-### Purpose
-
-Shows how the software is deployed and where each component runs.
-
-### What to include
-
-- User browser / client
-- Streamlit host
-- FastAPI host
-- SQLite or other database host
-- Optional reverse proxy / Docker
-
-### Why it matters
-
-It helps plan deployment and understand infrastructure requirements.
-
----
-
-## How to use this documentation
-
-- Use the Component Diagram for architecture reviews.
-- Use the DFD for data movement and caching logic.
-- Use Sequence Diagrams for request/response order.
-- Use Activity Diagrams for workflows and decision points.
-- Use ER Diagrams for database modeling.
-- Use Deployment Diagrams if you need infrastructure documentation.
-
-## Diagram tools
-
-You can create these diagrams using any of the following:
-
-- Mermaid
-- Draw.io / diagrams.net
-- Lucidchart
-- PlantUML
-- Microsoft Visio
-
----
-
-## Mermaid Diagram Examples
-
-### Component Diagram
-
-```mermaid
-flowchart TB
-    Browser["Browser / Streamlit UI"] -->|Login / Analyze| FastAPI["FastAPI Backend"]
-    FastAPI -->|Reads/Writes| DB["SQLite / SQLAlchemy DB"]
-    FastAPI -->|Loads hyperparams| Hyperparams["artifacts/hyperparams"]
-    FastAPI -->|Calls| AnalysisEngine["src/pipelines/analysis_engine.py"]
-    FastAPI -->|Calls wrappers| StaticPipeline["src/pipelines/anomaly_detection_pipeline.py"]
-    FastAPI -->|Calls wrappers| RealtimePipeline["src/pipelines/realtime_detection_pipeline.py"]
-    FastAPI -->|Uses| Components["src/components/*"]
-    Streamlit["Streamlit App\n(main.py)"] -->|API requests| FastAPI
-```
-
-### Data Flow Diagram (DFD)
-
-```mermaid
-flowchart TD
-    User["User"] -->|Login request| Streamlit
-    Streamlit -->|POST /login| FastAPI
-    FastAPI -->|Validate credentials| DB
-    FastAPI -->|Return token| Streamlit
-
-    User -->|Run analysis| Streamlit
-    Streamlit -->|POST /analyze| FastAPI
-    FastAPI -->|Check cache| DB
-    DB -->|Cache miss| FastAPI
-    FastAPI -->|Run pipeline| Pipeline["Pipeline modules"]
-    Pipeline -->|Result| FastAPI
-    FastAPI -->|Save cache| DB
-    FastAPI -->|Response| Streamlit
-```
-
-### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant S as Streamlit
-    participant A as FastAPI
-    participant D as Database
-    participant P as Pipeline
-
-    U->>S: Click login
-    S->>A: POST /login
-    A->>D: Verify user
-    D-->>A: User record
-    A-->>S: Token
-
-    U->>S: Click Run Analysis
-    S->>A: POST /analyze
-    A->>D: Lookup cache
-    alt Cache hit
-        D-->>A: Cached result
-    else Cache miss
-        D-->>A: No entry
-        A->>P: Execute pipeline
-        P-->>A: Analysis result
-        A->>D: Save cache
-    end
-    A-->>S: Results
-```
-
-### Activity Diagram
-
-```mermaid
-flowchart TD
-    Start([Start]) --> Login["Login required?"]
-    Login -->|No| ShowLogin["Show login screen"]
-    ShowLogin --> End
-    Login -->|Yes| Choose["Select stock/timeframe/mode"]
-    Choose --> Submit["Click Run Analysis"]
-    Submit --> CheckCache["Cache lookup"]
-    CheckCache -->|Hit| ReturnCached["Return cached results"]
-    ReturnCached --> Visualize["Show visualizations"]
-    CheckCache -->|Miss| RunPipeline["Run pipeline"]
-    RunPipeline --> SaveCache["Save cache entry"]
-    SaveCache --> Visualize
-    Visualize --> End
-```
-
-### ER Diagram
-
-```mermaid
-erDiagram
-    USER {
-        int id PK
-        string username
-        string hashed_password
-        bool is_active
-        datetime created_at
-    }
-  %% Note: pipeline cache is an implementation detail and omitted from this ER diagram
-```
-
-> Note: the ER diagram uses a simple relationship for illustration. In this project the cache entries are not strictly owned by a single user yet, but the data model is still useful to document how database entities are structured.
-
----
-
-## Notes
-
-This project uses a relational data store for auth and caching, so ER diagrams are relevant even though the application code is not strictly object-oriented. The ER diagram documents the data model behind the FastAPI backend.
-
+*** End Patch
 ---
 
 ## Updated diagrams (artifact persistence & favorites)
@@ -397,6 +72,20 @@ This project uses a relational data store for auth and caching, so ER diagrams a
 The system now persists full analysis artifacts (gzipped JSON) to the workspace under `artifacts/results/{user_id}/{config_hash}.json.gz` and records the file path in `UserAnalysis.data_path`. Users can mark important analyses with `UserAnalysis.is_favorite` which is exposed by the API and surfaced in the UI.
 
 ### Updated Component Diagram (summary)
+
+### Explanation Artifact Persistence (Update - June 2026)
+
+Add the following to component/data-flow diagrams:
+
+- Explanation generation: `/analyze/explain` endpoint -> `ai_services` -> produces explanation JSON
+- Artifact storage: explanation JSON written to `artifacts/explanations/{user_id}/explanation_<uuid>.json`
+- Hashing: Backend computes SHA256 over the stable JSON dump and stores the digest as `artifact_hash` for integrity and deduplication
+- DB history: A lightweight `explanations` DB table stores `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `user_id`, `created_at` and minimal `metadata` (e.g., request summary)
+- UI behaviour: The UI shows a history list (not full content). To view full content, the UI may fetch the artifact file via an API route that reads the JSON file.
+
+Update your ER diagram to add an `explanations` table with attributes: `id`, `analysis_id` (FK), `user_id` (FK), `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `metadata`, `created_at`.
+
+If you maintain a visual deployment diagram, show `Artifacts Storage` (disk) and the `SQLite DB` with the lightweight `explanations` table.
 
 ```mermaid
 flowchart TB
@@ -408,7 +97,8 @@ flowchart TB
   FastAPI -->|Calls wrappers| StaticPipeline["src/pipelines/anomaly_detection_pipeline.py"]
   FastAPI -->|Calls wrappers| RealtimePipeline["src/pipelines/realtime_detection_pipeline.py"]
   FastAPI -->|Uses| Components["src/components/*"]
-  FastAPI -->|Reads/Writes artifacts| Artifacts["artifacts/results/{user_id}/ (gzipped JSON)"]
+  FastAPI -->|Writes explanation artifacts| Explanations["artifacts/explanations/{user_id}/ (JSON)"]
+  FastAPI -->|Reads explanation artifacts| Explanations
   Browser -->|Requests analyses list| FastAPI
   Browser -->|Requests artifact| FastAPI
 ```
@@ -472,19 +162,27 @@ erDiagram
     datetime executed_at
   }
 
-  ARTIFACT_STORE {
-    string path PK
+  EXPLANATION {
+    int id PK
+    int analysis_id FK
     int user_id FK
-    string config_hash
+    string artifact_path
+    string artifact_hash
+    string model
+    string model_version
+    string summary
+    json highlights
+    json entries
+    int anomaly_count
+    json meta
     datetime created_at
-    int size_bytes
   }
 
-  USER ||--o{ ARTIFACT_STORE : stores
-  USER_ANALYSIS }o--|| ARTIFACT_STORE : references
+  USER ||--o{ EXPLANATION : creates
+  USER_ANALYSIS ||--o{ EXPLANATION : has
 
 ```
 
 Notes:
-- `ARTIFACT_STORE` is a conceptual representation for report purposes (artifacts are files on disk, not a separate DB table). The `data_path` attribute on `USER_ANALYSIS` points to the file.
+- `ARTIFACT_STORE` in the ER above was a conceptual placeholder representing files on disk. The project now uses a concrete `explanations` table (lightweight history) and explanation JSON files on disk under `artifacts/explanations/{user_id}/`. The DB stores `artifact_path` and `artifact_hash` plus minimal metadata for listing and deduplication.
 

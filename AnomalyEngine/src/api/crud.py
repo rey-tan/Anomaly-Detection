@@ -1,6 +1,6 @@
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.sql import func
 from sqlalchemy import String
 from typing import Any, Dict, List, Optional
@@ -15,6 +15,10 @@ def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
 
+def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email).first()
+
+
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -23,11 +27,22 @@ def get_users(db: Session) -> List[models.User]:
     return db.query(models.User).all()
 
 
-def create_user(db: Session, username: str, password: str, role: str = "user", permissions: Optional[Dict[str, Any]] = None):
+def create_user(
+    db: Session,
+    username: str,
+    password: str,
+    email: Optional[str] = None,
+    role: str = "user",
+    permissions: Optional[Dict[str, Any]] = None,
+    email_verified: bool = False,
+):
     hashed_password = get_password_hash(password)
+    email_to_use = email or f"{username}@example.com"
     user = models.User(
         username=username,
+        email=email_to_use,
         hashed_password=hashed_password,
+        email_verified=email_verified,
         role=role,
         permissions=permissions,
     )
@@ -37,11 +52,42 @@ def create_user(db: Session, username: str, password: str, role: str = "user", p
     return user
 
 
+def save_otp(db: Session, email: str, otp_code: str, expires_at: datetime):
+    user = get_user_by_email(db, email)
+    if not user:
+        return None
+    user.otp_code = otp_code
+    user.otp_expires_at = expires_at
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def verify_otp(db: Session, email: str, otp_code: str) -> bool:
+    user = get_user_by_email(db, email)
+    if not user or not user.otp_code or not user.otp_expires_at:
+        return False
+    if user.otp_code != otp_code:
+        return False
+    if user.otp_expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
+        return False
+    user.email_verified = True
+    user.otp_code = None
+    user.otp_expires_at = None
+    db.commit()
+    db.refresh(user)
+    return True
+
+
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user_by_username(db, username)
     if not user:
+        user = get_user_by_email(db, username)
+    if not user:
         return None
     if not verify_password(password, user.hashed_password):
+        return None
+    if not user.email_verified:
         return None
     return user
 

@@ -5,7 +5,7 @@ from src.components.preprocessing import Preprocessor
 from src.components.feature_engineering import FeatureEngineering
 from src.components.scaling import FeatureScaler
 from src.components.evaluation import Evaluator
-from src.components.anomaly_detection import train_model
+from src.components.anomaly_detection import AnomalyDetector
 
 
 def test_preprocessor_resamples_and_shapes():
@@ -82,6 +82,7 @@ def test_train_model_basic_outputs():
     # small synthetic X and df
     X = np.vstack([np.linspace(0, 1, 10), np.linspace(0, 1, 10)]).T
     df = pd.DataFrame({"close": np.linspace(0, 1, 10)})
-    out = train_model(X, {}, df)
+    detector = AnomalyDetector()
+    out = detector.train_model(X, {}, df)
     assert set(out.keys()) == {"dbscan", "isolation_forest", "zscore"}
     assert len(out["dbscan"]) == 10

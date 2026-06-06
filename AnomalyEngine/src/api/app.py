@@ -7,6 +7,7 @@ import math
 
 from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 import numpy as np
 import pandas as pd
@@ -20,12 +21,43 @@ from src.utils.paths import HYPERPARAMS, DATA
 from fastapi.responses import FileResponse
 from src.utils.io import write_result_artifact, write_explanation_artifact, read_result_artifact, get_symbols
 from src.utils.paths import ARTIFACTS
+from src.utils.otp import generate_otp, get_otp_expiration, send_otp_email
 from src.components.sharesansar_scraper import ShareSansarScraper
 from . import crud, database, models, schemas, security, ai_services
 
 load_dotenv()
 
-app = FastAPI(title="Anomaly Engine API")
+
+from contextlib import asynccontextmanager
+
+
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup code
+    models.Base.metadata.create_all(bind=database.engine)
+
+    db = database.SessionLocal()
+    try:
+        admin = crud.get_user_by_username(db, "admin")
+        if admin is None:
+            crud.create_user(
+                db,
+                "admin",
+                "admin@gmail.com",
+                "admin123",
+                role="admin",
+                email_verified=True,
+            )
+    finally:
+        db.close()
+
+    yield
+    # shutdown code (if needed)
+
+app = FastAPI(title="Anomaly Engine API",lifespan = lifespan)
 
 origins = ["http://localhost:5173"]
 
@@ -129,7 +161,9 @@ def require_role(allowed_roles: List[str]):
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db),
-):
+): 
+    print(f"Login attempt for username: {form_data.username}, with password: {form_data.password}")
+    
     user = crud.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -140,6 +174,62 @@ def login(
 
     access_token = security.create_access_token(data={"sub": user.username, "role": user.role})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/register/request", response_model=schemas.OTPRequestResponse)
+def register_request(request: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    """Public registration request that sends an OTP to the provided email."""
+    existing_user = crud.get_user_by_username(db, request.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already exists",
+        )
+    if crud.get_user_by_email(db, request.email):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
+    if request.role and request.role != "analyst":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only analyst role can be self-registered. Contact an admin for higher privileges.",
+        )
+
+    user = crud.create_user(
+        db,
+        username=request.username,
+        email=request.email,
+        password=request.password,
+        role="analyst",
+        permissions=None,
+        email_verified=False,
+    )
+    otp_code = generate_otp()
+    expires_at = get_otp_expiration()
+    crud.save_otp(db, request.email, otp_code, expires_at)
+    send_otp_email(request.email, otp_code)
+    return {
+        "message": "OTP sent to email. Verify within 10 minutes.",
+        "email": request.email,
+        "user_id": user.id,
+    }
+
+
+@app.post("/register/verify", response_model=schemas.UserRead)
+def verify_registration(request: schemas.OTPVerificationRequest, db: Session = Depends(database.get_db)):
+    if not crud.verify_otp(db, request.email, request.otp_code):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OTP",
+        )
+    user = crud.get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return user
 
 
 def _iter_date_range(start_date: datetime, end_date: datetime):
@@ -541,9 +631,11 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_
     user = crud.create_user(
         db,
         username=request.username,
+        email=request.email,
         password=request.password,
         role=role,
         permissions=request.permissions,
+        email_verified=True,
     )
     return user
 
@@ -683,16 +775,8 @@ def create_notification(request: schemas.NotificationCreate, db: Session = Depen
     )
 
 
-@app.on_event("startup")
-def startup_event():
-    models.Base.metadata.create_all(bind=database.engine)
-    db = database.SessionLocal()
-    try:
-        admin = crud.get_user_by_username(db, "admin")
-        if admin is None:
-            crud.create_user(db, "admin", "admin123", role="admin")
-    finally:
-        db.close()
+
+
 
 
 @app.get("/me/analyses/{analysis_id}/data")

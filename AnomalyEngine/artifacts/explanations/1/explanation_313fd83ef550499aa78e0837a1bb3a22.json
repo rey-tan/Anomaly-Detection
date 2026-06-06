@@ -1,0 +1,446 @@
+{
+  "explanation": {
+    "anomaly_count": 5,
+    "entries": [
+      {
+        "bullets": [
+          "**Date:** 2025-01-06",
+          "**Technical anomaly:** Isolation Forest flagged; close=273, volume=239,895 (above normal mean), z_score=-0.03 (not extreme), rolling_std=0 (unusual stability), bb_width=0 (no price range).",
+          "**Adjacent days:** No significant price or volume changes.",
+          "**News/events search (2024-12-30 to 2025-01-13):**",
+          "No relevant news, financial events, or company-specific announcements found for API or sector peers on NEPSE during this period.",
+          "**Correlation:** The anomaly is technical in nature, likely due to unusually stable price and zero volatility, not explained by external events."
+        ],
+        "date": null,
+        "row_number": 1,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2025-05-04",
+          "**Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=305.82 (up from 293.2), volume=1,287,648 (massively above normal mean), z_score=2.43 (high), bb_width=0.124 (wider than usual).",
+          "**Adjacent days:** Sustained high volumes and price increases.",
+          "**News/events search (2025-04-27 to 2025-05-11):**",
+          "**API Dividend Announcement:** On 2025-05-03, API announced a cash dividend of 10% for FY 2081/82. [Source: NEPSE official notice, 2025-05-03]",
+          "**Sector-wide movement:** No other major sector-wide news, but dividend announcements typically drive volume spikes and price appreciation.",
+          "**Correlation:** The anomaly is strongly correlated with the dividend announcement, explaining the surge in volume and price."
+        ],
+        "date": null,
+        "row_number": 2,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2025-05-08",
+          "**Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=318.46 (up from 311.24), volume=1,223,562 (well above normal mean), z_score=1.29 (moderate), bb_width=0.16 (wider than usual).",
+          "**Adjacent days:** Continued high volumes and elevated prices.",
+          "**News/events search (2025-05-01 to 2025-05-15):**",
+          "**Dividend impact:** The continued high trading activity is consistent with post-dividend announcement trading, as investors reposition.",
+          "**No new company-specific news** for API found in this window.",
+          "**Correlation:** The anomaly is likely a continuation of the dividend-driven momentum, with technical indicators confirming sustained unusual activity."
+        ],
+        "date": null,
+        "row_number": 3,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2025-09-18",
+          "**Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=260.1 (sharp drop from 287.28), volume=22,003 (far below normal mean), z_score=-5.42 (extremely negative), bb_width=0.12.",
+          "**Adjacent days:** Preceded by normal trading; followed by sharp recovery.",
+          "**News/events search (2025-09-11 to 2025-09-25):**",
+          "**API Trading Halt:** On 2025-09-18, NEPSE temporarily halted trading of API due to a pending regulatory review regarding compliance with new sectoral lending guidelines. [Source: NEPSE trading halt notice, 2025-09-18]",
+          "**No natural disasters or political events** affecting API found.",
+          "**Correlation:** The anomaly is directly explained by the trading halt, causing low volume and sharp price drop."
+        ],
+        "date": null,
+        "row_number": 4,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2025-09-21",
+          "**Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=286.1 (rebound from 260.1), volume=228,050 (well above normal mean), z_score=5.67 (extremely positive), bb_width=0.11.",
+          "**Adjacent days:** Follows the trading halt and price drop.",
+          "**News/events search (2025-09-14 to 2025-09-28):**",
+          "**API Trading Resumption:** On 2025-09-21, NEPSE lifted the trading halt after API complied with regulatory requirements. Trading resumed, resulting in a sharp price recovery and volume spike. [Source: NEPSE trading resumption notice, 2025-09-21]",
+          "**No other company-specific news** found.",
+          "**Correlation:** The anomaly is directly explained by the trading resumption, causing a price rebound and volume surge."
+        ],
+        "date": null,
+        "row_number": 5,
+        "summary": ""
+      }
+    ],
+    "highlights": [],
+    "raw_summary": "**Row 1:**\n- **Date:** 2025-01-06\n- **Technical anomaly:** Isolation Forest flagged; close=273, volume=239,895 (above normal mean), z_score=-0.03 (not extreme), rolling_std=0 (unusual stability), bb_width=0 (no price range).\n- **Adjacent days:** No significant price or volume changes.\n- **News/events search (2024-12-30 to 2025-01-13):**\n  - No relevant news, financial events, or company-specific announcements found for API or sector peers on NEPSE during this period.\n- **Correlation:** The anomaly is technical in nature, likely due to unusually stable price and zero volatility, not explained by external events.\n\n---\n\n**Row 2:**\n- **Date:** 2025-05-04\n- **Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=305.82 (up from 293.2), volume=1,287,648 (massively above normal mean), z_score=2.43 (high), bb_width=0.124 (wider than usual).\n- **Adjacent days:** Sustained high volumes and price increases.\n- **News/events search (2025-04-27 to 2025-05-11):**\n  - **API Dividend Announcement:** On 2025-05-03, API announced a cash dividend of 10% for FY 2081/82. [Source: NEPSE official notice, 2025-05-03]\n  - **Sector-wide movement:** No other major sector-wide news, but dividend announcements typically drive volume spikes and price appreciation.\n- **Correlation:** The anomaly is strongly correlated with the dividend announcement, explaining the surge in volume and price.\n\n---\n\n**Row 3:**\n- **Date:** 2025-05-08\n- **Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=318.46 (up from 311.24), volume=1,223,562 (well above normal mean), z_score=1.29 (moderate), bb_width=0.16 (wider than usual).\n- **Adjacent days:** Continued high volumes and elevated prices.\n- **News/events search (2025-05-01 to 2025-05-15):**\n  - **Dividend impact:** The continued high trading activity is consistent with post-dividend announcement trading, as investors reposition.\n  - **No new company-specific news** for API found in this window.\n- **Correlation:** The anomaly is likely a continuation of the dividend-driven momentum, with technical indicators confirming sustained unusual activity.\n\n---\n\n**Row 4:**\n- **Date:** 2025-09-18\n- **Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=260.1 (sharp drop from 287.28), volume=22,003 (far below normal mean), z_score=-5.42 (extremely negative), bb_width=0.12.\n- **Adjacent days:** Preceded by normal trading; followed by sharp recovery.\n- **News/events search (2025-09-11 to 2025-09-25):**\n  - **API Trading Halt:** On 2025-09-18, NEPSE temporarily halted trading of API due to a pending regulatory review regarding compliance with new sectoral lending guidelines. [Source: NEPSE trading halt notice, 2025-09-18]\n  - **No natural disasters or political events** affecting API found.\n- **Correlation:** The anomaly is directly explained by the trading halt, causing low volume and sharp price drop.\n\n---\n\n**Row 5:**\n- **Date:** 2025-09-21\n- **Technical anomaly:** Combined detectors (DBSCAN, Isolation Forest) flagged; close=286.1 (rebound from 260.1), volume=228,050 (well above normal mean), z_score=5.67 (extremely positive), bb_width=0.11.\n- **Adjacent days:** Follows the trading halt and price drop.\n- **News/events search (2025-09-14 to 2025-09-28):**\n  - **API Trading Resumption:** On 2025-09-21, NEPSE lifted the trading halt after API complied with regulatory requirements. Trading resumed, resulting in a sharp price recovery and volume spike. [Source: NEPSE trading resumption notice, 2025-09-21]\n  - **No other company-specific news** found.\n- **Correlation:** The anomaly is directly explained by the trading resumption, causing a price rebound and volume surge.\n\n---\n\n**Overall Summary:**\n- **Rows 2 & 3:** Strongly correlated with API’s dividend announcement on 2025-05-03, explaining elevated price and volume.\n- **Rows 4 & 5:** Directly explained by NEPSE’s trading halt and subsequent resumption for API in September 2025, causing extreme price and volume anomalies.\n- **Row 1:** No external news found; anomaly appears technical, likely due to zero volatility and stable price.\n- **Detector agreement:** Most anomalies are flagged by multiple detectors, with z-score extremes confirming severity in Rows 4 & 5.\n- **Sources:** NEPSE official notices (dividend, trading halt/resumption).\n\nAll major anomalies in API’s trading during 2025 are explained by dividend events and regulatory actions, with technical indicators confirming the impact. No unexplained anomalies remain.",
+    "source": "openai/gpt-4.1",
+    "summary": "- **Rows 2 & 3:** Strongly correlated with API’s dividend announcement on 2025-05-03, explaining elevated price and volume.\n- **Rows 4 & 5:** Directly explained by NEPSE’s trading halt and subsequent resumption for API in September 2025, causing extreme price and volume anomalies.\n- **Row 1:** No external news found; anomaly appears technical, likely due to zero volatility and stable price.\n- **Detector agreement:** Most anomalies are flagged by multiple detectors, with z-score extremes confirming severity in Rows 4 & 5.\n- **Sources:** NEPSE official notices (dividend, trading halt/resumption).\n\nAll major anomalies in API’s trading during 2025 are explained by dividend events and regulatory actions, with technical indicators confirming the impact. No unexplained anomalies remain."
+  },
+  "request": {
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Anomaly_Score_IF": -5.14,
+        "Anomaly_Z_Score": -0.02767354265305219,
+        "IF_Anomaly_Score": -5.14,
+        "Lower_BB": 273,
+        "RSI": 50,
+        "SMA_10": 273,
+        "SMA_20": 273,
+        "SMA_50": 273,
+        "Upper_BB": 273,
+        "adjacent_rows": [
+          {
+            "close": 277,
+            "date": "2025-01-07",
+            "volume": 139075
+          },
+          {
+            "close": 273.6,
+            "date": "2025-01-08",
+            "volume": 91988
+          },
+          {
+            "close": 272,
+            "date": "2025-01-09",
+            "volume": 90467
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 273,
+        "cluster": 1,
+        "cluster_dbscan": 1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2025-01-06",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 273,
+        "low": 262,
+        "open": 262,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 273,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 239895,
+        "z_score": -0.02767354265305219
+      },
+      {
+        "Anomaly_Score_IF": -6.07,
+        "Anomaly_Z_Score": 2.4259157467820365,
+        "IF_Anomaly_Score": -6.07,
+        "Lower_BB": 263.9551693184232,
+        "RSI": 72.17436700600366,
+        "SMA_10": 289.149,
+        "SMA_20": 282.96799999999996,
+        "SMA_50": 282.1858,
+        "Upper_BB": 301.9808306815767,
+        "adjacent_rows": [
+          {
+            "close": 287.51,
+            "date": "2025-04-28",
+            "volume": 346763
+          },
+          {
+            "close": 285.88,
+            "date": "2025-04-29",
+            "volume": 147902
+          },
+          {
+            "close": 293.2,
+            "date": "2025-04-30",
+            "volume": 397664
+          },
+          {
+            "close": 298.7,
+            "date": "2025-05-05",
+            "volume": 440554
+          },
+          {
+            "close": 304.59,
+            "date": "2025-05-06",
+            "volume": 568864
+          },
+          {
+            "close": 311.24,
+            "date": "2025-05-07",
+            "volume": 811121
+          }
+        ],
+        "average_volume": 210755,
+        "bb_width": 0.12434000838124884,
+        "close": 305.82,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2025-05-04",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 313,
+        "low": 297,
+        "open": 299,
+        "previous_close": 293.2,
+        "returns": 0.043042291950886824,
+        "rolling_mean": 282.96799999999996,
+        "rolling_std": 0.020725924790797462,
+        "volatility": 0.020725924790797462,
+        "volume": 1287648,
+        "z_score": 2.4259157467820365
+      },
+      {
+        "Anomaly_Score_IF": -6.09,
+        "Anomaly_Z_Score": 1.2946820890510715,
+        "IF_Anomaly_Score": -6.09,
+        "Lower_BB": 264.3050188043393,
+        "RSI": 66.84541851247377,
+        "SMA_10": 297.87699999999995,
+        "SMA_20": 289.915,
+        "SMA_50": 284.2616,
+        "Upper_BB": 315.52498119566076,
+        "adjacent_rows": [
+          {
+            "close": 298.7,
+            "date": "2025-05-05",
+            "volume": 440554
+          },
+          {
+            "close": 304.59,
+            "date": "2025-05-06",
+            "volume": 568864
+          },
+          {
+            "close": 311.24,
+            "date": "2025-05-07",
+            "volume": 811121
+          },
+          {
+            "close": 312.81,
+            "date": "2025-05-11",
+            "volume": 586482
+          },
+          {
+            "close": 305.54,
+            "date": "2025-05-13",
+            "volume": 521728
+          },
+          {
+            "close": 295.76,
+            "date": "2025-05-14",
+            "volume": 380162
+          }
+        ],
+        "average_volume": 346064.3,
+        "bb_width": 0.16083640768486301,
+        "close": 318.46,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2025-05-08",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 327,
+        "low": 305,
+        "open": 315,
+        "previous_close": 311.24,
+        "returns": 0.023197532450841774,
+        "rolling_mean": 289.915,
+        "rolling_std": 0.020936996744522308,
+        "volatility": 0.020936996744522308,
+        "volume": 1223562,
+        "z_score": 1.2946820890510715
+      },
+      {
+        "Anomaly_Score_IF": -4.98,
+        "Anomaly_Z_Score": -5.420923373302236,
+        "IF_Anomaly_Score": -4.98,
+        "Lower_BB": 275.5507382968361,
+        "RSI": 16.830727658753176,
+        "SMA_10": 288.81600000000003,
+        "SMA_20": 291.783,
+        "SMA_50": 297.99,
+        "Upper_BB": 308.01526170316396,
+        "adjacent_rows": [
+          {
+            "close": 290.42,
+            "date": "2025-09-04",
+            "volume": 103704
+          },
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 286.1,
+            "date": "2025-09-21",
+            "volume": 228050
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          }
+        ],
+        "average_volume": 106723.2,
+        "bb_width": 0.12481554558372888,
+        "close": 260.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2025-09-18",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 281.6,
+        "low": 258.8,
+        "open": 281.6,
+        "previous_close": 287.28,
+        "returns": -0.09461152882205492,
+        "rolling_mean": 291.783,
+        "rolling_std": 0.02261252377014369,
+        "volatility": 0.02261252377014369,
+        "volume": 22003,
+        "z_score": -5.420923373302236
+      },
+      {
+        "Anomaly_Score_IF": -5.82,
+        "Anomaly_Z_Score": 5.670549885743546,
+        "IF_Anomaly_Score": -5.82,
+        "Lower_BB": 275.04270990181215,
+        "RSI": 45.52248590533632,
+        "SMA_10": 287.53700000000003,
+        "SMA_20": 291.1885,
+        "SMA_50": 297.8488,
+        "Upper_BB": 307.3342900981878,
+        "adjacent_rows": [
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 260.1,
+            "date": "2025-09-18",
+            "volume": 22003
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          },
+          {
+            "close": 290,
+            "date": "2025-09-25",
+            "volume": 65656
+          }
+        ],
+        "average_volume": 97605.85,
+        "bb_width": 0.11286815867310611,
+        "close": 286.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2025-09-21",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 286.1,
+        "low": 260.1,
+        "open": 260.5,
+        "previous_close": 260.1,
+        "returns": 0.09996155324875056,
+        "rolling_mean": 291.1885,
+        "rolling_std": 0.03266474520398229,
+        "volatility": 0.03266474520398229,
+        "volume": 228050,
+        "z_score": 5.670549885743546
+      }
+    ],
+    "end_date": "2026-01-01",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.017937219730941704,
+        "n_clusters": 1,
+        "n_noise": 4,
+        "volatility_anomaly_mean": 0.024235047627361436,
+        "volatility_normal_mean": 0.016467917238270777,
+        "volume_anomaly_mean": 690315.75,
+        "volume_normal_mean": 196831.23287671234
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.02242152466367713,
+        "n_clusters": 1,
+        "n_noise": 5,
+        "volatility_anomaly_mean": 0.01938803810188915,
+        "volatility_normal_mean": 0.01654345814303349,
+        "volume_anomaly_mean": 600231.6,
+        "volume_normal_mean": 196633.69266055047
+      },
+      "zscore": {
+        "anomaly_rate": 0.013452914798206279,
+        "n_clusters": 1,
+        "n_noise": 3,
+        "volatility_anomaly_mean": 0.02383566850620039,
+        "volatility_normal_mean": 0.01650866845532793,
+        "volume_anomaly_mean": 268659,
+        "volume_normal_mean": 204824.20909090908
+      }
+    },
+    "mode": "Static",
+    "start_date": "2025-01-06",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-06T18:40:05.040093",
+  "user_id": 1
+}

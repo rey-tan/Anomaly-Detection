@@ -16,6 +16,7 @@ class TokenData(BaseModel):
 
 class UserCreate(BaseModel):
     username: str
+    email: str
     password: str
     role: Optional[str] = "analyst"
     permissions: Optional[Dict[str, Any]] = None
@@ -24,6 +25,8 @@ class UserCreate(BaseModel):
 class UserRead(BaseModel):
     id: int
     username: str
+    email: str
+    email_verified: bool
     role: str
     permissions: Optional[Dict[str, Any]] = None
     is_active: bool
@@ -31,6 +34,17 @@ class UserRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OTPVerificationRequest(BaseModel):
+    email: str
+    otp_code: str
+
+
+class OTPRequestResponse(BaseModel):
+    message: str
+    email: str
+    user_id: int
 
 
 class UserRoleUpdate(BaseModel):

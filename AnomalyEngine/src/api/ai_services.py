@@ -2,6 +2,7 @@ import json
 import os
 import re
 from typing import Any, Dict, List
+from datetime import datetime, timedelta
 
 from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
@@ -33,7 +34,96 @@ def _extract_anomaly_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return rows
 
 
-def build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
+def fetch_google_custom_search(query: str, num_results: int = 5) -> List[Dict[str, Any]]:
+    """
+    Fetch search results from Google Custom Search API.
+    
+    Requires environment variables:
+    - GOOGLE_SEARCH_API_KEY: your Google API key
+    - GOOGLE_SEARCH_ENGINE_ID: your Custom Search Engine ID
+    """
+    api_key_env = os.getenv("GOOGLE_SEARCH_API_KEY", "").strip()
+    engine_id = os.getenv("GOOGLE_SEARCH_ENGINE_ID", "").strip()
+    
+    if not api_key_env or not engine_id:
+        print("Warning: Google Custom Search API key or engine ID not configured. Skipping search.")
+        return []
+    
+    try:
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            "q": query,
+            "key": api_key_env,
+            "cx": engine_id,
+            "num": min(num_results, 10),  # API limit is 10 per request
+        }
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        results = []
+        if "items" in data:
+            for item in data["items"][:num_results]:
+                results.append({
+                    "title": item.get("title", ""),
+                    "link": item.get("link", ""),
+                    "snippet": item.get("snippet", ""),
+                })
+        return results
+    except Exception as e:
+        print(f"Error fetching Google Custom Search results: {e}")
+        return []
+
+
+def build_search_context(stock: str, anomaly_rows: List[Dict[str, Any]]) -> str:
+    """
+    Build search context from anomaly rows by fetching news for each date.
+    Returns formatted markdown text with search results.
+    """
+    search_context_parts = ["## Search Context\n"]
+    
+    for row in anomaly_rows[:10]:  # limit to first 10 anomalies to avoid too many searches
+        date_str = row.get("date", "")
+        if not date_str:
+            continue
+        
+        try:
+            # Parse date and create search window (2 weeks before and after)
+            anomaly_date = datetime.strptime(str(date_str), "%Y-%m-%d")
+            start_date = anomaly_date - timedelta(days=14)
+            end_date = anomaly_date + timedelta(days=14)
+            
+            # Build multiple search queries
+            queries = [
+                f"{stock} Nepal {date_str}",
+                f"Nepal protest {anomaly_date.strftime('%B %Y')}",
+                f"Nepal strike {anomaly_date.strftime('%B %Y')}",
+                f"NEPSE {stock} {date_str}",
+                f"Nepal news {date_str}",
+            ]
+            
+            section_found = False
+            for query in queries:
+                results = fetch_google_custom_search(query, num_results=3)
+                if results:
+                    if not section_found:
+                        search_context_parts.append(f"\n### {date_str} ({stock})")
+                        section_found = True
+                    
+                    search_context_parts.append(f"\n**Query:** {query}")
+                    for result in results:
+                        search_context_parts.append(f"- {result['title']}: {result['snippet'][:200]}... ([link]({result['link']}))")
+            
+            if not section_found:
+                search_context_parts.append(f"\n### {date_str} ({stock})")
+                search_context_parts.append("No relevant news found in search results.")
+        
+        except Exception as e:
+            print(f"Error processing anomaly date {date_str}: {e}")
+            continue
+    
+    return "\n".join(search_context_parts) if len(search_context_parts) > 1 else ""
+
     """Build a detailed prompt for AI model to explain anomalies."""
     anomaly_rows = payload.data or []
     compact_rows = anomaly_rows[:15]
@@ -116,11 +206,26 @@ def build_ai_prompt(payload: schemas.AnomalyExplanationRequest) -> str:
     }
 
     return (
-        "You are an equity market analyst explaining anomaly detection results to an analyst user. "
-        "The rows below have already been flagged as anomalies by the detection system. "
-        "Explain why each point is unusual using the provided feature values and detector labels. "
+        "You are an equity market analyst specializing in NEPSE (Nepal Stock Exchange) stocks. "
+        "The rows below have already been flagged as anomalies by the detection system. \n\n"
+        "CRITICAL: Search ONLY for news and events related to NEPSE-listed companies. "
+        f"Focus on the ticker '{payload.stock}' and the date range {payload.start_date} to {payload.end_date}.\n\n"
+        "Search for these categories of events that could cause stock price/volume anomalies:\n"
+        "1. FINANCIAL EVENTS: Earnings reports, dividend announcements, earnings guidance changes, "
+        "regulatory approvals/rejections, licensing changes, policy changes affecting the sector, mergers/acquisitions, "
+        "capital raises, write-downs, or accounting restatements.\n"
+        "2. REAL-WORLD EVENTS: Political developments, labor strikes/protests, natural disasters (earthquakes, floods), "
+        "infrastructure changes, supply chain disruptions, or major accidents affecting operations.\n"
+        "3. MARKET EVENTS: Sector-wide news, competitor announcements affecting market dynamics, "
+        "macroeconomic policy changes (interest rates, currency movements), or market sentiment shifts.\n"
+        "4. COMPANY-SPECIFIC NEWS: Executive appointments/departures, major contracts/deals, new products/services, "
+        "management commentary, or analyst reports.\n\n"
+        "For each anomaly date, search the web for events from 2 weeks before to 2 weeks after the anomaly. "
+        "Correlate any findings with the detected price/volume movements. Cite sources explicitly. \n\n"
+        "Explain why each point is unusual using the provided feature values, detector labels, and any external context you find. "
         "Mention relative price movement, volume behavior, z-score severity, and whether multiple detectors agree. "
-        "Do not invent facts or claim causal certainty. Return only markdown. Use bold headings like **Row 1:**, bullet lists for each anomaly, and finish with a bold **Overall Summary:** section. Do not wrap the response in code fences.\n\n"
+        "Do not invent facts—only report news you actually find. If no relevant news is found, explicitly state that and focus on technical indicators. "
+        "Return only markdown. Use bold headings like **Row 1:**, bullet lists for each anomaly (including any news correlation), and finish with a bold **Overall Summary:** section. Do not wrap the response in code fences.\n\n"
         f"Analysis context:\n{json.dumps(summary, ensure_ascii=False, indent=2, default=str)}\n\n"
         "Detection parameters:\n"
         f"{chr(10).join(params_lines)}\n\n"
@@ -182,33 +287,6 @@ def parse_ai_explanation_entries(summary: str) -> List[Dict[str, Any]]:
     return entries
 
 
-def extract_meaningful_highlights(entries: List[Dict[str, Any]]) -> List[str]:
-    """Extract meaningful highlights from all entries, not just duplicates."""
-    if not entries:
-        return []
-    
-    highlights = set()
-    
-    # Extract key patterns from all entries
-    for entry in entries:
-        for bullet in entry.get("bullets", []):
-            # Extract high-level patterns
-            if "z-score" in bullet.lower() or "σ" in bullet:
-                highlights.add(bullet[:100] + "..." if len(bullet) > 100 else bullet)
-            elif "volume" in bullet.lower() and ("spike" in bullet.lower() or "high" in bullet.lower() or "low" in bullet.lower()):
-                highlights.add(bullet[:100] + "..." if len(bullet) > 100 else bullet)
-            elif "detector" in bullet.lower() and ("all" in bullet.lower() or "flagged" in bullet.lower()):
-                highlights.add(bullet[:100] + "..." if len(bullet) > 100 else bullet)
-    
-    # If no patterns found, take first bullet from first few entries
-    if not highlights:
-        for entry in entries[:3]:
-            if entry.get("bullets"):
-                highlights.add(entry["bullets"][0])
-    
-    return sorted(list(highlights))[:5]
-
-
 def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
     """Call GitHub Models endpoint for AI explanation."""
     endpoint = os.getenv("MODEL_ENDPOINT")
@@ -223,7 +301,16 @@ def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
         response = client.complete(
             model=model,
             messages=[
-                SystemMessage("You explain anomaly detection results in concise analyst-friendly language."),
+                SystemMessage(
+                    "You are a NEPSE (Nepal Stock Exchange) financial analyst with access to web search. "
+                    "For each anomaly analyzed, actively search the web for news and events from NEPSE-listed companies only. "
+                    "Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; "
+                    "(2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; "
+                    "(3) Market events: sector news, competitor moves, macroeconomic changes; "
+                    "(4) Company news: executive changes, major contracts, product launches. "
+                    "Search 2 weeks before to 2 weeks after each anomaly date. Correlate findings with technical anomalies. "
+                    "Report only what you find—do not speculate or invent facts."
+                ),
                 UserMessage(prompt),
             ],
             temperature=0.2, #for more strict, factual and less creative responses
@@ -269,7 +356,14 @@ def call_openai_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
             messages = [
                 {
                     "role":"system",
-                    "content":"You explain anomaly detection results in concise analyst-friendly language."
+                    "content":"You are a NEPSE (Nepal Stock Exchange) financial analyst with access to web search. "
+                    "For each anomaly analyzed, actively search the web for news and events from NEPSE-listed companies only. "
+                    "Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; "
+                    "(2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; "
+                    "(3) Market events: sector news, competitor moves, macroeconomic changes; "
+                    "(4) Company news: executive changes, major contracts, product launches. "
+                    "Search 2 weeks before to 2 weeks after each anomaly date. Correlate findings with technical anomalies. "
+                    "Report only what you find—do not speculate or invent facts."
                 },
                 {
                     "role":"user",

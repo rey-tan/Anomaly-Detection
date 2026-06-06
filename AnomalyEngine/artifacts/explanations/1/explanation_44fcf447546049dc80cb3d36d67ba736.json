@@ -1,0 +1,1732 @@
+{
+  "explanation": {
+    "anomaly_count": 23,
+    "entries": [
+      {
+        "bullets": [
+          "The close price jumped sharply from 175.8 to 193.3, a significant upward move relative to adjacent days.",
+          "Volume was unusually low (23,832) compared to the average (163,758), indicating the price move occurred on thin trading.",
+          "Z-score is 4.32, well above the threshold, signaling an extreme deviation from the rolling mean.",
+          "Both DBSCAN and combined detectors flagged this row, suggesting agreement on its anomaly status."
+        ],
+        "date": null,
+        "row_number": 1,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price surged from 191 to 209.4, far above the rolling mean (174.14), marking a strong upward move.",
+          "Volume spiked to 883,819, much higher than the average (135,076), indicating heavy trading activity.",
+          "Z-score is 4.18, showing a severe deviation from typical price behavior.",
+          "DBSCAN, Isolation Forest, and combined detectors all flagged this row, reinforcing the anomaly."
+        ],
+        "date": null,
+        "row_number": 2,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price increased from 220 to 235.9, well above the rolling mean (185.75).",
+          "Volume was elevated at 1,043,530 versus the average (306,034), reflecting intense trading.",
+          "Z-score of 3.12 is above the anomaly threshold, indicating a notable price deviation.",
+          "Both DBSCAN and combined detectors flagged this row."
+        ],
+        "date": null,
+        "row_number": 3,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price rose from 241 to 258.1, significantly above the rolling mean (206.66).",
+          "Volume reached 1,477,229, nearly triple the average (531,097), showing exceptional trading activity.",
+          "Z-score is 3.07, marking a substantial deviation.",
+          "DBSCAN, Isolation Forest, and combined detectors all agree on this anomaly."
+        ],
+        "date": null,
+        "row_number": 4,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price dropped sharply from 269.7 to 250.1, below the rolling mean (219.73).",
+          "Volume was high at 1,228,937 compared to the average (701,861), indicating heavy trading during the decline.",
+          "Z-score is -3.26, a strong negative deviation from the mean.",
+          "DBSCAN, Isolation Forest, and combined detectors all flagged this row."
+        ],
+        "date": null,
+        "row_number": 5,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price decreased from 320 to 314.9, but remains well above the rolling mean (248.64).",
+          "Volume was elevated at 1,353,662 versus the average (990,992), suggesting active trading.",
+          "Z-score is -0.76, not extreme, but the price and volume context are unusual.",
+          "DBSCAN and combined detectors flagged this row."
+        ],
+        "date": null,
+        "row_number": 6,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price jumped from 314.9 to 346.3, far above the rolling mean (255.49).",
+          "Volume surged to 2,237,172, more than double the average (1,028,415), indicating intense activity.",
+          "Z-score is 4.33, an extreme positive deviation.",
+          "DBSCAN, Isolation Forest, and combined detectors all agree on the anomaly."
+        ],
+        "date": null,
+        "row_number": 7,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price increased from 346.3 to 375, well above the rolling mean (263.8).",
+          "Volume was high at 1,734,493 compared to the average (1,096,083), reflecting strong trading.",
+          "Z-score is 3.59, indicating a severe deviation.",
+          "DBSCAN, Isolation Forest, and combined detectors all flagged this row."
+        ],
+        "date": null,
+        "row_number": 8,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price dropped from 375 to 367, still above the rolling mean (271.65).",
+          "Volume was exceptionally high at 2,142,354 versus the average (1,145,571).",
+          "Z-score is -1.00, not extreme, but the combination of price and volume is unusual.",
+          "DBSCAN, Isolation Forest, and combined detectors all agree."
+        ],
+        "date": null,
+        "row_number": 9,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price decreased from 367 to 363, above the rolling mean (279.29).",
+          "Volume was slightly above average (1,243,099 vs. 1,210,564).",
+          "Z-score is -0.54, not severe, but the context is unusual.",
+          "DBSCAN and combined detectors flagged this row."
+        ],
+        "date": null,
+        "row_number": 10,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price increased from 363 to 367.2, above the rolling mean (286.65).",
+          "Volume was below average (899,006 vs. 1,246,609), indicating the price move occurred on lighter trading.",
+          "Z-score is 0.45, not extreme, but the price and volume combination is atypical.",
+          "DBSCAN and combined detectors flagged this row."
+        ],
+        "date": null,
+        "row_number": 11,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price remained steady at 367, above the rolling mean (293.21).",
+          "Volume was exceptionally high at 2,278,787 versus the average (1,250,051).",
+          "Z-score is -0.08, not severe, but the volume is highly unusual.",
+          "DBSCAN, Isolation Forest, and combined detectors all agree."
+        ],
+        "date": null,
+        "row_number": 12,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price dropped from 367 to 349, above the rolling mean (299.25).",
+          "Volume was slightly above average (1,459,450 vs. 1,311,813).",
+          "Z-score is -2.22, indicating a notable negative deviation.",
+          "DBSCAN, Isolation Forest, and combined detectors all flagged this row."
+        ],
+        "date": null,
+        "row_number": 13,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price decreased from 349 to 346, above the rolling mean (305.13).",
+          "Volume was below average (962,018 vs. 1,342,407).",
+          "Z-score is -0.44, not severe, but the price and volume context is unusual.",
+          "DBSCAN and combined detectors flagged this row."
+        ],
+        "date": null,
+        "row_number": 14,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "Close price dropped from 346 to 335.5, above the rolling mean (310.21).",
+          "Volume was below average (1,084,119 vs. 1,356,696).",
+          "Z-score is -1.40, indicating a moderate negative deviation.",
+          "DBSCAN and combined detectors flagged this row."
+        ],
+        "date": null,
+        "row_number": 15,
+        "summary": ""
+      }
+    ],
+    "highlights": [],
+    "raw_summary": "**Row 1:**\n- The close price jumped sharply from 175.8 to 193.3, a significant upward move relative to adjacent days.\n- Volume was unusually low (23,832) compared to the average (163,758), indicating the price move occurred on thin trading.\n- Z-score is 4.32, well above the threshold, signaling an extreme deviation from the rolling mean.\n- Both DBSCAN and combined detectors flagged this row, suggesting agreement on its anomaly status.\n\n**Row 2:**\n- Close price surged from 191 to 209.4, far above the rolling mean (174.14), marking a strong upward move.\n- Volume spiked to 883,819, much higher than the average (135,076), indicating heavy trading activity.\n- Z-score is 4.18, showing a severe deviation from typical price behavior.\n- DBSCAN, Isolation Forest, and combined detectors all flagged this row, reinforcing the anomaly.\n\n**Row 3:**\n- Close price increased from 220 to 235.9, well above the rolling mean (185.75).\n- Volume was elevated at 1,043,530 versus the average (306,034), reflecting intense trading.\n- Z-score of 3.12 is above the anomaly threshold, indicating a notable price deviation.\n- Both DBSCAN and combined detectors flagged this row.\n\n**Row 4:**\n- Close price rose from 241 to 258.1, significantly above the rolling mean (206.66).\n- Volume reached 1,477,229, nearly triple the average (531,097), showing exceptional trading activity.\n- Z-score is 3.07, marking a substantial deviation.\n- DBSCAN, Isolation Forest, and combined detectors all agree on this anomaly.\n\n**Row 5:**\n- Close price dropped sharply from 269.7 to 250.1, below the rolling mean (219.73).\n- Volume was high at 1,228,937 compared to the average (701,861), indicating heavy trading during the decline.\n- Z-score is -3.26, a strong negative deviation from the mean.\n- DBSCAN, Isolation Forest, and combined detectors all flagged this row.\n\n**Row 6:**\n- Close price decreased from 320 to 314.9, but remains well above the rolling mean (248.64).\n- Volume was elevated at 1,353,662 versus the average (990,992), suggesting active trading.\n- Z-score is -0.76, not extreme, but the price and volume context are unusual.\n- DBSCAN and combined detectors flagged this row.\n\n**Row 7:**\n- Close price jumped from 314.9 to 346.3, far above the rolling mean (255.49).\n- Volume surged to 2,237,172, more than double the average (1,028,415), indicating intense activity.\n- Z-score is 4.33, an extreme positive deviation.\n- DBSCAN, Isolation Forest, and combined detectors all agree on the anomaly.\n\n**Row 8:**\n- Close price increased from 346.3 to 375, well above the rolling mean (263.8).\n- Volume was high at 1,734,493 compared to the average (1,096,083), reflecting strong trading.\n- Z-score is 3.59, indicating a severe deviation.\n- DBSCAN, Isolation Forest, and combined detectors all flagged this row.\n\n**Row 9:**\n- Close price dropped from 375 to 367, still above the rolling mean (271.65).\n- Volume was exceptionally high at 2,142,354 versus the average (1,145,571).\n- Z-score is -1.00, not extreme, but the combination of price and volume is unusual.\n- DBSCAN, Isolation Forest, and combined detectors all agree.\n\n**Row 10:**\n- Close price decreased from 367 to 363, above the rolling mean (279.29).\n- Volume was slightly above average (1,243,099 vs. 1,210,564).\n- Z-score is -0.54, not severe, but the context is unusual.\n- DBSCAN and combined detectors flagged this row.\n\n**Row 11:**\n- Close price increased from 363 to 367.2, above the rolling mean (286.65).\n- Volume was below average (899,006 vs. 1,246,609), indicating the price move occurred on lighter trading.\n- Z-score is 0.45, not extreme, but the price and volume combination is atypical.\n- DBSCAN and combined detectors flagged this row.\n\n**Row 12:**\n- Close price remained steady at 367, above the rolling mean (293.21).\n- Volume was exceptionally high at 2,278,787 versus the average (1,250,051).\n- Z-score is -0.08, not severe, but the volume is highly unusual.\n- DBSCAN, Isolation Forest, and combined detectors all agree.\n\n**Row 13:**\n- Close price dropped from 367 to 349, above the rolling mean (299.25).\n- Volume was slightly above average (1,459,450 vs. 1,311,813).\n- Z-score is -2.22, indicating a notable negative deviation.\n- DBSCAN, Isolation Forest, and combined detectors all flagged this row.\n\n**Row 14:**\n- Close price decreased from 349 to 346, above the rolling mean (305.13).\n- Volume was below average (962,018 vs. 1,342,407).\n- Z-score is -0.44, not severe, but the price and volume context is unusual.\n- DBSCAN and combined detectors flagged this row.\n\n**Row 15:**\n- Close price dropped from 346 to 335.5, above the rolling mean (310.21).\n- Volume was below average (1,084,119 vs. 1,356,696).\n- Z-score is -1.40, indicating a moderate negative deviation.\n- DBSCAN and combined detectors flagged this row.\n\n**Overall Summary:**\n- Most anomalies are characterized by sharp price movements (both up and down) relative to their rolling means, often accompanied by unusually high or low trading volumes.\n- Z-score severity is high in several cases, indicating extreme deviations from typical price behavior.\n- Multiple detectors (DBSCAN, Isolation Forest, combined) frequently agree, reinforcing the reliability of these anomaly flags.\n- The flagged rows represent periods of heightened volatility and atypical trading activity, warranting further investigation for underlying drivers.",
+    "source": "openai/gpt-4.1",
+    "summary": "- Most anomalies are characterized by sharp price movements (both up and down) relative to their rolling means, often accompanied by unusually high or low trading volumes.\n- Z-score severity is high in several cases, indicating extreme deviations from typical price behavior.\n- Multiple detectors (DBSCAN, Isolation Forest, combined) frequently agree, reinforcing the reliability of these anomaly flags.\n- The flagged rows represent periods of heightened volatility and atypical trading activity, warranting further investigation for underlying drivers."
+  },
+  "request": {
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Anomaly_Score_IF": -6.27,
+        "Anomaly_Z_Score": 4.324330585732933,
+        "IF_Anomaly_Score": -6.27,
+        "Lower_BB": 171.24972916083524,
+        "RSI": 41.06776180698153,
+        "SMA_10": 182.25,
+        "SMA_20": 190.345,
+        "SMA_50": 193.4318181818182,
+        "Upper_BB": 209.44027083916475,
+        "adjacent_rows": [
+          {
+            "close": 179.1,
+            "date": "2024-02-28",
+            "volume": 73474
+          },
+          {
+            "close": 176.6,
+            "date": "2024-02-29",
+            "volume": 183421
+          },
+          {
+            "close": 175.8,
+            "date": "2024-03-03",
+            "volume": 103413
+          },
+          {
+            "close": 185.9,
+            "date": "2024-03-05",
+            "volume": 246540
+          },
+          {
+            "close": 187.5,
+            "date": "2024-03-06",
+            "volume": 126770
+          },
+          {
+            "close": 187,
+            "date": "2024-03-07",
+            "volume": 103854
+          }
+        ],
+        "average_volume": 163758.15,
+        "bb_width": 0.19757134856869896,
+        "close": 193.3,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": -1,
+        "date": "2024-03-04",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 193.3,
+        "low": 179,
+        "open": 179,
+        "previous_close": 175.8,
+        "returns": 0.09954493742889636,
+        "rolling_mean": 190.345,
+        "rolling_std": 0.02695384676571282,
+        "volatility": 0.02695384676571282,
+        "volume": 23832,
+        "z_score": 4.324330585732933
+      },
+      {
+        "Anomaly_Score_IF": -6.13,
+        "Anomaly_Z_Score": 4.1829567778911665,
+        "IF_Anomaly_Score": -6.13,
+        "Lower_BB": 153.17506076746463,
+        "RSI": 90.65606361829028,
+        "SMA_10": 179.12,
+        "SMA_20": 174.13500000000002,
+        "SMA_50": 172.07399999999998,
+        "Upper_BB": 195.0949392325354,
+        "adjacent_rows": [
+          {
+            "close": 176.1,
+            "date": "2024-07-11",
+            "volume": 172243
+          },
+          {
+            "close": 188,
+            "date": "2024-07-14",
+            "volume": 351899
+          },
+          {
+            "close": 191,
+            "date": "2024-07-15",
+            "volume": 605211
+          },
+          {
+            "close": 208.8,
+            "date": "2024-07-17",
+            "volume": 744724
+          },
+          {
+            "close": 210,
+            "date": "2024-07-18",
+            "volume": 842492
+          },
+          {
+            "close": 210.2,
+            "date": "2024-07-21",
+            "volume": 522204
+          }
+        ],
+        "average_volume": 135076.35,
+        "bb_width": 0.20019044157149368,
+        "close": 209.4,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-07-16",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 210,
+        "low": 191,
+        "open": 191,
+        "previous_close": 191,
+        "returns": 0.09633507853403134,
+        "rolling_mean": 174.13500000000002,
+        "rolling_std": 0.028413444792268972,
+        "volatility": 0.028413444792268972,
+        "volume": 883819,
+        "z_score": 4.1829567778911665
+      },
+      {
+        "Anomaly_Score_IF": -6.24,
+        "Anomaly_Z_Score": 3.1231637044701825,
+        "IF_Anomaly_Score": -6.24,
+        "Lower_BB": 142.16248367998742,
+        "RSI": 98.21693907875188,
+        "SMA_10": 202.17,
+        "SMA_20": 185.75,
+        "SMA_50": 177.38,
+        "Upper_BB": 229.33751632001258,
+        "adjacent_rows": [
+          {
+            "close": 210,
+            "date": "2024-07-18",
+            "volume": 842492
+          },
+          {
+            "close": 210.2,
+            "date": "2024-07-21",
+            "volume": 522204
+          },
+          {
+            "close": 220,
+            "date": "2024-07-22",
+            "volume": 830170
+          },
+          {
+            "close": 228.1,
+            "date": "2024-07-24",
+            "volume": 847574
+          },
+          {
+            "close": 228.5,
+            "date": "2024-07-25",
+            "volume": 676251
+          },
+          {
+            "close": 233.9,
+            "date": "2024-07-28",
+            "volume": 734555
+          }
+        ],
+        "average_volume": 306034.6,
+        "bb_width": 0.36954231725318,
+        "close": 235.9,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": -1,
+        "date": "2024-07-23",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 237,
+        "low": 220,
+        "open": 224.4,
+        "previous_close": 220,
+        "returns": 0.07227272727272727,
+        "rolling_mean": 185.75,
+        "rolling_std": 0.03164070415808472,
+        "volatility": 0.03164070415808472,
+        "volume": 1043530,
+        "z_score": 3.1231637044701825
+      },
+      {
+        "Anomaly_Score_IF": -6.01,
+        "Anomaly_Z_Score": 3.0650978974019427,
+        "IF_Anomaly_Score": -6.01,
+        "Lower_BB": 149.67592466218954,
+        "RSI": 91.49797570850203,
+        "SMA_10": 230.42,
+        "SMA_20": 206.66000000000003,
+        "SMA_50": 185.29399999999998,
+        "Upper_BB": 263.6440753378105,
+        "adjacent_rows": [
+          {
+            "close": 233.9,
+            "date": "2024-07-28",
+            "volume": 734555
+          },
+          {
+            "close": 238.5,
+            "date": "2024-07-29",
+            "volume": 1020096
+          },
+          {
+            "close": 241,
+            "date": "2024-07-30",
+            "volume": 819035
+          },
+          {
+            "close": 253.9,
+            "date": "2024-08-01",
+            "volume": 828114
+          },
+          {
+            "close": 269.7,
+            "date": "2024-08-05",
+            "volume": 1362971
+          },
+          {
+            "close": 250.1,
+            "date": "2024-08-06",
+            "volume": 1228937
+          }
+        ],
+        "average_volume": 531096.95,
+        "bb_width": 0.4415658685611039,
+        "close": 258.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-07-31",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 264.2,
+        "low": 244,
+        "open": 244.6,
+        "previous_close": 241,
+        "returns": 0.07095435684647322,
+        "rolling_mean": 206.66000000000003,
+        "rolling_std": 0.03263429095076933,
+        "volatility": 0.03263429095076933,
+        "volume": 1477229,
+        "z_score": 3.0650978974019427
+      },
+      {
+        "Anomaly_Score_IF": -6.14,
+        "Anomaly_Z_Score": -3.2607859453732804,
+        "IF_Anomaly_Score": -6.14,
+        "Lower_BB": 161.2444544269095,
+        "RSI": 69.36251189343481,
+        "SMA_10": 243.77000000000004,
+        "SMA_20": 219.725,
+        "SMA_50": 190.18200000000002,
+        "Upper_BB": 278.2055455730905,
+        "adjacent_rows": [
+          {
+            "close": 258.1,
+            "date": "2024-07-31",
+            "volume": 1477229
+          },
+          {
+            "close": 253.9,
+            "date": "2024-08-01",
+            "volume": 828114
+          },
+          {
+            "close": 269.7,
+            "date": "2024-08-05",
+            "volume": 1362971
+          },
+          {
+            "close": 268.1,
+            "date": "2024-08-07",
+            "volume": 1010815
+          },
+          {
+            "close": 275.9,
+            "date": "2024-08-08",
+            "volume": 1307915
+          },
+          {
+            "close": 297.9,
+            "date": "2024-08-11",
+            "volume": 1406458
+          }
+        ],
+        "average_volume": 701861.1,
+        "bb_width": 0.46765730166405833,
+        "close": 250.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-08-06",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 275,
+        "low": 250,
+        "open": 275,
+        "previous_close": 269.7,
+        "returns": -0.07267334074898035,
+        "rolling_mean": 219.725,
+        "rolling_std": 0.040132897708408784,
+        "volatility": 0.040132897708408784,
+        "volume": 1228937,
+        "z_score": -3.2607859453732804
+      },
+      {
+        "Anomaly_Score_IF": -6.97,
+        "Anomaly_Z_Score": -0.7619340922220575,
+        "IF_Anomaly_Score": -6.97,
+        "Lower_BB": 180.77514078787488,
+        "RSI": 75.91863517060366,
+        "SMA_10": 274.96000000000004,
+        "SMA_20": 248.64499999999998,
+        "SMA_50": 202.59399999999997,
+        "Upper_BB": 316.5148592121251,
+        "adjacent_rows": [
+          {
+            "close": 275.9,
+            "date": "2024-08-08",
+            "volume": 1307915
+          },
+          {
+            "close": 297.9,
+            "date": "2024-08-11",
+            "volume": 1406458
+          },
+          {
+            "close": 320,
+            "date": "2024-08-12",
+            "volume": 1627746
+          },
+          {
+            "close": 346.3,
+            "date": "2024-08-14",
+            "volume": 2237172
+          },
+          {
+            "close": 375,
+            "date": "2024-08-15",
+            "volume": 1734493
+          },
+          {
+            "close": 367,
+            "date": "2024-08-18",
+            "volume": 2142354
+          }
+        ],
+        "average_volume": 990992.3,
+        "bb_width": 0.43105658438948946,
+        "close": 314.9,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-08-13",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 325,
+        "low": 308.2,
+        "open": 325,
+        "previous_close": 320,
+        "returns": -0.01593750000000005,
+        "rolling_mean": 248.64499999999998,
+        "rolling_std": 0.04454120015887215,
+        "volatility": 0.04454120015887215,
+        "volume": 1353662,
+        "z_score": -0.7619340922220575
+      },
+      {
+        "Anomaly_Score_IF": -5.11,
+        "Anomaly_Z_Score": 4.3317853012352385,
+        "IF_Anomaly_Score": -5.11,
+        "Lower_BB": 177.43568962305125,
+        "RSI": 83.57954545454544,
+        "SMA_10": 285.49,
+        "SMA_20": 255.49,
+        "SMA_50": 206.16,
+        "Upper_BB": 333.5443103769488,
+        "adjacent_rows": [
+          {
+            "close": 297.9,
+            "date": "2024-08-11",
+            "volume": 1406458
+          },
+          {
+            "close": 320,
+            "date": "2024-08-12",
+            "volume": 1627746
+          },
+          {
+            "close": 314.9,
+            "date": "2024-08-13",
+            "volume": 1353662
+          },
+          {
+            "close": 375,
+            "date": "2024-08-15",
+            "volume": 1734493
+          },
+          {
+            "close": 367,
+            "date": "2024-08-18",
+            "volume": 2142354
+          },
+          {
+            "close": 363,
+            "date": "2024-08-21",
+            "volume": 1243099
+          }
+        ],
+        "average_volume": 1028414.85,
+        "bb_width": 0.450790126346802,
+        "close": 346.3,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-08-14",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 346.3,
+        "low": 321.1,
+        "open": 321.1,
+        "previous_close": 314.9,
+        "returns": 0.0997141949825342,
+        "rolling_mean": 255.49,
+        "rolling_std": 0.044826572249045786,
+        "volatility": 0.044826572249045786,
+        "volume": 2237172,
+        "z_score": 4.3317853012352385
+      },
+      {
+        "Anomaly_Score_IF": -5.73,
+        "Anomaly_Z_Score": 3.590175467186787,
+        "IF_Anomaly_Score": -5.73,
+        "Lower_BB": 172.42360088190455,
+        "RSI": 85.85413607440037,
+        "SMA_10": 297.18,
+        "SMA_20": 263.8,
+        "SMA_50": 210.282,
+        "Upper_BB": 355.17639911809545,
+        "adjacent_rows": [
+          {
+            "close": 320,
+            "date": "2024-08-12",
+            "volume": 1627746
+          },
+          {
+            "close": 314.9,
+            "date": "2024-08-13",
+            "volume": 1353662
+          },
+          {
+            "close": 346.3,
+            "date": "2024-08-14",
+            "volume": 2237172
+          },
+          {
+            "close": 367,
+            "date": "2024-08-18",
+            "volume": 2142354
+          },
+          {
+            "close": 363,
+            "date": "2024-08-21",
+            "volume": 1243099
+          },
+          {
+            "close": 367.2,
+            "date": "2024-08-22",
+            "volume": 899006
+          }
+        ],
+        "average_volume": 1096082.5,
+        "bb_width": 0.4873407952965091,
+        "close": 375,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-08-15",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 380.9,
+        "low": 353.2,
+        "open": 353.2,
+        "previous_close": 346.3,
+        "returns": 0.08287611897198954,
+        "rolling_mean": 263.8,
+        "rolling_std": 0.045964964873602104,
+        "volatility": 0.045964964873602104,
+        "volume": 1734493,
+        "z_score": 3.590175467186787
+      },
+      {
+        "Anomaly_Score_IF": -5.53,
+        "Anomaly_Z_Score": -0.9995861292113448,
+        "IF_Anomaly_Score": -5.53,
+        "Lower_BB": 173.04481170904472,
+        "RSI": 82.1652972450459,
+        "SMA_10": 308.49,
+        "SMA_20": 271.65,
+        "SMA_50": 214.282,
+        "Upper_BB": 370.25518829095523,
+        "adjacent_rows": [
+          {
+            "close": 314.9,
+            "date": "2024-08-13",
+            "volume": 1353662
+          },
+          {
+            "close": 346.3,
+            "date": "2024-08-14",
+            "volume": 2237172
+          },
+          {
+            "close": 375,
+            "date": "2024-08-15",
+            "volume": 1734493
+          },
+          {
+            "close": 363,
+            "date": "2024-08-21",
+            "volume": 1243099
+          },
+          {
+            "close": 367.2,
+            "date": "2024-08-22",
+            "volume": 899006
+          },
+          {
+            "close": 367,
+            "date": "2024-08-25",
+            "volume": 2278787
+          }
+        ],
+        "average_volume": 1145570.95,
+        "bb_width": 0.5373579743376308,
+        "close": 367,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2024-08-18",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 390,
+        "low": 360,
+        "open": 382.5,
+        "previous_close": 375,
+        "returns": -0.021333333333333315,
+        "rolling_mean": 271.65,
+        "rolling_std": 0.04712289971601406,
+        "volatility": 0.04712289971601406,
+        "volume": 2142354,
+        "z_score": -0.9995861292113448
+      },
+      {
+        "Anomaly_Score_IF": -6.72,
+        "Anomaly_Z_Score": -0.5400283497101491,
+        "IF_Anomaly_Score": -6.72,
+        "Lower_BB": 177.11831991923438,
+        "RSI": 80.17450315075132,
+        "SMA_10": 317.82,
+        "SMA_20": 279.29,
+        "SMA_50": 218.202,
+        "Upper_BB": 381.46168008076563,
+        "adjacent_rows": [
+          {
+            "close": 346.3,
+            "date": "2024-08-14",
+            "volume": 2237172
+          },
+          {
+            "close": 375,
+            "date": "2024-08-15",
+            "volume": 1734493
+          },
+          {
+            "close": 367,
+            "date": "2024-08-18",
+            "volume": 2142354
+          },
+          {
+            "close": 367.2,
+            "date": "2024-08-22",
+            "volume": 899006
+          },
+          {
+            "close": 367,
+            "date": "2024-08-25",
+            "volume": 2278787
+          },
+          {
+            "close": 349,
+            "date": "2024-08-27",
+            "volume": 1459450
+          }
+        ],
+        "average_volume": 1210564.05,
+        "bb_width": 0.5629293668361742,
+        "close": 363,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-08-21",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 379.9,
+        "low": 363,
+        "open": 374,
+        "previous_close": 367,
+        "returns": -0.010899182561307952,
+        "rolling_mean": 279.29,
+        "rolling_std": 0.047571095639034056,
+        "volatility": 0.047571095639034056,
+        "volume": 1243099,
+        "z_score": -0.5400283497101491
+      },
+      {
+        "Anomaly_Score_IF": -6.58,
+        "Anomaly_Z_Score": 0.4496067255957996,
+        "IF_Anomaly_Score": -6.58,
+        "Lower_BB": 181.30348405831046,
+        "RSI": 80.33653846153845,
+        "SMA_10": 329.53000000000003,
+        "SMA_20": 286.65,
+        "SMA_50": 222.202,
+        "Upper_BB": 391.9965159416895,
+        "adjacent_rows": [
+          {
+            "close": 375,
+            "date": "2024-08-15",
+            "volume": 1734493
+          },
+          {
+            "close": 367,
+            "date": "2024-08-18",
+            "volume": 2142354
+          },
+          {
+            "close": 363,
+            "date": "2024-08-21",
+            "volume": 1243099
+          },
+          {
+            "close": 367,
+            "date": "2024-08-25",
+            "volume": 2278787
+          },
+          {
+            "close": 349,
+            "date": "2024-08-27",
+            "volume": 1459450
+          },
+          {
+            "close": 346,
+            "date": "2024-08-28",
+            "volume": 962018
+          }
+        ],
+        "average_volume": 1246608.8,
+        "bb_width": 0.5737827665669364,
+        "close": 367.2,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-08-22",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 373.3,
+        "low": 362.1,
+        "open": 370.2,
+        "previous_close": 363,
+        "returns": 0.01157024793388417,
+        "rolling_mean": 286.65,
+        "rolling_std": 0.047523684492461284,
+        "volatility": 0.047523684492461284,
+        "volume": 899006,
+        "z_score": 0.4496067255957996
+      },
+      {
+        "Anomaly_Score_IF": -5.46,
+        "Anomaly_Z_Score": -0.08397778663610563,
+        "IF_Anomaly_Score": -5.46,
+        "Lower_BB": 184.88173185758916,
+        "RSI": 78.49293563579278,
+        "SMA_10": 339.41999999999996,
+        "SMA_20": 293.20500000000004,
+        "SMA_50": 226.06599999999997,
+        "Upper_BB": 401.5282681424109,
+        "adjacent_rows": [
+          {
+            "close": 367,
+            "date": "2024-08-18",
+            "volume": 2142354
+          },
+          {
+            "close": 363,
+            "date": "2024-08-21",
+            "volume": 1243099
+          },
+          {
+            "close": 367.2,
+            "date": "2024-08-22",
+            "volume": 899006
+          },
+          {
+            "close": 349,
+            "date": "2024-08-27",
+            "volume": 1459450
+          },
+          {
+            "close": 346,
+            "date": "2024-08-28",
+            "volume": 962018
+          },
+          {
+            "close": 335.5,
+            "date": "2024-08-29",
+            "volume": 1084119
+          }
+        ],
+        "average_volume": 1250050.6,
+        "bb_width": 0.5903175375608223,
+        "close": 367,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2024-08-25",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 388,
+        "low": 365,
+        "open": 374.5,
+        "previous_close": 367.2,
+        "returns": -0.0005446623093681158,
+        "rolling_mean": 293.20500000000004,
+        "rolling_std": 0.04665392918266774,
+        "volatility": 0.04665392918266774,
+        "volume": 2278787,
+        "z_score": -0.08397778663610563
+      },
+      {
+        "Anomaly_Score_IF": -5.9,
+        "Anomaly_Z_Score": -2.2201664711455855,
+        "IF_Anomaly_Score": -5.9,
+        "Lower_BB": 192.74598475570082,
+        "RSI": 73.20644216691068,
+        "SMA_10": 346.73,
+        "SMA_20": 299.25,
+        "SMA_50": 229.52599999999998,
+        "Upper_BB": 405.7540152442992,
+        "adjacent_rows": [
+          {
+            "close": 363,
+            "date": "2024-08-21",
+            "volume": 1243099
+          },
+          {
+            "close": 367.2,
+            "date": "2024-08-22",
+            "volume": 899006
+          },
+          {
+            "close": 367,
+            "date": "2024-08-25",
+            "volume": 2278787
+          },
+          {
+            "close": 346,
+            "date": "2024-08-28",
+            "volume": 962018
+          },
+          {
+            "close": 335.5,
+            "date": "2024-08-29",
+            "volume": 1084119
+          },
+          {
+            "close": 328,
+            "date": "2024-09-01",
+            "volume": 802824
+          }
+        ],
+        "average_volume": 1311813.45,
+        "bb_width": 0.6103381962424022,
+        "close": 349,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2024-08-27",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 367,
+        "low": 346,
+        "open": 367,
+        "previous_close": 367,
+        "returns": -0.049046321525885506,
+        "rolling_mean": 299.25,
+        "rolling_std": 0.047794099215010634,
+        "volatility": 0.047794099215010634,
+        "volume": 1459450,
+        "z_score": -2.2201664711455855
+      },
+      {
+        "Anomaly_Score_IF": -6.57,
+        "Anomaly_Z_Score": -0.4385873456529511,
+        "IF_Anomaly_Score": -6.57,
+        "Lower_BB": 202.14882748779607,
+        "RSI": 69.85944820406039,
+        "SMA_10": 351.53999999999996,
+        "SMA_20": 305.125,
+        "SMA_50": 232.926,
+        "Upper_BB": 408.1011725122039,
+        "adjacent_rows": [
+          {
+            "close": 367.2,
+            "date": "2024-08-22",
+            "volume": 899006
+          },
+          {
+            "close": 367,
+            "date": "2024-08-25",
+            "volume": 2278787
+          },
+          {
+            "close": 349,
+            "date": "2024-08-27",
+            "volume": 1459450
+          },
+          {
+            "close": 335.5,
+            "date": "2024-08-29",
+            "volume": 1084119
+          },
+          {
+            "close": 328,
+            "date": "2024-09-01",
+            "volume": 802824
+          },
+          {
+            "close": 353,
+            "date": "2024-09-02",
+            "volume": 1225949
+          }
+        ],
+        "average_volume": 1342407.25,
+        "bb_width": 0.5952379914000226,
+        "close": 346,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-08-28",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 362,
+        "low": 345,
+        "open": 349,
+        "previous_close": 349,
+        "returns": -0.008595988538681931,
+        "rolling_mean": 305.125,
+        "rolling_std": 0.048086346153446334,
+        "volatility": 0.048086346153446334,
+        "volume": 962018,
+        "z_score": -0.4385873456529511
+      },
+      {
+        "Anomaly_Score_IF": -6.55,
+        "Anomaly_Z_Score": -1.3965727532784418,
+        "IF_Anomaly_Score": -6.55,
+        "Lower_BB": 212.11487012472972,
+        "RSI": 73.33333333333333,
+        "SMA_10": 353.09,
+        "SMA_20": 310.20500000000004,
+        "SMA_50": 236.176,
+        "Upper_BB": 408.2951298752704,
+        "adjacent_rows": [
+          {
+            "close": 367,
+            "date": "2024-08-25",
+            "volume": 2278787
+          },
+          {
+            "close": 349,
+            "date": "2024-08-27",
+            "volume": 1459450
+          },
+          {
+            "close": 346,
+            "date": "2024-08-28",
+            "volume": 962018
+          },
+          {
+            "close": 328,
+            "date": "2024-09-01",
+            "volume": 802824
+          },
+          {
+            "close": 353,
+            "date": "2024-09-02",
+            "volume": 1225949
+          },
+          {
+            "close": 352,
+            "date": "2024-09-03",
+            "volume": 744150
+          }
+        ],
+        "average_volume": 1356695.6,
+        "bb_width": 0.5847399694501958,
+        "close": 335.5,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-08-29",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 352.9,
+        "low": 330,
+        "open": 352.9,
+        "previous_close": 346,
+        "returns": -0.030346820809248554,
+        "rolling_mean": 310.20500000000004,
+        "rolling_std": 0.04948676445644921,
+        "volatility": 0.04948676445644921,
+        "volume": 1084119,
+        "z_score": -1.3965727532784418
+      },
+      {
+        "Anomaly_Score_IF": -6.46,
+        "Anomaly_Z_Score": -1.0445705724660959,
+        "IF_Anomaly_Score": -6.46,
+        "Lower_BB": 222.3676104568952,
+        "RSI": 67.3623188405797,
+        "SMA_10": 354.4,
+        "SMA_20": 314.68,
+        "SMA_50": 239.26,
+        "Upper_BB": 406.9923895431048,
+        "adjacent_rows": [
+          {
+            "close": 349,
+            "date": "2024-08-27",
+            "volume": 1459450
+          },
+          {
+            "close": 346,
+            "date": "2024-08-28",
+            "volume": 962018
+          },
+          {
+            "close": 335.5,
+            "date": "2024-08-29",
+            "volume": 1084119
+          },
+          {
+            "close": 353,
+            "date": "2024-09-02",
+            "volume": 1225949
+          },
+          {
+            "close": 352,
+            "date": "2024-09-03",
+            "volume": 744150
+          },
+          {
+            "close": 338.9,
+            "date": "2024-09-04",
+            "volume": 719329
+          }
+        ],
+        "average_volume": 1374173.8,
+        "bb_width": 0.5628804240433221,
+        "close": 328,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-09-01",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 342,
+        "low": 325.6,
+        "open": 342,
+        "previous_close": 335.5,
+        "returns": -0.02235469448584204,
+        "rolling_mean": 314.68,
+        "rolling_std": 0.050356647381640994,
+        "volatility": 0.050356647381640994,
+        "volume": 802824,
+        "z_score": -1.0445705724660959
+      },
+      {
+        "Anomaly_Score_IF": -6.04,
+        "Anomaly_Z_Score": 3.296994402792784,
+        "IF_Anomaly_Score": -6.04,
+        "Lower_BB": 233.35598962917436,
+        "RSI": 70.32156035846073,
+        "SMA_10": 355.07,
+        "SMA_20": 320.28000000000003,
+        "SMA_50": 242.86399999999998,
+        "Upper_BB": 407.2040103708257,
+        "adjacent_rows": [
+          {
+            "close": 346,
+            "date": "2024-08-28",
+            "volume": 962018
+          },
+          {
+            "close": 335.5,
+            "date": "2024-08-29",
+            "volume": 1084119
+          },
+          {
+            "close": 328,
+            "date": "2024-09-01",
+            "volume": 802824
+          },
+          {
+            "close": 352,
+            "date": "2024-09-03",
+            "volume": 744150
+          },
+          {
+            "close": 338.9,
+            "date": "2024-09-04",
+            "volume": 719329
+          },
+          {
+            "close": 335.1,
+            "date": "2024-09-05",
+            "volume": 676073
+          }
+        ],
+        "average_volume": 1363310.2,
+        "bb_width": 0.49248731088286496,
+        "close": 353,
+        "cluster": 2,
+        "cluster_dbscan": 2,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-09-02",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 353,
+        "low": 323.4,
+        "open": 334.5,
+        "previous_close": 328,
+        "returns": 0.07621951219512191,
+        "rolling_mean": 320.28000000000003,
+        "rolling_std": 0.05201053320119466,
+        "volatility": 0.05201053320119466,
+        "volume": 1225949,
+        "z_score": 3.296994402792784
+      },
+      {
+        "Anomaly_Score_IF": -6.38,
+        "Anomaly_Z_Score": -1.699112272486947,
+        "IF_Anomaly_Score": -6.38,
+        "Lower_BB": 253.31658218789642,
+        "RSI": 55.91734502191608,
+        "SMA_10": 349.96,
+        "SMA_20": 329.225,
+        "SMA_50": 249.87199999999996,
+        "Upper_BB": 405.13341781210363,
+        "adjacent_rows": [
+          {
+            "close": 328,
+            "date": "2024-09-01",
+            "volume": 802824
+          },
+          {
+            "close": 353,
+            "date": "2024-09-02",
+            "volume": 1225949
+          },
+          {
+            "close": 352,
+            "date": "2024-09-03",
+            "volume": 744150
+          },
+          {
+            "close": 335.1,
+            "date": "2024-09-05",
+            "volume": 676073
+          },
+          {
+            "close": 330,
+            "date": "2024-09-08",
+            "volume": 389711
+          },
+          {
+            "close": 321,
+            "date": "2024-09-09",
+            "volume": 661100
+          }
+        ],
+        "average_volume": 1347001.95,
+        "bb_width": 0.447969417598723,
+        "close": 338.9,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-09-04",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 359,
+        "low": 337,
+        "open": 359,
+        "previous_close": 352,
+        "returns": -0.037215909090909105,
+        "rolling_mean": 329.225,
+        "rolling_std": 0.05177430454806875,
+        "volatility": 0.05177430454806875,
+        "volume": 719329,
+        "z_score": -1.699112272486947
+      },
+      {
+        "Anomaly_Score_IF": -6.59,
+        "Anomaly_Z_Score": -0.5538388683494313,
+        "IF_Anomaly_Score": -6.59,
+        "Lower_BB": 261.93729759678183,
+        "RSI": 56.376262626262644,
+        "SMA_10": 347.16999999999996,
+        "SMA_20": 332.495,
+        "SMA_50": 253.178,
+        "Upper_BB": 403.0527024032182,
+        "adjacent_rows": [
+          {
+            "close": 353,
+            "date": "2024-09-02",
+            "volume": 1225949
+          },
+          {
+            "close": 352,
+            "date": "2024-09-03",
+            "volume": 744150
+          },
+          {
+            "close": 338.9,
+            "date": "2024-09-04",
+            "volume": 719329
+          },
+          {
+            "close": 330,
+            "date": "2024-09-08",
+            "volume": 389711
+          },
+          {
+            "close": 321,
+            "date": "2024-09-09",
+            "volume": 661100
+          },
+          {
+            "close": 318,
+            "date": "2024-09-10",
+            "volume": 502730
+          }
+        ],
+        "average_volume": 1341562.7,
+        "bb_width": 0.42111430858381477,
+        "close": 335.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-09-05",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 343,
+        "low": 330.2,
+        "open": 340,
+        "previous_close": 338.9,
+        "returns": -0.011212747123044986,
+        "rolling_mean": 332.495,
+        "rolling_std": 0.05090444624397547,
+        "volatility": 0.05090444624397547,
+        "volume": 676073,
+        "z_score": -0.5538388683494313
+      },
+      {
+        "Anomaly_Score_IF": -5.67,
+        "Anomaly_Z_Score": -3.3453273727108765,
+        "IF_Anomaly_Score": -5.67,
+        "Lower_BB": 289.0474978808312,
+        "RSI": 22.2672064777328,
+        "SMA_10": 311.42,
+        "SMA_20": 323.58500000000004,
+        "SMA_50": 290.684,
+        "Upper_BB": 358.12250211916887,
+        "adjacent_rows": [
+          {
+            "close": 307.5,
+            "date": "2024-09-23",
+            "volume": 378446
+          },
+          {
+            "close": 301,
+            "date": "2024-09-24",
+            "volume": 446031
+          },
+          {
+            "close": 307,
+            "date": "2024-09-25",
+            "volume": 405463
+          },
+          {
+            "close": 280,
+            "date": "2024-09-29",
+            "volume": 487941
+          },
+          {
+            "close": 282.9,
+            "date": "2024-09-30",
+            "volume": 243263
+          },
+          {
+            "close": 301,
+            "date": "2024-10-01",
+            "volume": 612401
+          }
+        ],
+        "average_volume": 668536.7,
+        "bb_width": 0.24313623455944267,
+        "close": 284.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2024-09-26",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 300.9,
+        "low": 277,
+        "open": 300.9,
+        "previous_close": 307,
+        "returns": -0.0745928338762214,
+        "rolling_mean": 323.58500000000004,
+        "rolling_std": 0.031225442212439933,
+        "volatility": 0.031225442212439933,
+        "volume": 1668374,
+        "z_score": -3.3453273727108765
+      },
+      {
+        "Anomaly_Score_IF": -6.9,
+        "Anomaly_Z_Score": 2.757930999245961,
+        "IF_Anomaly_Score": -6.9,
+        "Lower_BB": 275.2475832073643,
+        "RSI": 40.56603773584906,
+        "SMA_10": 301.51000000000005,
+        "SMA_20": 316.305,
+        "SMA_50": 296.86,
+        "Upper_BB": 357.3624167926357,
+        "adjacent_rows": [
+          {
+            "close": 284.1,
+            "date": "2024-09-26",
+            "volume": 1668374
+          },
+          {
+            "close": 280,
+            "date": "2024-09-29",
+            "volume": 487941
+          },
+          {
+            "close": 282.9,
+            "date": "2024-09-30",
+            "volume": 243263
+          },
+          {
+            "close": 293,
+            "date": "2024-10-02",
+            "volume": 348725
+          },
+          {
+            "close": 299,
+            "date": "2024-10-06",
+            "volume": 257587
+          },
+          {
+            "close": 303,
+            "date": "2024-10-07",
+            "volume": 262692
+          }
+        ],
+        "average_volume": 613236.25,
+        "bb_width": 0.2728067560972472,
+        "close": 301,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2024-10-01",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 302.3,
+        "low": 284,
+        "open": 285.9,
+        "previous_close": 282.9,
+        "returns": 0.06398020501944157,
+        "rolling_mean": 316.305,
+        "rolling_std": 0.03484941347193398,
+        "volatility": 0.03484941347193398,
+        "volume": 612401,
+        "z_score": 2.757930999245961
+      },
+      {
+        "Anomaly_Score_IF": -6.21,
+        "Anomaly_Z_Score": -4.227023180910638,
+        "IF_Anomaly_Score": -6.21,
+        "Lower_BB": 275.55073829683886,
+        "RSI": 16.830727658753176,
+        "SMA_10": 288.81600000000003,
+        "SMA_20": 291.783,
+        "SMA_50": 297.99,
+        "Upper_BB": 308.0152617031612,
+        "adjacent_rows": [
+          {
+            "close": 290.42,
+            "date": "2025-09-04",
+            "volume": 103704
+          },
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 286.1,
+            "date": "2025-09-21",
+            "volume": 228050
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          }
+        ],
+        "average_volume": 106723.2,
+        "bb_width": 0.12481554558370746,
+        "close": 260.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": -1,
+        "date": "2025-09-18",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 281.6,
+        "low": 258.8,
+        "open": 281.6,
+        "previous_close": 287.28,
+        "returns": -0.09461152882205492,
+        "rolling_mean": 291.783,
+        "rolling_std": 0.022612523770143653,
+        "volatility": 0.022612523770143653,
+        "volume": 22003,
+        "z_score": -4.227023180910638
+      },
+      {
+        "Anomaly_Score_IF": -6.48,
+        "Anomaly_Z_Score": 4.34267985490303,
+        "IF_Anomaly_Score": -6.48,
+        "Lower_BB": 275.042709901815,
+        "RSI": 45.52248590533632,
+        "SMA_10": 287.53700000000003,
+        "SMA_20": 291.18850000000003,
+        "SMA_50": 297.8488,
+        "Upper_BB": 307.3342900981851,
+        "adjacent_rows": [
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 260.1,
+            "date": "2025-09-18",
+            "volume": 22003
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          },
+          {
+            "close": 290,
+            "date": "2025-09-25",
+            "volume": 65656
+          }
+        ],
+        "average_volume": 97605.85,
+        "bb_width": 0.11286815867308664,
+        "close": 286.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": -1,
+        "date": "2025-09-21",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 286.1,
+        "low": 260.1,
+        "open": 260.5,
+        "previous_close": 260.1,
+        "returns": 0.09996155324875056,
+        "rolling_mean": 291.18850000000003,
+        "rolling_std": 0.032664745203982264,
+        "volatility": 0.032664745203982264,
+        "volume": 228050,
+        "z_score": 4.34267985490303
+      }
+    ],
+    "end_date": "2026-01-01",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.048034934497816595,
+        "n_clusters": 2,
+        "n_noise": 22,
+        "volatility_anomaly_mean": 0.0410788301520015,
+        "volatility_normal_mean": 0.019332777663885498,
+        "volume_anomaly_mean": 1126389.1363636365,
+        "volume_normal_mean": 231080.89678899082
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.021834061135371178,
+        "n_clusters": 1,
+        "n_noise": 10,
+        "volatility_anomaly_mean": 0.0416779074101422,
+        "volatility_normal_mean": 0.019901888952447967,
+        "volume_anomaly_mean": 1633656.4,
+        "volume_normal_mean": 243739.4375
+      },
+      "zscore": {
+        "anomaly_rate": 0.03056768558951965,
+        "n_clusters": 1,
+        "n_noise": 14,
+        "volatility_anomaly_mean": 0.03694935075296719,
+        "volatility_normal_mean": 0.019854807239316603,
+        "volume_anomaly_mean": 1129886.2142857143,
+        "volume_normal_mean": 247102.30855855855
+      }
+    },
+    "mode": "Static",
+    "start_date": "2025-01-06",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-06T17:27:56.384616",
+  "user_id": 1
+}

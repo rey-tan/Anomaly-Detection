@@ -1,10 +1,11 @@
 import React from 'react'
-
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { fetchNotifications, markNotificationRead } from "../api";
 
-export default function NotificationsPage({ token }) {
+export default function NotificationsPage({ token, onSelectAnalysis }) {
 
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -45,6 +46,19 @@ export default function NotificationsPage({ token }) {
     }
   };
 
+  const handleViewAnalysis = async (analysisId) => {
+    if (!analysisId) return;
+    if (onSelectAnalysis) {
+      try {
+        await onSelectAnalysis(analysisId);
+        return;
+      } catch (err) {
+        setError(err.message || "Failed to load analysis");
+      }
+    }
+    navigate(`/results`);
+  };
+
   return (
     <section className="page-split">
         <div className="page-panel">
@@ -67,6 +81,9 @@ export default function NotificationsPage({ token }) {
                   <div className="notification-meta">{n.created_at ? String(n.created_at).split("T")[0] : ""} • {n.type}</div>
                 </div>
                 <div className="notification-actions">
+                  {n.analysis_id && (n.type === "explanation_generated" || n.type === "analysis_complete") ? (
+                    <button className="text-button" onClick={() => handleViewAnalysis(n.analysis_id)}>View Now</button>
+                  ) : null}
                   {!n.is_read ? (
                     <button className="text-button" onClick={() => handleMarkRead(n.id)}>Mark read</button>
                   ) : null}

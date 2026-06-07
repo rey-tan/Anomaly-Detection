@@ -91,6 +91,8 @@ class UserAnalysisRead(BaseModel):
 
 class NotificationRead(BaseModel):
     id: int
+    user_id: int
+    analysis_id: Optional[int] = None
     title: str
     message: str
     type: str
@@ -104,6 +106,7 @@ class NotificationRead(BaseModel):
 
 class NotificationCreate(BaseModel):
     user_id: int
+    analysis_id: Optional[int] = None
     title: str
     message: str
     type: Optional[str] = "info"
@@ -134,6 +137,7 @@ class AnomalyExplanationRequest(BaseModel):
     timeframe: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
+    analysis_id: Optional[int] = None
     metrics: Optional[Dict[str, Any]] = None
     best_params: Optional[Dict[str, Any]] = None
     data: List[Dict[str, Any]]

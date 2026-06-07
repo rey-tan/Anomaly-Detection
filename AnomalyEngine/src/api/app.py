@@ -501,7 +501,7 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
             "rows": len(data),
         },
     )
-    crud.create_user_analysis(
+    analysis = crud.create_user_analysis(
         db=db,
         user_id=current_user.id,
         config_hash=cache_key,
@@ -520,9 +520,10 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     crud.create_notification(
         db=db,
         user_id=current_user.id,
-        title="Analysis complete",
+        title="Analysis Complete",
         message=f"Your analysis for {config['stock']} completed successfully.",
-        type="analysis",
+        type="analysis_complete",
+        analysis_id=analysis.id,
     )
 
     return format_analyze_response(metrics, data, best_params)
@@ -550,13 +551,41 @@ def explain_analysis(request: schemas.AnomalyExplanationRequest, db: Session = D
             db=db,
             user_id=current_user.id,
             explanation=explanation,
-            analysis_id=None,
+            analysis_id=request.analysis_id,
             metadata={"request_summary": {"stock": request.stock, "mode": request.mode}},
             artifact_path=artifact_path,
             artifact_hash=artifact_hash,
         )
     except Exception:
         # don't break functionality if DB write fails
+        pass
+
+    # Log user activity
+    try:
+        crud.create_user_activity(
+            db=db,
+            user_id=current_user.id,
+            action="explanation_generated",
+            resource=request.stock,
+            details={"mode": request.mode, "analysis_id": request.analysis_id},
+        )
+    except Exception:
+        # don't break functionality if activity logging fails
+        pass
+
+    # Create notification
+    try:
+        notification = models.Notification(
+            user_id=current_user.id,
+            analysis_id=request.analysis_id,
+            title="AI Explanation Retrieved",
+            message=f"Explanation generated for {request.stock} analysis",
+            type="explanation_generated",
+        )
+        db.add(notification)
+        db.commit()
+    except Exception:
+        # don't break functionality if notification creation fails
         pass
 
     return {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchNotifications, markNotificationRead } from "../api";
 
 function formatNotificationDate(value) {
@@ -7,7 +8,8 @@ function formatNotificationDate(value) {
   return Number.isNaN(date.getTime()) ? String(value).split("T")[0] : date.toLocaleDateString();
 }
 
-export default function NotificationsDropdown({ token, onOpenAll }) {
+export default function NotificationsDropdown({ token, onOpenAll, onSelectAnalysis }) {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,6 +84,20 @@ export default function NotificationsDropdown({ token, onOpenAll }) {
     }
   };
 
+  const handleViewAnalysis = async (analysisId) => {
+    if (!analysisId) return;
+    setOpen(false);
+    if (onSelectAnalysis) {
+      try {
+        await onSelectAnalysis(analysisId);
+        return;
+      } catch (err) {
+        setError(err.message || "Failed to load analysis");
+      }
+    }
+    navigate('/results');
+  };
+
   const handleOpenAll = () => {
     setOpen(false);
     onOpenAll?.();
@@ -135,15 +151,26 @@ export default function NotificationsDropdown({ token, onOpenAll }) {
                       {formatNotificationDate(notification.created_at)} {notification.type ? `• ${notification.type}` : ""}
                     </small>
                   </div>
-                  {!notification.is_read ? (
-                    <button
-                      className="text-button"
-                      type="button"
-                      onClick={() => handleMarkRead(notification.id)}
-                    >
-                      Mark read
-                    </button>
-                  ) : null}
+                  <div className="notification-preview-actions">
+                    {notification.analysis_id && (notification.type === "explanation_generated" || notification.type === "analysis_complete") ? (
+                      <button
+                        className="text-button"
+                        type="button"
+                        onClick={() => handleViewAnalysis(notification.analysis_id)}
+                      >
+                        View Now
+                      </button>
+                    ) : null}
+                    {!notification.is_read ? (
+                      <button
+                        className="text-button"
+                        type="button"
+                        onClick={() => handleMarkRead(notification.id)}
+                      >
+                        Mark read
+                      </button>
+                    ) : null}
+                  </div>
                 </article>
               ))}
             </div>

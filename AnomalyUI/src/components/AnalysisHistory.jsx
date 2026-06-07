@@ -1,8 +1,8 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { fetchAnalyses, fetchAnalysisData, toggleFavorite } from "../api";
+import { fetchAnalyses, toggleFavorite } from "../api";
 
-export default function AnalysisHistory({ token, onSelect }) {
+export default function AnalysisHistory({ token, onSelectAnalysis }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,12 +17,8 @@ export default function AnalysisHistory({ token, onSelect }) {
   }, [token]);
 
   const handleClick = async (analysis) => {
-    try {
-      const payload = await fetchAnalysisData(token, analysis.id);
-      onSelect(payload, analysis);
-    } catch (err) {
-      setError(err.message || "Failed to load artifact");
-    }
+    if (!onSelectAnalysis) return;
+    onSelectAnalysis(analysis.id);
   };
 
   const handleFavorite = async (analysis, ev) => {

@@ -17,6 +17,7 @@ export default function ResultsPage({
   aiError,
   aiLoading,
   handleExplainWithAI,
+  handleSelectAnalysis,
   navigate,
 }) {
 
@@ -105,7 +106,7 @@ export default function ResultsPage({
             ) : null}
           </div>
         </div>
-        <AnalysisHistory token={token} onSelect={(payload, analysis) => { setResults(payload); setSelectedAnalysis(analysis); navigate('/results'); }} />
+        <AnalysisHistory token={token} onSelectAnalysis={handleSelectAnalysis} />
       </div>
 
       <div className="page-panel">

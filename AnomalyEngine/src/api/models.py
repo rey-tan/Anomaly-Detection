@@ -74,6 +74,7 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=True)
     title = Column(String, nullable=False)
     message = Column(String, nullable=False)
     type = Column(String, nullable=False, default="info")

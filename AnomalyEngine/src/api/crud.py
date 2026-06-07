@@ -276,9 +276,11 @@ def create_notification(
     message: str,
     type: str = "info",
     is_read: bool = False,
+    analysis_id: Optional[int] = None,
 ):
     notification = models.Notification(
         user_id=user_id,
+        analysis_id=analysis_id,
         title=title,
         message=message,
         type=type,

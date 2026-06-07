@@ -16,6 +16,8 @@ export default function AppRoutes(props) {
   const {
     user,
     token,
+    analyses,
+    setAnalyses,
     results,
     selectedAnalysis,
     setResults,
@@ -28,6 +30,7 @@ export default function AppRoutes(props) {
     activityUser,
     handleOpenLastRun,
     handleAnalyze,
+    handleSelectAnalysis,
     loading,
     error,
     onLogout,
@@ -56,9 +59,12 @@ export default function AppRoutes(props) {
             selectedAnalysis={selectedAnalysis}
             setResults={setResults}
             setSelectedAnalysis={setSelectedAnalysis}
+            analyses={analyses}
+            setAnalyses={setAnalyses}
             onLogout={onLogout}
             onOpenNotifications={onOpenNotifications}
             handleOpenLastRun={handleOpenLastRun}
+            handleSelectAnalysis={handleSelectAnalysis}
           />
         ) : (
           <Navigate to="/login" replace />
@@ -67,7 +73,7 @@ export default function AppRoutes(props) {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage user={user} selectedAnalysis={selectedAnalysis} results={results} onOpenLastRun={handleOpenLastRun} />} />
         <Route path="analysis" element={<AnalysisPage onSubmit={handleAnalyze} loading={loading} error={error} />} />
-        <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} aiExplanation={aiExplanation} aiExplanationMarkdown={aiExplanationMarkdown} aiError={aiError} aiLoading={aiLoading} handleExplainWithAI={handleExplainWithAI} navigate={navigate} />} />
+        <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} aiExplanation={aiExplanation} aiExplanationMarkdown={aiExplanationMarkdown} aiError={aiError} aiLoading={aiLoading} handleExplainWithAI={handleExplainWithAI} navigate={navigate} handleSelectAnalysis={handleSelectAnalysis} />} />
         <Route path="activity" element={
           user?.role === 'admin' ? (
             <ActivityPage token={token} initialUserId={activityUser} />
@@ -96,7 +102,7 @@ export default function AppRoutes(props) {
         />
         <Route
           path="notifications"
-          element={<NotificationsPage token={token} />}
+          element={<NotificationsPage token={token} analyses={analyses} setAnalyses={setAnalyses} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} onSelectAnalysis={handleSelectAnalysis} />}
         />
         <Route
           path="data"

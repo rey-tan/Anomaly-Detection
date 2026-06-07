@@ -86,6 +86,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [results, setResults] = useState(null);
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+  const [analyses, setAnalyses] = useState([]);
   const [activityUser, setActivityUser] = useState(null);
   const [aiExplanation, setAiExplanation] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -107,17 +108,19 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    if (!token || selectedAnalysis) return;
-
+    if (!token) return;
     let active = true;
     (async () => {
       try {
-        const analyses = await fetchAnalyses(token);
-        if (!active || !analyses?.length) return;
-        const latest = analyses[0];
-        const enriched = await enrichAnalysisWithAnomalyCount(latest, token);
+        const list = await fetchAnalyses(token).catch(() => []);
         if (!active) return;
-        setSelectedAnalysis(enriched);
+        setAnalyses(list || []);
+        if (!selectedAnalysis && list?.length) {
+          const latest = list[0];
+          const enriched = await enrichAnalysisWithAnomalyCount(latest, token);
+          if (!active) return;
+          setSelectedAnalysis(enriched);
+        }
       } catch (err) {
         // ignore errors on initial history load
       }
@@ -215,6 +218,31 @@ function App() {
     }
   };
 
+  const handleSelectAnalysis = async (analysisId) => {
+    if (!token || !analysisId) return;
+    setError("");
+    try {
+      const payload = await fetchAnalysisData(token, analysisId);
+      let analysis = analyses.find((item) => item.id === analysisId);
+      if (!analysis) {
+        const list = await fetchAnalyses(token);
+        setAnalyses(list || []);
+        analysis = list?.find((item) => item.id === analysisId);
+      }
+      const enriched = analysis
+        ? await enrichAnalysisWithAnomalyCount(analysis, token, payload.data)
+        : { id: analysisId, anomalyCount: countAnomalyRows(payload.data || []), ...payload };
+      setResults(payload);
+      setSelectedAnalysis(enriched);
+      setAiExplanation(null);
+      setAiError("");
+      navigate('/results');
+    } catch (err) {
+      setError(err.message || "Failed to load historical analysis");
+      throw err;
+    }
+  };
+
   const aiExplanationMarkdown = useMemo(() => {
     if (!aiExplanation) return "";
     return aiExplanation.raw_summary || aiExplanation.summary || "";
@@ -299,6 +327,8 @@ function App() {
     <AppRoutes
       user={user}
       token={token}
+      analyses={analyses}
+      setAnalyses={setAnalyses}
       results={results}
       selectedAnalysis={selectedAnalysis}
       setResults={setResults}
@@ -311,6 +341,7 @@ function App() {
       activityUser={activityUser}
       handleOpenLastRun={handleOpenLastRun}
       handleAnalyze={handleAnalyze}
+      handleSelectAnalysis={handleSelectAnalysis}
       loading={loading}
       error={error}
       onLogout={handleLogout}

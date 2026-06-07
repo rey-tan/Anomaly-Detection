@@ -192,7 +192,7 @@ export default function AdminDataPanel({ token }) {
             <div className="page-intro">
                 <p className="eyebrow">Data Management</p>
                 <h2>Dataset inventory and scraping</h2>
-                <p>Browse available market files, preview a selected symbol, and trigger admin scrapes from a dedicated page.</p>
+                <p>Browse available market files, preview a selected symbol, and trigger admin scrapes.</p>
             </div>
             <div className="admin-panel">
                 <div className="admin-panel-head">

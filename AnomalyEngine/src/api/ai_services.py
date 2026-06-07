@@ -11,6 +11,11 @@ import requests
 from openai import OpenAI, api_key
 
 from . import schemas
+from tavily import TavilyClient
+
+
+
+
 
 
 def _extract_anomaly_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -34,89 +39,74 @@ def _extract_anomaly_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return rows
 
 
-def fetch_google_custom_search(query: str, num_results: int = 5) -> List[Dict[str, Any]]:
-    """
-    Fetch search results from Google Custom Search API.
-    
-    Requires environment variables:
-    - GOOGLE_SEARCH_API_KEY: your Google API key
-    - GOOGLE_SEARCH_ENGINE_ID: your Custom Search Engine ID
-    """
-    api_key_env = os.getenv("GOOGLE_SEARCH_API_KEY", "").strip()
-    engine_id = os.getenv("GOOGLE_SEARCH_ENGINE_ID", "").strip()
-    
-    if not api_key_env or not engine_id:
-        print("Warning: Google Custom Search API key or engine ID not configured. Skipping search.")
+def tavily_search(query: str, num_results: int = 5) -> List[Dict[str, Any]]:
+    """Fetch search results from Tavily API."""
+    api_key = os.getenv("TAVILY_API_KEY", "").strip()
+    if not api_key:
+        print("Warning: Tavily API key not configured. Skipping search.")
         return []
     
     try:
-        url = "https://www.googleapis.com/customsearch/v1"
-        params = {
-            "q": query,
-            "key": api_key_env,
-            "cx": engine_id,
-            "num": min(num_results, 10),  # API limit is 10 per request
-        }
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+        tavily_client = TavilyClient(api_key=api_key)
+        response = tavily_client.search(
+            query=query,
+            max_results=min(num_results, 10),  # Tavily supports up to 10 results per query
+            include_answer=False,  # We only want search results, not QA answers
+        )
         
         results = []
-        if "items" in data:
-            for item in data["items"][:num_results]:
+        if response.get("results"):
+            for item in response["results"][:num_results]:
                 results.append({
                     "title": item.get("title", ""),
-                    "link": item.get("link", ""),
-                    "snippet": item.get("snippet", ""),
+                    "link": item.get("url", ""),
+                    "snippet": item.get("content", ""),
                 })
         return results
     except Exception as e:
-        print(f"Error fetching Google Custom Search results: {e}")
+        print(f"Error fetching Tavily Search results: {e}")
         return []
+
+
 
 
 def build_search_context(stock: str, anomaly_rows: List[Dict[str, Any]]) -> str:
     """
-    Build search context from anomaly rows by fetching news for each date.
+    Build search context from anomaly rows by fetching news for each date using Tavily API.
     Returns formatted markdown text with search results.
     """
     search_context_parts = ["## Search Context\n"]
     
-    for row in anomaly_rows[:10]:  # limit to first 10 anomalies to avoid too many searches
+    for row in anomaly_rows[:5]:  # limit to first 5 anomalies to reduce token usage
         date_str = row.get("date", "")
         if not date_str:
             continue
         
         try:
-            # Parse date and create search window (2 weeks before and after)
+            # Parse date for context window
             anomaly_date = datetime.strptime(str(date_str), "%Y-%m-%d")
-            start_date = anomaly_date - timedelta(days=14)
-            end_date = anomaly_date + timedelta(days=14)
             
-            # Build multiple search queries
+            # Build minimal search queries (reduced from 5 to 2 most important)
             queries = [
                 f"{stock} Nepal {date_str}",
                 f"Nepal protest {anomaly_date.strftime('%B %Y')}",
-                f"Nepal strike {anomaly_date.strftime('%B %Y')}",
-                f"NEPSE {stock} {date_str}",
-                f"Nepal news {date_str}",
             ]
             
             section_found = False
             for query in queries:
-                results = fetch_google_custom_search(query, num_results=3)
+                results = tavily_search(query, num_results=1)  # reduced from 3 to 1 result per query
                 if results:
                     if not section_found:
                         search_context_parts.append(f"\n### {date_str} ({stock})")
                         section_found = True
                     
-                    search_context_parts.append(f"\n**Query:** {query}")
+                    # Minimal formatting: just the result, no query header
                     for result in results:
-                        search_context_parts.append(f"- {result['title']}: {result['snippet'][:200]}... ([link]({result['link']}))")
+                        search_context_parts.append(f"- {result['title']}: {result['snippet'][:100]}... ([link]({result['link']}))")  # reduced from 200 to 100 chars
             
             if not section_found:
                 search_context_parts.append(f"\n### {date_str} ({stock})")
-                search_context_parts.append("No relevant news found in search results.")
+                search_context_parts.append("No news found.")
         
         except Exception as e:
             print(f"Error processing anomaly date {date_str}: {e}")
@@ -299,7 +289,7 @@ def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
     anomaly_rows = _extract_anomaly_rows(payload.data or [])
     search_context = build_search_context(payload.stock, anomaly_rows)
     print(f"Fetched search context for {len(anomaly_rows)} anomalies")
-
+    print(search_context)
     prompt = build_ai_prompt(payload, search_context=search_context)
 
     try:

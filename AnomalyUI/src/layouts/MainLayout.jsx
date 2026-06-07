@@ -23,6 +23,7 @@ export default function MainLayout({
   onLogout,
   onOpenNotifications,
   handleOpenLastRun,
+  handleSelectAnalysis,
   setActivityUser,
 }) {
   const location = useLocation()
@@ -50,7 +51,7 @@ export default function MainLayout({
           </p>
         </div>
         <div className="topbar-actions">
-          <NotificationsDropdown token={token} onOpenAll={onOpenNotifications} />
+          <NotificationsDropdown token={token} onOpenAll={onOpenNotifications} onSelectAnalysis={handleSelectAnalysis} />
           <div className="user-chip">
             <div>
               <span>Signed in as</span>
@@ -92,13 +93,13 @@ export default function MainLayout({
           >
             <span>Last analysis</span>
             <h3>{latestStock || 'No analysis yet'}</h3>
-            { latestRun ?
-            <p className="mt-5">
+            { latestRun ? (
+              <div className="mt-5">
                 <div>{latestTimeframe}</div> • <div>{latestWindow}</div>
-            </p> 
-            : 
-            <p className="mt-5">Run an analysis to see details here</p>
-          }
+              </div>
+            ) : (
+              <div className="mt-5">Run an analysis to see details here</div>
+            )}
           </button>
         </aside>
 

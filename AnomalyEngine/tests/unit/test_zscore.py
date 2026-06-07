@@ -1,13 +1,14 @@
 import pandas as pd
 from src.models.zscore import zscore
 
+#all values same → should NOT crash
 
 def test_zscore_zero_std_returns_zeros():
     s = pd.Series([5.0] * 10)
     zs = zscore(s)
     assert (zs == 0).all()
 
-
+# function should correctly standardize numbers when normal case
 def test_zscore_standardizes_nontrivial_series():
     s = pd.Series([1.0, 2.0, 3.0, 4.0])
     zs = zscore(s)

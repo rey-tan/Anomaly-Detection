@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from src.api import models, database
 from src.api.app import app
 from src.api.database import Base
+from sqlalchemy.pool import StaticPool
 
 
 def override_get_db():
@@ -16,9 +17,13 @@ def override_get_db():
 
 def test_explain_endpoint_writes_artifact(monkeypatch, tmp_path):
     # setup in-memory DB
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    Base.metadata.create_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
 
     # create a test user and patch database.get_db to use this session
@@ -26,6 +31,7 @@ def test_explain_endpoint_writes_artifact(monkeypatch, tmp_path):
     db.add(user)
     db.commit()
     db.refresh(user)
+    user_id = user.id
 
     def _get_db():
         try:
@@ -65,7 +71,7 @@ def test_explain_endpoint_writes_artifact(monkeypatch, tmp_path):
     assert body["summary"] == "ok"
 
     # check that DB has an explanation row
-    rows = db.query(models.Explanation).filter(models.Explanation.user_id == user.id).all()
+    rows = db.query(models.Explanation).filter(models.Explanation.user_id == user_id).all()
     assert len(rows) >= 1
     e = rows[0]
     assert e.artifact_hash is not None or e.artifact_path is not None

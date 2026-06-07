@@ -1,3 +1,5 @@
+import React from 'react'
+
 function MetricCard({ title, value, description }) {
   return (
     <div className="metric-card">

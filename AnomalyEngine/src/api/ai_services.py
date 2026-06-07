@@ -8,7 +8,6 @@ from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 import requests
-from openai import OpenAI, api_key
 
 from . import schemas
 from tavily import TavilyClient
@@ -189,7 +188,6 @@ def build_ai_prompt(payload: schemas.AnomalyExplanationRequest, search_context: 
 
     summary = {
         "stock": payload.stock,
-        "mode": payload.mode,
         "timeframe": payload.timeframe,
         "window": {"start_date": payload.start_date, "end_date": payload.end_date},
         "metrics": payload.metrics or {},
@@ -332,85 +330,6 @@ def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
         "source": model,
     }
 
-
-def call_openai_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
-    """Call OpenAI API for AI explanation (fallback)."""
-   
-    model = os.getenv("MODEL_NAME", "openai/gpt-4.1")
-    endpoint = os.getenv("MODEL_ENDPOINT")
-
-    print(f"Using OpenAI model {model} for anomaly explanation")
-
-    # Fetch search context from Google Custom Search
-    anomaly_rows = _extract_anomaly_rows(payload.data or [])
-    search_context = build_search_context(payload.stock, anomaly_rows)
-    print(f"Fetched search context for {len(anomaly_rows)} anomalies")
-
-    prompt = build_ai_prompt(payload, search_context=search_context)
-
-    try:
-        client = OpenAI(
-            base_url=endpoint,
-            api_key=token,
-        )
-        response = client.chat.completions.create(
-            messages = [
-                {
-                    "role":"system",
-                    "content":"You are a NEPSE (Nepal Stock Exchange) financial analyst. "
-                    "Analyze the provided anomalies and web search results to identify correlations. "
-                    "Use the search context to validate or explain the detected anomalies. "
-                    "Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; "
-                    "(2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; "
-                    "(3) Market events: sector news, competitor moves, macroeconomic changes; "
-                    "(4) Company news: executive changes, major contracts, product launches. "
-                    "Report only what you find in the search results—do not speculate or invent facts."
-                },
-                {
-                    "role":"user",
-                    "content":prompt
-                }
-            ],
-            temperature=0.2,
-
-        )
-        response = requests.post(
-            endpoint,
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": "You explain anomaly detection results in concise analyst-friendly language."},
-                    {"role": "user", "content": prompt},
-                ],
-                "temperature": 0.2,
-                "top_p": 1,
-                "model":model
-            },
-        )
-        response.raise_for_status()
-        data = response.json()
-        summary = data["choices"][0]["message"]["content"].strip()
-    except Exception as e:
-        print("Error calling OpenAI API, falling back to heuristic explanation", e)
-        return heuristic_anomaly_explanation(payload)
-
-    if not summary:
-        return heuristic_anomaly_explanation(payload)
-
-    entries = parse_ai_explanation_entries(summary)
-    overall = extract_overall_summary(summary)
-
-    return {
-        "raw_summary": summary,
-        "summary": overall,
-        "highlights": [],
-        "entries": entries,
-        "anomaly_count": len(_extract_anomaly_rows(payload.data)),
-        "source": model,
-    }
-
-
 def heuristic_anomaly_explanation(payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
     """Generate heuristic explanation with structured table format."""
     anomaly_rows = _extract_anomaly_rows(payload.data)
@@ -513,7 +432,9 @@ def heuristic_anomaly_explanation(payload: schemas.AnomalyExplanationRequest) ->
     )
     
     return {
+        "raw_summary": summary,
         "summary": summary,
+        "highlights": [],
         "entries": entries,
         "anomaly_count": len(anomaly_rows),
         "source": "heuristic",
@@ -527,9 +448,7 @@ def call_ai_explanation(payload: schemas.AnomalyExplanationRequest) -> Dict[str,
     if github_token:
         return call_github_ai_explanation(github_token,payload)
     
-    openai_key = os.getenv("TOKEN", "").strip()
-    if openai_key:
-        return call_openai_ai_explanation(openai_key,payload)
     
     # Fallback to heuristic
     return heuristic_anomaly_explanation(payload)
+    

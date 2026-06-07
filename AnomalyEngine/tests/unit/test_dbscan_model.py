@@ -18,3 +18,17 @@ def test_dbscan_two_clusters_and_noise():
     # expect at least two different cluster ids (excluding noise)
     cluster_ids = set([l for l in labels if l != -1])
     assert len(cluster_ids) >= 2
+
+
+def test_dbscan_all_noise():
+    X = np.array([
+        [100, 100],
+        [200, 200],
+        [300, 300]
+    ])
+
+    model = DBSCAN(eps=0.5, min_pts=2)
+    labels = model.fit_predict(X)
+
+    # all points should be noise OR mostly noise
+    assert all(l == -1 for l in labels)

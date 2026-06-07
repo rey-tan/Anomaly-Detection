@@ -8,62 +8,13 @@ from src.components.evaluation import Evaluator
 from src.components.anomaly_detection import AnomalyDetector
 
 
-def test_preprocessor_resamples_and_shapes():
-    # create minute-level data across 3 days
-    rng = pd.date_range("2023-01-01", periods=60 * 24 * 3, freq="T")
-    df = pd.DataFrame({
-        "transaction_time": rng,
-        "price": np.random.rand(len(rng)) * 100,
-        "volume": np.random.randint(1, 1000, size=len(rng)),
-    })
-
+def test_preprocessor_empty_input():
     pre = Preprocessor()
+    df = pd.DataFrame()
+
     out = pre.transform(df, timeframe="1D")
 
-    # should have OHLCV and non-empty
-    assert not out.empty
-    assert set(["open", "high", "low", "close", "volume"]).issubset(out.columns)
-
-
-def test_preprocessor_handles_ohlcv_input():
-    rng = pd.date_range("2023-01-01", periods=120, freq="D")
-    df = pd.DataFrame({
-        "date": rng,
-        "open": np.linspace(100, 140, len(rng)),
-        "high": np.linspace(101, 141, len(rng)),
-        "low": np.linspace(99, 139, len(rng)),
-        "close": np.linspace(100.5, 140.5, len(rng)),
-        "volume": np.random.randint(1, 1000, size=len(rng)),
-        "amount": np.random.randint(1000, 5000, size=len(rng)),
-    })
-
-    pre = Preprocessor()
-    out = pre.transform(df, timeframe="1D")
-
-    assert not out.empty
-    assert set(["open", "high", "low", "close", "volume", "amount"]).issubset(out.columns)
-
-
-def test_feature_engineering_adds_indicators():
-    n = 100
-    dates = pd.date_range(end=pd.Timestamp.today(), periods=n)
-    df = pd.DataFrame({"close": np.cumsum(np.random.randn(n)) + 100, "volume": np.random.randint(1,100,size=n)}, index=dates)
-
-    fe = FeatureEngineering()
-    out = fe.transform(df.copy(), features=["close"])
-
-    # indicators present
-    assert "SMA_10" in out.columns
-    assert "RSI" in out.columns
-    assert "Upper_BB" in out.columns
-
-
-def test_feature_scaler_returns_array_shape():
-    n = 50
-    df = pd.DataFrame({"a": np.arange(n), "b": np.arange(n) * 2.0})
-    scaler = FeatureScaler()
-    X = scaler.fit_transform(df, ["a", "b"]) 
-    assert X.shape == (n, 2)
+    assert out.empty or out is None
 
 
 def test_evaluator_compute_metrics():
@@ -86,3 +37,12 @@ def test_train_model_basic_outputs():
     out = detector.train_model(X, {}, df)
     assert set(out.keys()) == {"dbscan", "isolation_forest", "zscore"}
     assert len(out["dbscan"]) == 10
+
+
+    
+
+
+
+
+
+

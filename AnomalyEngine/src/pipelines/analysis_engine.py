@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 from src.components.data_loader import DataLoader
 from src.components.evaluation import Evaluator
 from src.components.feature_engineering import FeatureEngineering
@@ -15,6 +13,8 @@ from src.components.preprocessing import Preprocessor
 from src.models.dbscan import DBSCAN
 from src.models.isolation_forest import IsolationForest
 from src.models.zscore import zscore
+from src.utils.load import load_config
+from src.utils.paths import CONFIG
 
 
 @dataclass(slots=True)
@@ -23,8 +23,8 @@ class AnalysisRequest:
     start_date: str
     end_date: str
     timeframe: str
-    features: list[str]
-    mode: str
+    features: Optional[list[str]] = None
+    mode: str = "static"
 
     @classmethod
     def from_mapping(cls, config: dict[str, Any]) -> "AnalysisRequest":
@@ -33,8 +33,8 @@ class AnalysisRequest:
             start_date=config["start_date"],
             end_date=config["end_date"],
             timeframe=config["timeframe"],
-            features=list(config["features"]),
-            mode=config["mode"],
+            features=config.get("features"),
+            mode=config.get("mode", "static"),
         )
 
 
@@ -99,7 +99,7 @@ class AnomalyDetectorService:
         return np.where(np.abs(z_scores) > threshold, -1, 1)
 
 
-class BaseAnalysisPipeline(ABC):
+class StaticAnalysisPipeline:
     def __init__(
         self,
         config: dict[str, Any] | AnalysisRequest,
@@ -121,6 +121,7 @@ class BaseAnalysisPipeline(ABC):
 
     def _prepare_features(self) -> pd.DataFrame:
         data = self.data_loader.load(self.config.stock, self.config.start_date, self.config.end_date)
+
         if data.empty:
             raise ValueError(f"No processed data found for {self.config.stock}")
 
@@ -128,7 +129,13 @@ class BaseAnalysisPipeline(ABC):
         if clean_data.empty:
             raise ValueError("No data available after preprocessing")
 
-        feature_df = self.feature_engineer.transform(clean_data, self.config.features)
+        features = load_config(CONFIG / "config.yaml").get("features", [])
+        print("features",features)
+        if not features:
+            raise ValueError("No features configured for analysis")
+
+        self.config.features = features
+        feature_df = self.feature_engineer.transform(clean_data, features)
         if feature_df.empty:
             raise ValueError("Feature engineering produced an empty dataset")
 
@@ -173,12 +180,6 @@ class BaseAnalysisPipeline(ABC):
 
         return result_df
 
-    @abstractmethod
-    def run(self) -> PipelineResult:
-        raise NotImplementedError
-
-
-class StaticAnalysisPipeline(BaseAnalysisPipeline):
     def run(self) -> PipelineResult:
         feature_df = self._prepare_features()
         X_scaled = self.scaler.fit_transform(feature_df, self.config.features)

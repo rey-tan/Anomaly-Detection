@@ -45,6 +45,6 @@ class AnomalyDetector:
         return {
             "dbscan": self._predict_dbscan(X, best_params.get("dbscan", {})),
             "isolation_forest": self._predict_isolation_forest(X, best_params.get("isolation_forest", {})),
-            "zscore": self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 2.0)),
+            "zscore": self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 3.0)),
         }
 

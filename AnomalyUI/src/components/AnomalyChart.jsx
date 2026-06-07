@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Line, Scatter } from "react-chartjs-2";
 import {

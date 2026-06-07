@@ -1,0 +1,441 @@
+{
+  "explanation": {
+    "anomaly_count": 6,
+    "entries": [],
+    "highlights": [],
+    "raw_summary": "**Row 1: 2025-05-04 (API)**\n- **Technical anomaly:** Exceptionally high volume (1,287,648 vs normal mean ~187,100), flagged by DBSCAN and Isolation Forest. Close price at 305.82, minimal z-score (0.01), zero rolling std and bb_width, indicating a sudden spike in trading activity without price volatility.\n- **Event correlation:**\n  - **Real-world events:** 2025 Nepalese Gen Z protests are ongoing ([Wikipedia](https://en.wikipedia.org/wiki/2025_Nepalese_Gen_Z_protests)), with significant unrest and fatalities. This could impact market sentiment and trading volumes.\n  - **Other:** Public holiday context ([Holiday API](https://holidayapi.com/countries/np-1/2025)), which may affect trading schedules or liquidity.\n- **Conclusion:** The anomaly is likely correlated with heightened uncertainty and market activity due to the Gen Z protests, possibly causing investors to reposition or react to perceived risk.\n\n**Row 2: 2025-05-08 (API)**\n- **Technical anomaly:** High volume (1,223,562 vs average 777,046.75), price jump from 311.24 to 318.46, z-score 1.34, bb_width 0.0937. DBSCAN flagged.\n- **Event correlation:**\n  - **Real-world events:** Gen Z protests continue ([Wikipedia](https://en.wikipedia.org/wiki/2025_Nepalese_Gen_Z_protests)), maintaining elevated uncertainty.\n  - **Other:** Public holiday in Province 5 ([Holiday API](https://holidayapi.com/countries/np-p5/2025)), possibly affecting trading patterns.\n- **Conclusion:** Sustained protest activity and holiday disruptions likely contributed to abnormal trading volumes and price movement.\n\n**Row 3: 2025-07-22 (API)**\n- **Technical anomaly:** Volume spike (806,211 vs avg 169,464.55), price up from 302.99 to 312.07, z-score 1.73, bb_width 0.0765. DBSCAN flagged.\n- **Event correlation:**\n  - **Real-world events:** Gen Z protests still ongoing ([Wikipedia](https://en.wikipedia.org/wiki/2025_Nepalese_Gen_Z_protests)).\n  - **Other:** No direct company or sector news found.\n- **Conclusion:** Continued protest-related uncertainty likely driving abnormal trading behavior.\n\n**Row 4: 2025-07-23 (API)**\n- **Technical anomaly:** Volume spike (864,614 vs avg 203,379.65), price up from 312.07 to 320.52, z-score 1.56, bb_width 0.1014. DBSCAN flagged.\n- **Event correlation:**\n  - **Real-world events:** Federal Government decision on drought response ([IFRC DREF Operation PDF](https://go-api.ifrc.org/api/downloadfile/92104/MDRNP019do)), affecting all 136 municipalities. This could impact economic activity and market sentiment.\n  - **Gen Z protests:** Still ongoing ([Wikipedia](https://en.wikipedia.org/wiki/2025_Nepalese_Gen_Z_protests)).\n- **Conclusion:** The anomaly is likely correlated with both the government’s drought response and ongoing protests, increasing uncertainty and trading activity.\n\n**Row 5: 2025-09-18 (API)**\n- **Technical anomaly:** Sharp price drop (287.28 to 260.1), extremely low volume (22,003 vs avg 106,723.2), z-score -5.42, bb_width 0.1248. Flagged by DBSCAN and Isolation Forest.\n- **Event correlation:**\n  - **Real-world events:** Gen Z protests ongoing ([Wikipedia](https://en.wikipedia.org/wiki/2025_Nepalese_Gen_Z_protests)), possibly intensifying around this period.\n  - **Other:** Public holiday ([Holiday API](https://holidayapi.com/countries/np/2025)), which may reduce trading activity and liquidity.\n- **Conclusion:** The anomaly is likely due to a combination of protest-related uncertainty and reduced trading activity from the public holiday, causing a sharp price drop and illiquidity.\n\n**Row 6: 2025-09-21 (API)**\n- **Technical anomaly:** Price rebound (260.1 to 286.1), volume spike (228,050 vs avg 97,605.85), z-score 5.74, bb_width 0.1129. Flagged by DBSCAN and Isolation Forest.\n- **Event correlation:**\n  - **Real-world events:** No new news found for this specific date, but Gen Z protests are still ongoing ([Wikipedia](https://en.wikipedia.org/wiki/2025_Nepalese_Gen_Z_protests)).\n- **Conclusion:** The anomaly is likely a technical rebound following the sharp drop on 2025-09-18, with protest-related uncertainty continuing to drive volatility.\n\n---\n\n**Overall Summary:**\n- All anomalies coincide with periods of significant real-world unrest (2025 Nepalese Gen Z protests), which are likely driving abnormal trading volumes, price volatility, and liquidity disruptions in API.\n- Several anomalies also coincide with public holidays, which may further impact trading activity and liquidity.\n- The July 23 anomaly additionally correlates with a government drought response decision, potentially affecting economic sentiment.\n- No company-specific or sector-specific financial events were found in the search results for these dates.\n- Multiple detectors (DBSCAN, Isolation Forest) consistently flag these anomalies, and technical indicators (volume, z-score, price movement) confirm abnormal behavior.\n- The primary drivers for these anomalies are real-world events (protests, government actions, holidays), with no evidence of company-specific or sector-wide financial news in the provided context.",
+    "source": "openai/gpt-4.1",
+    "summary": "- All anomalies coincide with periods of significant real-world unrest (2025 Nepalese Gen Z protests), which are likely driving abnormal trading volumes, price volatility, and liquidity disruptions in API.\n- Several anomalies also coincide with public holidays, which may further impact trading activity and liquidity.\n- The July 23 anomaly additionally correlates with a government drought response decision, potentially affecting economic sentiment.\n- No company-specific or sector-specific financial events were found in the search results for these dates.\n- Multiple detectors (DBSCAN, Isolation Forest) consistently flag these anomalies, and technical indicators (volume, z-score, price movement) confirm abnormal behavior.\n- The primary drivers for these anomalies are real-world events (protests, government actions, holidays), with no evidence of company-specific or sector-wide financial news in the provided context."
+  },
+  "request": {
+    "analysis_id": null,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Anomaly_Score_IF": -3.74,
+        "Anomaly_Z_Score": 0.00647872936296499,
+        "IF_Anomaly_Score": -3.74,
+        "Lower_BB": 305.82,
+        "RSI": 50,
+        "SMA_10": 305.82,
+        "SMA_20": 305.82,
+        "SMA_50": 305.82,
+        "Upper_BB": 305.82,
+        "adjacent_rows": [
+          {
+            "close": 298.7,
+            "date": "2025-05-05",
+            "volume": 440554
+          },
+          {
+            "close": 304.59,
+            "date": "2025-05-06",
+            "volume": 568864
+          },
+          {
+            "close": 311.24,
+            "date": "2025-05-07",
+            "volume": 811121
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 305.82,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2025-05-04",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 313,
+        "low": 297,
+        "open": 299,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 305.82,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 1287648,
+        "z_score": 0.00647872936296499
+      },
+      {
+        "Anomaly_Score_IF": -5.96,
+        "Anomaly_Z_Score": 1.3370733471594438,
+        "IF_Anomaly_Score": -5.96,
+        "Lower_BB": 292.8456841009584,
+        "RSI": 73.51190476190474,
+        "SMA_10": 307.762,
+        "SMA_20": 307.762,
+        "SMA_50": 307.762,
+        "Upper_BB": 322.6783158990416,
+        "adjacent_rows": [
+          {
+            "close": 298.7,
+            "date": "2025-05-05",
+            "volume": 440554
+          },
+          {
+            "close": 304.59,
+            "date": "2025-05-06",
+            "volume": 568864
+          },
+          {
+            "close": 311.24,
+            "date": "2025-05-07",
+            "volume": 811121
+          },
+          {
+            "close": 312.81,
+            "date": "2025-05-11",
+            "volume": 586482
+          },
+          {
+            "close": 305.54,
+            "date": "2025-05-13",
+            "volume": 521728
+          },
+          {
+            "close": 295.76,
+            "date": "2025-05-14",
+            "volume": 380162
+          }
+        ],
+        "average_volume": 777046.75,
+        "bb_width": 0.09367779877561762,
+        "close": 318.46,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2025-05-08",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 327,
+        "low": 305,
+        "open": 315,
+        "previous_close": 311.24,
+        "returns": 0.023197532450841774,
+        "rolling_mean": 307.762,
+        "rolling_std": 0.02001092606185059,
+        "volatility": 0.02001092606185059,
+        "volume": 1223562,
+        "z_score": 1.3370733471594438
+      },
+      {
+        "Anomaly_Score_IF": -6.99,
+        "Anomaly_Z_Score": 1.7254219238231876,
+        "IF_Anomaly_Score": -6.99,
+        "Lower_BB": 283.4268063018397,
+        "RSI": 75.56422401783217,
+        "SMA_10": 298.842,
+        "SMA_20": 295.363,
+        "SMA_50": 296.93760000000003,
+        "Upper_BB": 307.2991936981603,
+        "adjacent_rows": [
+          {
+            "close": 304.55,
+            "date": "2025-07-17",
+            "volume": 334212
+          },
+          {
+            "close": 303.33,
+            "date": "2025-07-20",
+            "volume": 365383
+          },
+          {
+            "close": 302.99,
+            "date": "2025-07-21",
+            "volume": 225064
+          },
+          {
+            "close": 320.52,
+            "date": "2025-07-23",
+            "volume": 864614
+          },
+          {
+            "close": 326.63,
+            "date": "2025-07-24",
+            "volume": 744394
+          },
+          {
+            "close": 320.46,
+            "date": "2025-07-27",
+            "volume": 847098
+          }
+        ],
+        "average_volume": 169464.55,
+        "bb_width": 0.07649689940180286,
+        "close": 312.07,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2025-07-22",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 314.1,
+        "low": 304,
+        "open": 304,
+        "previous_close": 302.99,
+        "returns": 0.029967985742103576,
+        "rolling_mean": 295.363,
+        "rolling_std": 0.010876814360683934,
+        "volatility": 0.010876814360683934,
+        "volume": 806211,
+        "z_score": 1.7254219238231876
+      },
+      {
+        "Anomaly_Score_IF": -6.8,
+        "Anomaly_Z_Score": 1.559611772495978,
+        "IF_Anomaly_Score": -6.8,
+        "Lower_BB": 280.56324538047267,
+        "RSI": 79.06921241050111,
+        "SMA_10": 301.50699999999995,
+        "SMA_20": 296.809,
+        "SMA_50": 297.0918,
+        "Upper_BB": 313.0547546195274,
+        "adjacent_rows": [
+          {
+            "close": 303.33,
+            "date": "2025-07-20",
+            "volume": 365383
+          },
+          {
+            "close": 302.99,
+            "date": "2025-07-21",
+            "volume": 225064
+          },
+          {
+            "close": 312.07,
+            "date": "2025-07-22",
+            "volume": 806211
+          },
+          {
+            "close": 326.63,
+            "date": "2025-07-24",
+            "volume": 744394
+          },
+          {
+            "close": 320.46,
+            "date": "2025-07-27",
+            "volume": 847098
+          },
+          {
+            "close": 319.79,
+            "date": "2025-07-28",
+            "volume": 516878
+          }
+        ],
+        "average_volume": 203379.65,
+        "bb_width": 0.10137123811011707,
+        "close": 320.52,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": 1,
+        "date": "2025-07-23",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 323.5,
+        "low": 313,
+        "open": 318,
+        "previous_close": 312.07,
+        "returns": 0.027077258307431018,
+        "rolling_mean": 296.809,
+        "rolling_std": 0.011918230719219566,
+        "volatility": 0.011918230719219566,
+        "volume": 864614,
+        "z_score": 1.559611772495978
+      },
+      {
+        "Anomaly_Score_IF": -5.09,
+        "Anomaly_Z_Score": -5.420373945545333,
+        "IF_Anomaly_Score": -5.09,
+        "Lower_BB": 275.5507382968358,
+        "RSI": 16.830727658753176,
+        "SMA_10": 288.816,
+        "SMA_20": 291.783,
+        "SMA_50": 297.99,
+        "Upper_BB": 308.01526170316424,
+        "adjacent_rows": [
+          {
+            "close": 290.42,
+            "date": "2025-09-04",
+            "volume": 103704
+          },
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 286.1,
+            "date": "2025-09-21",
+            "volume": 228050
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          }
+        ],
+        "average_volume": 106723.2,
+        "bb_width": 0.12481554558373106,
+        "close": 260.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2025-09-18",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 281.6,
+        "low": 258.8,
+        "open": 281.6,
+        "previous_close": 287.28,
+        "returns": -0.09461152882205492,
+        "rolling_mean": 291.783,
+        "rolling_std": 0.0226125237701437,
+        "volatility": 0.0226125237701437,
+        "volume": 22003,
+        "z_score": -5.420373945545333
+      },
+      {
+        "Anomaly_Score_IF": -4.99,
+        "Anomaly_Z_Score": 5.740205151396146,
+        "IF_Anomaly_Score": -4.99,
+        "Lower_BB": 275.0427099018119,
+        "RSI": 45.52248590533632,
+        "SMA_10": 287.53700000000003,
+        "SMA_20": 291.18850000000003,
+        "SMA_50": 297.8488,
+        "Upper_BB": 307.33429009818815,
+        "adjacent_rows": [
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 260.1,
+            "date": "2025-09-18",
+            "volume": 22003
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          },
+          {
+            "close": 290,
+            "date": "2025-09-25",
+            "volume": 65656
+          }
+        ],
+        "average_volume": 97605.85,
+        "bb_width": 0.11286815867310811,
+        "close": 286.1,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2025-09-21",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 286.1,
+        "low": 260.1,
+        "open": 260.5,
+        "previous_close": 260.1,
+        "returns": 0.09996155324875056,
+        "rolling_mean": 291.18850000000003,
+        "rolling_std": 0.0326647452039823,
+        "volatility": 0.0326647452039823,
+        "volume": 228050,
+        "z_score": 5.740205151396146
+      }
+    ],
+    "end_date": "2026-01-01",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.040268456375838924,
+        "n_clusters": 1,
+        "n_noise": 6,
+        "volatility_anomaly_mean": 0.016347206685980015,
+        "volatility_normal_mean": 0.016552659618932933,
+        "volume_anomaly_mean": 738681.3333333334,
+        "volume_normal_mean": 187100.34965034964
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.020134228187919462,
+        "n_clusters": 1,
+        "n_noise": 3,
+        "volatility_anomaly_mean": 0.018425756324708668,
+        "volatility_normal_mean": 0.016505728059240842,
+        "volume_anomaly_mean": 512567,
+        "volume_normal_mean": 203080.3904109589
+      },
+      "zscore": {
+        "anomaly_rate": 0.013422818791946308,
+        "n_clusters": 1,
+        "n_noise": 2,
+        "volatility_anomaly_mean": 0.027638634487063,
+        "volatility_normal_mean": 0.01639344419489227,
+        "volume_anomaly_mean": 125026.5,
+        "volume_normal_mean": 210458.40136054423
+      }
+    },
+    "start_date": "2025-05-01",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-07T14:13:31.539130",
+  "user_id": 7
+}

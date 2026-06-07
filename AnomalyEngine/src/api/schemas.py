@@ -72,11 +72,9 @@ class UserAnalysisRead(BaseModel):
     id: int
     config_hash: str
     stock: str
-    mode: str
     timeframe: str
     start_date: str
     end_date: str
-    features: List[Any]
     best_params: Optional[Dict[str, Any]]
     metrics: Optional[Dict[str, Any]]
     is_favorite: Optional[bool] = False
@@ -117,8 +115,6 @@ class AnalyzeConfig(BaseModel):
     start_date: str
     end_date: str
     timeframe: str
-    features: List[str]
-    mode: str
 
 
 class ModelResult(BaseModel):
@@ -133,7 +129,6 @@ class AnalyzeResponse(BaseModel):
 
 class AnomalyExplanationRequest(BaseModel):
     stock: Optional[str] = None
-    mode: Optional[str] = None
     timeframe: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None

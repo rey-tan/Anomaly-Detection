@@ -10,11 +10,11 @@ from src.components.scaling import FeatureScaler
 def make_mock_data(n=200):
     dates = pd.date_range(end=pd.Timestamp.today(), periods=n, freq='D')
     df = pd.DataFrame({
-        'open': np.linspace(10, 20, n),
+        'open': np.linspace(10, 20, n), #creates a linearly increasing open price from 10 to 20 with evenly spaced values over n days
         'high': np.linspace(10.5, 20.5, n),
         'low': np.linspace(9.5, 19.5, n),
         'close': np.linspace(10, 20, n),
-        'volume': np.random.randint(1, 1000, size=n),
+        'volume': np.random.randint(1, 1000, size=n), #generates random integer values between 1 and 1000 for the volume column, with a total of n values
     }, index=dates)
     return df
 
@@ -64,3 +64,7 @@ def test_anomaly_detector_service_predicts_labels():
     assert set(labels.keys()) == {'dbscan', 'isolation_forest', 'isolation_forest_score', 'zscore'}
     assert len(labels['dbscan']) == len(df)
     assert len(labels['zscore']) == len(df)
+
+
+
+

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchNotifications, markNotificationRead } from "../api";
@@ -150,17 +151,18 @@ export default function NotificationsDropdown({ token, onOpenAll, onSelectAnalys
                     <small>
                       {formatNotificationDate(notification.created_at)} {notification.type ? `• ${notification.type}` : ""}
                     </small>
-                  </div>
-                  <div className="notification-preview-actions">
-                    {notification.analysis_id && (notification.type === "explanation_generated" || notification.type === "analysis_complete") ? (
+                     {notification.analysis_id && (notification.type === "explanation_generated" || notification.type === "analysis_complete") ? (
                       <button
-                        className="text-button"
+                        className="text-button notification-view"
                         type="button"
                         onClick={() => handleViewAnalysis(notification.analysis_id)}
                       >
-                        View Now
+                        View analysis
                       </button>
                     ) : null}
+                  </div>
+                  <div className="notification-preview-actions">
+                   
                     {!notification.is_read ? (
                       <button
                         className="text-button"

@@ -3,7 +3,7 @@ from typing import Optional
 import bcrypt
 from jose import JWTError, jwt
 
-SECRET_KEY = "change-this-secret-key-change-me"
+SECRET_KEY = "i_am_a_very_secret_key_for_jwt_token_generation"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

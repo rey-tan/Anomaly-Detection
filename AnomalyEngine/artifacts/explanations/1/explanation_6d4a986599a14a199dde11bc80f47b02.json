@@ -1,0 +1,23 @@
+{
+  "explanation": {
+    "anomaly_count": 1,
+    "entries": [],
+    "highlights": [
+      "h"
+    ],
+    "raw_summary": "ok",
+    "summary": "ok"
+  },
+  "request": {
+    "analysis_id": null,
+    "best_params": null,
+    "data": [],
+    "end_date": "2024-01-10",
+    "metrics": null,
+    "start_date": "2024-01-01",
+    "stock": "NABIL",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-07T12:50:52.240877",
+  "user_id": 1
+}

@@ -127,11 +127,9 @@ def _serialize_activity(activity: models.UserActivity, username: Optional[str] =
     details = dict(activity.details or {}) if isinstance(activity.details, dict) else (activity.details or {})
     if cache_entry is not None and isinstance(details, dict):
         details.setdefault("stock", cache_entry.stock)
-        details.setdefault("mode", cache_entry.mode)
         details.setdefault("timeframe", cache_entry.timeframe)
         details.setdefault("start_date", cache_entry.start_date)
         details.setdefault("end_date", cache_entry.end_date)
-        details.setdefault("features", cache_entry.features)
         details.setdefault("rows", len(cache_entry.data or []))
     return {
         "id": activity.id,
@@ -220,11 +218,9 @@ def create_user_analysis(
     user_id: int,
     config_hash: str,
     stock: str,
-    mode: str,
     timeframe: str,
     start_date: str,
     end_date: str,
-    features: List[Any],
     best_params: Optional[Dict[str, Any]],
     metrics: Optional[Dict[str, Any]],
     status: str = "success",
@@ -235,11 +231,9 @@ def create_user_analysis(
         user_id=user_id,
         config_hash=config_hash,
         stock=stock,
-        mode=mode,
         timeframe=timeframe,
         start_date=start_date,
         end_date=end_date,
-        features=features,
         best_params=best_params,
         metrics=metrics,
         status=status,
@@ -357,11 +351,9 @@ def create_cache_entry(
     db: Session,
     config_hash: str,
     stock: str,
-    mode: str,
     timeframe: str,
     start_date: str,
     end_date: str,
-    features: list,
     best_params: dict,
     metrics: dict,
     data: list,
@@ -369,11 +361,9 @@ def create_cache_entry(
     entry = models.PipelineCache(
         config_hash=config_hash,
         stock=stock,
-        mode=mode,
         timeframe=timeframe,
         start_date=start_date,
         end_date=end_date,
-        features=features,
         best_params=best_params,
         metrics=metrics,
         data=data,
@@ -388,11 +378,9 @@ def create_or_update_cache_entry(
     db: Session,
     config_hash: str,
     stock: str,
-    mode: str,
     timeframe: str,
     start_date: str,
     end_date: str,
-    features: list,
     best_params: dict,
     metrics: dict,
     data: list,
@@ -403,20 +391,16 @@ def create_or_update_cache_entry(
         entry.metrics = metrics
         entry.data = data
         entry.stock = stock
-        entry.mode = mode
         entry.timeframe = timeframe
         entry.start_date = start_date
         entry.end_date = end_date
-        entry.features = features
     else:
         entry = models.PipelineCache(
             config_hash=config_hash,
             stock=stock,
-            mode=mode,
             timeframe=timeframe,
             start_date=start_date,
             end_date=end_date,
-            features=features,
             best_params=best_params,
             metrics=metrics,
             data=data,

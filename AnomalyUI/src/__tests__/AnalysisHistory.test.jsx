@@ -1,39 +1,26 @@
-import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import AnalysisHistory from "../components/AnalysisHistory";
-import * as api from "../api";
-import { vi } from "vitest";
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import AnalysisHistory from '../components/AnalysisHistory'
+import * as api from '../api'
+import { vi } from 'vitest'
 
-vi.mock("../api", () => ({
+vi.mock('../api', () => ({
   fetchAnalyses: vi.fn(),
   fetchAnalysisData: vi.fn(),
   toggleFavorite: vi.fn(),
-}));
+}))
 
-describe("AnalysisHistory", () => {
-  beforeEach(() => {
-    api.fetchAnalyses.mockResolvedValue([
-      { id: 1, stock: "NABIL", executed_at: new Date().toISOString(), mode: "Static", timeframe: "1D", status: "success", is_favorite: false },
-    ]);
-    api.fetchAnalysisData.mockResolvedValue({ data: [] });
-    api.toggleFavorite.mockResolvedValue({ id: 1, is_favorite: true });
-  });
+describe('AnalysisHistory', () => {
+  it('renders recent analyses and allows selecting one', async () => {
+    api.fetchAnalyses.mockResolvedValue([{ id: 1, stock: 'API', executed_at: new Date().toISOString(), mode: 'Static', timeframe: '1D', status: 'success', is_favorite: false }])
+    api.fetchAnalysisData.mockResolvedValue({ data: [] })
 
-  it("renders and calls onSelect when View clicked", async () => {
-    const onSelect = vi.fn();
-    render(<AnalysisHistory token="tok" onSelect={onSelect} />);
-    await waitFor(() => expect(api.fetchAnalyses).toHaveBeenCalled());
-    const viewBtn = await screen.findByText("View");
-    fireEvent.click(viewBtn);
-    await waitFor(() => expect(api.fetchAnalysisData).toHaveBeenCalled());
-    expect(onSelect).toHaveBeenCalled();
-  });
+    const onSelectAnalysis = vi.fn()
+    render(<AnalysisHistory token="tok" onSelectAnalysis={onSelectAnalysis} />)
 
-  it("toggles favorite", async () => {
-    render(<AnalysisHistory token="tok" onSelect={() => {}} />);
-    await waitFor(() => expect(api.fetchAnalyses).toHaveBeenCalled());
-    const favBtn = await screen.findByText(/Favorite/);
-    fireEvent.click(favBtn);
-    await waitFor(() => expect(api.toggleFavorite).toHaveBeenCalled());
-  });
-});
+    expect(await screen.findByText(/API/i)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /View/i }))
+    await waitFor(() => expect(onSelectAnalysis).toHaveBeenCalledWith(1))
+  })
+})

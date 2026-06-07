@@ -2,16 +2,12 @@ import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { fetchSymbols } from "../api";
 
-const defaultFeatures = [
-  "close",
-  "volume",
-  "volatility",
-  "returns",
-  "RSI",
-  "SMA_10",
-  "SMA_20",
-  "SMA_50",
-];
+const today = new Date();
+const defaultStart = new Date(today);
+defaultStart.setDate(defaultStart.getDate() - 365);
+
+const endDate = today.toISOString().split('T')[0];
+const startDate = defaultStart.toISOString().split('T')[0];
 
 export default function AnalysisPanel({ onSubmit, loading }) {
   const [symbols, setSymbols] = useState([]);
@@ -19,10 +15,8 @@ export default function AnalysisPanel({ onSubmit, loading }) {
   const [form, setForm] = useState({
     stock: "API",
     timeframe: "1D",
-    mode: "Static",
-    start_date: "2024-01-01",
-    end_date: "2026-01-01",
-    features: ["bb_width", "RSI", "volume", "volatility", "returns"],
+    start_date: startDate,
+    end_date: endDate,
   });
 
   useEffect(() => {
@@ -61,17 +55,10 @@ export default function AnalysisPanel({ onSubmit, loading }) {
   }, []);
 
   const canSubmit = useMemo(() => {
-    return form.stock.trim() && form.start_date && form.end_date && form.features.length > 0;
+    return form.stock.trim() && form.start_date && form.end_date;
   }, [form]);
 
-  const toggleFeature = (feature) => {
-    setForm((prev) => {
-      const nextFeatures = prev.features.includes(feature)
-        ? prev.features.filter((item) => item !== feature)
-        : [...prev.features, feature];
-      return { ...prev, features: nextFeatures };
-    });
-  };
+  
 
   return (
     <form
@@ -85,7 +72,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
       <div className="section-heading">
         <div>
           <h3>Run anomaly analysis</h3>
-          <p>Choose the dataset, mode, timeframe, and features to uncover outlier events.</p>
+          <p>Choose the dataset and time range to uncover outlier events.</p>
         </div>
       </div>
 
@@ -105,15 +92,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
             ))}
           </select>
         </label>
-        {/* <label className="field-group">
-          <span>Mode</span>
-          <select
-            value={form.mode}
-            onChange={(event) => setForm((prev) => ({ ...prev, mode: event.target.value }))}
-          >
-            <option value="Static">Static</option>
-          </select>
-        </label> */}
+       
         <label className="field-group">
           <span>Timeframe</span>
           <select
@@ -144,24 +123,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
         </label>
       </div>
 
-      {/* <div className="feature-panel">
-        <div className="feature-heading">
-          <span>Feature selection</span>
-          <p>Active features power the anomaly model.</p>
-        </div>
-        <div className="feature-grid">
-          {defaultFeatures.map((feature) => (
-            <button
-              type="button"
-              key={feature}
-              className={form.features.includes(feature) ? "feature-pill active" : "feature-pill"}
-              onClick={() => toggleFeature(feature)}
-            >
-              {feature}
-            </button>
-          ))}
-        </div>
-      </div> */}
+      
 
       <div className="form-footer">
         <button type="submit" className="primary-button" disabled={!canSubmit || loading}>

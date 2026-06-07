@@ -9,6 +9,9 @@ class Preprocessor:
     def transform(self, df: pd.DataFrame, timeframe: str = "1D") -> pd.DataFrame:
         df = df.copy()
 
+        if df.empty:
+            return df
+
         #resample if needed
         df = df.resample(timeframe).agg(
             open=("open", "first"),

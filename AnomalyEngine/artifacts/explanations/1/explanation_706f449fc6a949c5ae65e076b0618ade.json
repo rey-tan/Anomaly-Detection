@@ -1,0 +1,178 @@
+{
+  "explanation": {
+    "anomaly_count": 2,
+    "entries": [],
+    "highlights": [],
+    "raw_summary": "**Row 1: 2025-10-07 (API)**\n\n- **Technical Anomaly Details:**\n  - Close price: 285.5 (matches rolling mean, zero rolling std)\n  - Volume: 87,576 (below normal mean for Isolation Forest, above z-score anomaly mean)\n  - Z-score: -0.05 (not extreme)\n  - BB width: 0 (no volatility)\n  - Detected by: Combined, DBSCAN, Isolation Forest\n  - Adjacent days show increased volumes (e.g., 155,349 on 2025-10-08, 149,572 on 2025-10-12) with slight price declines.\n\n- **Event Correlation:**\n  - **Real-World Events:** No direct financial or company-specific news found for API. However, search results indicate public holidays in Central Nepal around this period ([Holiday API](https://holidayapi.com/countries/np-1/2025)), which may impact trading activity and volume.\n  - **Political Events:** Gen Z protests for democratic renewal are referenced ([East Asia Forum](https://eastasiaforum.org/2025/10/22/nepals-gen-z-protests-are-a-call-for-democratic-renewal)), but the article is dated 2025-10-22, after the anomaly. No evidence links these protests directly to API’s trading anomaly on 2025-10-07.\n\n- **Summary:** The anomaly is characterized by low volatility, stable price, and moderate volume, detected by multiple algorithms. The presence of public holidays could explain reduced trading activity and lack of price movement. No direct financial, company, or sector news found.\n\n---\n\n**Row 2: 2025-11-02 (API)**\n\n- **Technical Anomaly Details:**\n  - Close price: 292 (up from previous close of 284.9)\n  - Rolling mean: 279.06 (close price significantly above mean)\n  - Rolling std: 0.017 (low volatility)\n  - Volume: 185,519 (substantially above average volume)\n  - Z-score: 2.09 (high, but below threshold for z-score anomaly)\n  - BB width: 0.0836 (some volatility)\n  - Detected by: Isolation Forest\n  - Adjacent days: Volumes drop sharply after anomaly (e.g., 62,787 on 2025-11-04), price reverts to 284–288 range.\n\n- **Event Correlation:**\n  - **Market Events:** No direct financial or company news for API found. However, a sector-wide event is referenced: Riot police fired tear gas during a Gen Z protest outside parliament in Kathmandu on September 8, 2025 ([HRW](https://www.hrw.org/news/2025/11/20/nepal-unlawful-use-of-force-during-gen-z-protest)). The news is published on 2025-11-20, but the protest itself occurred earlier. The timing is close to the anomaly, and ongoing political unrest may have contributed to increased trading activity and volatility.\n  - **Stock Info:** API’s price and volume are noted as unusually high on financial notice sites ([FinancialNotices](https://www.financialnotices.com/stock-nepse.php?symbol=API)), but no specific financial event is cited.\n\n- **Summary:** The anomaly is marked by a sharp price increase and very high trading volume, detected by Isolation Forest. The context of political protests and unrest in Kathmandu may have contributed to heightened market activity, but no direct company or sector news is found.\n\n---\n\n**Overall Summary:**\n\n- Both anomalies for API in the specified period are primarily characterized by unusual volume and price behavior, with detection by multiple algorithms.\n- **Row 1 (2025-10-07):** Stable price and low volatility coincide with public holidays, likely reducing trading activity. No direct company or sector news found.\n- **Row 2 (2025-11-02):** Significant price and volume spike occurs amid ongoing political protests in Kathmandu, which may have influenced market sentiment and activity. No direct financial or company-specific events found for API.\n- No evidence of earnings, dividends, regulatory changes, executive moves, or major contracts for API in the search window.\n- The anomalies are best explained by technical factors and possible indirect effects from real-world events (holidays, protests), rather than direct financial or company news.",
+    "source": "openai/gpt-4.1",
+    "summary": "The anomaly is characterized by low volatility, stable price, and moderate volume, detected by multiple algorithms. The presence of public holidays could explain reduced trading activity and lack of price movement. No direct financial, company, or sector news found."
+  },
+  "request": {
+    "analysis_id": null,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Anomaly_Score_IF": -3.58,
+        "Anomaly_Z_Score": -0.05167074333661854,
+        "IF_Anomaly_Score": -3.58,
+        "Lower_BB": 285.5,
+        "RSI": 50,
+        "SMA_10": 285.5,
+        "SMA_20": 285.5,
+        "SMA_50": 285.5,
+        "Upper_BB": 285.5,
+        "adjacent_rows": [
+          {
+            "close": 280,
+            "date": "2025-10-08",
+            "volume": 155349
+          },
+          {
+            "close": 282.1,
+            "date": "2025-10-09",
+            "volume": 114738
+          },
+          {
+            "close": 278,
+            "date": "2025-10-12",
+            "volume": 149572
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 285.5,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2025-10-07",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 295,
+        "low": 285,
+        "open": 295,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 285.5,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 87576,
+        "z_score": -0.05167074333661854
+      },
+      {
+        "Anomaly_Score_IF": -4.57,
+        "Anomaly_Z_Score": 2.0915815000667775,
+        "IF_Anomaly_Score": -4.57,
+        "Lower_BB": 266.8477607683961,
+        "RSI": 55.89836660617058,
+        "SMA_10": 278.12,
+        "SMA_20": 279.0571428571429,
+        "SMA_50": 279.0571428571429,
+        "Upper_BB": 291.26652494588967,
+        "adjacent_rows": [
+          {
+            "close": 282,
+            "date": "2025-10-28",
+            "volume": 71226
+          },
+          {
+            "close": 279,
+            "date": "2025-10-29",
+            "volume": 52858
+          },
+          {
+            "close": 284.9,
+            "date": "2025-10-30",
+            "volume": 99728
+          },
+          {
+            "close": 288,
+            "date": "2025-11-03",
+            "volume": 94495
+          },
+          {
+            "close": 284,
+            "date": "2025-11-04",
+            "volume": 62787
+          },
+          {
+            "close": 285,
+            "date": "2025-11-05",
+            "volume": 81456
+          }
+        ],
+        "average_volume": 80220.46153846153,
+        "bb_width": 0.08362590471744379,
+        "close": 292,
+        "cluster": 1,
+        "cluster_dbscan": 1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2025-11-02",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 295,
+        "low": 284,
+        "open": 290,
+        "previous_close": 284.9,
+        "returns": 0.024921024921024992,
+        "rolling_mean": 279.0571428571429,
+        "rolling_std": 0.0173219239305619,
+        "volatility": 0.0173219239305619,
+        "volume": 185519,
+        "z_score": 2.0915815000667775
+      }
+    ],
+    "end_date": "2026-01-01",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.01818181818181818,
+        "n_clusters": 1,
+        "n_noise": 1,
+        "volatility_anomaly_mean": 0,
+        "volatility_normal_mean": 0.012186967701681546,
+        "volume_anomaly_mean": 87576,
+        "volume_normal_mean": 97026.57407407407
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.03636363636363636,
+        "n_clusters": 1,
+        "n_noise": 2,
+        "volatility_anomaly_mean": 0.00866096196528095,
+        "volatility_normal_mean": 0.012090081735098896,
+        "volume_anomaly_mean": 136547.5,
+        "volume_normal_mean": 95356.90566037736
+      },
+      "zscore": {
+        "anomaly_rate": 0.01818181818181818,
+        "n_clusters": 1,
+        "n_noise": 1,
+        "volatility_anomaly_mean": 0.016586228652511036,
+        "volatility_normal_mean": 0.011879815319227636,
+        "volume_anomaly_mean": 71226,
+        "volume_normal_mean": 97329.35185185185
+      }
+    },
+    "start_date": "2025-10-01",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-07T13:49:15.133576",
+  "user_id": 1
+}

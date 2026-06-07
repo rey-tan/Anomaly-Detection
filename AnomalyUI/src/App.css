@@ -1679,7 +1679,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   margin-top:10px!important;
   display:flex;
   flex-wrap:wrap;
-  gap:0 8px;
+  gap:5px 8px;
+  color:white;
 }
 .favorite-row h2{
   margin-bottom: 0px;
@@ -1692,6 +1693,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .quick-link:hover{
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(168, 85, 247, 0.12));
     border-color: rgba(125, 211, 252, 0.34);
+}
+.results-ai-card{
+  margin-top:40px;
 }
 .results-ai-markdown{
   margin-top:20px;
@@ -1759,4 +1763,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .results-ai-markdown hr{
   display: none;
+}
+.notification-view{
+  text-align: left;
+  padding:7px 5px 2px;
+}
+
+.notification-preview-actions{
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    gap: 20px;
 }

@@ -24,8 +24,9 @@ from src.utils.paths import ARTIFACTS
 from src.utils.otp import generate_otp, get_otp_expiration, send_otp_email
 from src.components.sharesansar_scraper import ShareSansarScraper
 from . import crud, database, models, schemas, security, ai_services
-
+from dotenv import load_dotenv
 load_dotenv()
+print("MODE:", os.getenv("ENV"))
 
 
 from contextlib import asynccontextmanager
@@ -65,6 +66,12 @@ app.add_middleware(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
+
+
+def is_dev():
+    
+    return os.getenv("ENV").strip() == "development"
+
 def convert_numpy_types(obj):
     """Convert numpy, pandas, and datetime types to JSON-serializable native types."""
     if isinstance(obj, (np.integer,)):
@@ -98,6 +105,81 @@ def convert_numpy_types(obj):
         return obj
 
 
+
+
+
+
+@app.post("/test/register/request", response_model=schemas.OTPRequestResponse)
+def test_register_request(request: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    """Test registration request """
+
+    if not is_dev():
+       raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Test Registration is disabled in production",
+        )
+    existing_user = crud.get_user_by_username(db, request.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already exists",
+        )
+    if crud.get_user_by_email(db, request.email):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
+    if request.role and request.role != "analyst" and request.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only analyst and admin roles can be self-registered. Contact an admin for higher privileges.",
+        )
+
+    user = crud.create_user(
+        db,
+        username=request.username,
+        email=request.email,
+        password=request.password,
+        role="analyst",
+        permissions=None,
+        email_verified=False,
+    )
+    otp_code = '123456'
+    expires_at = get_otp_expiration()
+    crud.save_otp(db, request.email, otp_code, expires_at)
+
+    return {
+        "message": "OTP sent to email. Verify within 10 minutes.",
+        "email": request.email,
+        "user_id": user.id,
+    }
+
+
+@app.post("/test/register/verify", response_model=schemas.UserRead)
+def test_verify_registration(request: schemas.OTPVerificationRequest, db: Session = Depends(database.get_db)):
+    
+    if not is_dev():
+       raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Test Verification is disabled in production",
+        )
+    
+    if not crud.verify_otp(db, request.email, request.otp_code):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OTP",
+        )
+    user = crud.get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return user
+
+
+
+
 def format_analyze_response(metrics: Dict[str, Any], data: List[Dict[str, Any]], best_params: Dict[str, Any]) -> Dict[str, Any]:
     """Format analysis response by embedding params with their corresponding metrics."""
     models = {}
@@ -109,8 +191,6 @@ def format_analyze_response(metrics: Dict[str, Any], data: List[Dict[str, Any]],
             "params": best_params.get(param_key, {}),
         }
     return {"data": data, "models": models}
-
-
 
 
 
@@ -167,6 +247,8 @@ def login(
 
     access_token = security.create_access_token(data={"sub": user.username, "role": user.role})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
 
 
 @app.post("/register/request", response_model=schemas.OTPRequestResponse)
@@ -391,11 +473,9 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
             details={
                 "config_hash": cache_key,
                 "stock": config["stock"],
-                "mode": config["mode"],
                 "timeframe": config["timeframe"],
                 "start_date": config["start_date"],
                 "end_date": config["end_date"],
-                "features": config["features"],
                 "cache_hit": True,
             },
         )
@@ -417,17 +497,17 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     best_params = load_json(hyperparams_file)[config["timeframe"]]
 
     results = None
-    if config["mode"] == "Static":
-        start_ts = time.time()
-        try:
-            print(f"Starting pipeline for {config['stock']} with timeframe {config['timeframe']}", flush=True)
-            results = run_pipeline(config, best_params)
-        except Exception as exc:
-            print(f"Pipeline raised exception: {exc}", flush=True)
-            results = None
-        finally:
-            end_ts = time.time()
-            print(f"Pipeline execution time: {end_ts - start_ts:.2f}s", flush=True)
+
+    start_ts = time.time()
+    try:
+        print(f"Starting pipeline for {config['stock']} with timeframe {config['timeframe']}", flush=True)
+        results = run_pipeline(config, best_params)
+    except Exception as exc:
+        print(f"Pipeline raised exception: {exc}", flush=True)
+        results = None
+    finally:
+        end_ts = time.time()
+        print(f"Pipeline execution time: {end_ts - start_ts:.2f}s", flush=True)
    
 
     if results is None:
@@ -439,11 +519,9 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
             details={
                 "config_hash": cache_key,
                 "stock": config["stock"],
-                "mode": config["mode"],
                 "timeframe": config["timeframe"],
                 "start_date": config["start_date"],
                 "end_date": config["end_date"],
-                "features": config["features"],
                 "cache_hit": False,
             },
         )
@@ -475,11 +553,9 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         db=db,
         config_hash=cache_key,
         stock=config["stock"],
-        mode=config["mode"],
         timeframe=config["timeframe"],
         start_date=config["start_date"],
         end_date=config["end_date"],
-        features=config["features"],
         best_params=best_params,
         metrics=metrics,
         data=data,
@@ -493,11 +569,9 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         details={
             "config_hash": cache_key,
             "stock": config["stock"],
-            "mode": config["mode"],
             "timeframe": config["timeframe"],
             "start_date": config["start_date"],
             "end_date": config["end_date"],
-            "features": config["features"],
             "rows": len(data),
         },
     )
@@ -506,11 +580,9 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         user_id=current_user.id,
         config_hash=cache_key,
         stock=config["stock"],
-        mode=config["mode"],
         timeframe=config["timeframe"],
         start_date=config["start_date"],
         end_date=config["end_date"],
-        features=config["features"],
         best_params=best_params,
         metrics=metrics,
         data_path=data_path,
@@ -552,7 +624,7 @@ def explain_analysis(request: schemas.AnomalyExplanationRequest, db: Session = D
             user_id=current_user.id,
             explanation=explanation,
             analysis_id=request.analysis_id,
-            metadata={"request_summary": {"stock": request.stock, "mode": request.mode}},
+            metadata={"request_summary": {"stock": request.stock, "timeframe": request.timeframe}},
             artifact_path=artifact_path,
             artifact_hash=artifact_hash,
         )
@@ -562,12 +634,12 @@ def explain_analysis(request: schemas.AnomalyExplanationRequest, db: Session = D
 
     # Log user activity
     try:
-        crud.create_user_activity(
+        crud.log_user_activity(
             db=db,
             user_id=current_user.id,
             action="explanation_generated",
             resource=request.stock,
-            details={"mode": request.mode, "analysis_id": request.analysis_id},
+            details={"analysis_id": request.analysis_id},
         )
     except Exception:
         # don't break functionality if activity logging fails
@@ -621,11 +693,9 @@ def save_cache(request: schemas.CacheCreate, db: Session = Depends(database.get_
         db=db,
         config_hash=config_hash,
         stock=config["stock"],
-        mode=config["mode"],
         timeframe=config["timeframe"],
         start_date=config["start_date"],
         end_date=config["end_date"],
-        features=config["features"],
         best_params=request.best_params,
         metrics=request.metrics,
         data=request.data,

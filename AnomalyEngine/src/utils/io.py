@@ -5,6 +5,7 @@ import uuid
 from typing import Any
 from src.utils import paths
 import hashlib
+import os
 
 
 def write_result_artifact(data: Any, user_id: int, config_hash: str) -> str:
@@ -42,7 +43,19 @@ def read_result_artifact(path: str) -> Any:
 
 def get_symbols():
     symbols = []
-    with open(paths.ARTIFACTS / "symbols.json", "r") as f:
+    # prefer configured artifacts path; fall back to environment or project path
+    target = paths.ARTIFACTS / "symbols.json"
+    if not target.exists():
+        env_path = os.getenv("ARTIFACTS")
+        if env_path:
+            candidate = Path(env_path) / "symbols.json"
+            if candidate.exists():
+                target = candidate
+
+    if not target.exists():
+        return []
+
+    with open(target, "r") as f:
         data = json.load(f)
         for category in data.values():
             symbols.extend(category.keys())

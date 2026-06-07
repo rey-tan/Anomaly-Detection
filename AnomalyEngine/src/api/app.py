@@ -43,14 +43,7 @@ async def lifespan(app: FastAPI):
     try:
         admin = crud.get_user_by_username(db, "admin")
         if admin is None:
-            crud.create_user(
-                db,
-                "admin",
-                "admin@gmail.com",
-                "admin123",
-                role="admin",
-                email_verified=True,
-            )
+            crud.create_user(db, "admin", "admin@gmail.com", "admin123", role="admin")
     finally:
         db.close()
 

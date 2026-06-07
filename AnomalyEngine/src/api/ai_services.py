@@ -128,7 +128,7 @@ def build_search_context(stock: str, anomaly_rows: List[Dict[str, Any]]) -> str:
 def build_ai_prompt(payload: schemas.AnomalyExplanationRequest, search_context: str = "") -> str:
     """Build a detailed prompt for AI model to explain anomalies."""
     anomaly_rows = payload.data or []
-    compact_rows = anomaly_rows[:15]
+    compact_rows = anomaly_rows
 
     row_summaries = []
     for index, row in enumerate(compact_rows, start=1):
@@ -210,9 +210,8 @@ def build_ai_prompt(payload: schemas.AnomalyExplanationRequest, search_context: 
     return (
         "You are an equity market analyst specializing in NEPSE (Nepal Stock Exchange) stocks. "
         "The rows below have already been flagged as anomalies by the detection system. \n\n"
-        "CRITICAL: Search ONLY for news and events related to NEPSE-listed companies. "
         f"Focus on the ticker '{payload.stock}' and the date range {payload.start_date} to {payload.end_date}.\n\n"
-        "Search for these categories of events that could cause stock price/volume anomalies:\n"
+        "Explain anomalies using these event categories:\n"
         "1. FINANCIAL EVENTS: Earnings reports, dividend announcements, earnings guidance changes, "
         "regulatory approvals/rejections, licensing changes, policy changes affecting the sector, mergers/acquisitions, "
         "capital raises, write-downs, or accounting restatements.\n"
@@ -221,9 +220,9 @@ def build_ai_prompt(payload: schemas.AnomalyExplanationRequest, search_context: 
         "3. MARKET EVENTS: Sector-wide news, competitor announcements affecting market dynamics, "
         "macroeconomic policy changes (interest rates, currency movements), or market sentiment shifts.\n"
         "4. COMPANY-SPECIFIC NEWS: Executive appointments/departures, major contracts/deals, new products/services, "
-        "management commentary, or analyst reports.\n\n"
-        "For each anomaly date, search the web for events from 2 weeks before to 2 weeks after the anomaly. "
-        "Correlate any findings with the detected price/volume movements. Cite sources explicitly. \n\n"
+        "management commentary, or analyst reports.\n"
+        f"\n## Web Search Results\n{search_context if search_context.strip() else 'No search results available. Proceed with technical analysis.'}\n\n"
+        "Based on the search results above, correlate any found news/events with the anomalies below. If search results are empty for a date, explicitly state that and focus on technical indicators.\n\n"
         "Explain why each point is unusual using the provided feature values, detector labels, and any external context you find. "
         "Mention relative price movement, volume behavior, z-score severity, and whether multiple detectors agree. "
         "Do not invent facts—only report news you actually find. If no relevant news is found, explicitly state that and focus on technical indicators. "
@@ -296,7 +295,12 @@ def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
 
     print(f"Using GitHub model endpoint {endpoint} with model {model} for anomaly explanation")
 
-    prompt = build_ai_prompt(payload)
+    # Fetch search context from Google Custom Search
+    anomaly_rows = _extract_anomaly_rows(payload.data or [])
+    search_context = build_search_context(payload.stock, anomaly_rows)
+    print(f"Fetched search context for {len(anomaly_rows)} anomalies")
+
+    prompt = build_ai_prompt(payload, search_context=search_context)
 
     try:
         client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(token))
@@ -304,8 +308,9 @@ def call_github_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
             model=model,
             messages=[
                 SystemMessage(
-                    "You are a NEPSE (Nepal Stock Exchange) financial analyst with access to web search. "
-                    "For each anomaly analyzed, actively search the web for news and events from NEPSE-listed companies only. "
+                    "You are a NEPSE (Nepal Stock Exchange) financial analyst. "
+                    "Analyze the provided anomalies and web search results to identify correlations. "
+                    "Use the search context to validate or explain the detected anomalies. "
                     "Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; "
                     "(2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; "
                     "(3) Market events: sector news, competitor moves, macroeconomic changes; "
@@ -344,10 +349,14 @@ def call_openai_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
     model = os.getenv("MODEL_NAME", "openai/gpt-4.1")
     endpoint = os.getenv("MODEL_ENDPOINT")
 
-
     print(f"Using OpenAI model {model} for anomaly explanation")
 
-    prompt = build_ai_prompt(payload)
+    # Fetch search context from Google Custom Search
+    anomaly_rows = _extract_anomaly_rows(payload.data or [])
+    search_context = build_search_context(payload.stock, anomaly_rows)
+    print(f"Fetched search context for {len(anomaly_rows)} anomalies")
+
+    prompt = build_ai_prompt(payload, search_context=search_context)
 
     try:
         client = OpenAI(
@@ -358,14 +367,14 @@ def call_openai_ai_explanation(token:str,payload: schemas.AnomalyExplanationRequ
             messages = [
                 {
                     "role":"system",
-                    "content":"You are a NEPSE (Nepal Stock Exchange) financial analyst with access to web search. "
-                    "For each anomaly analyzed, actively search the web for news and events from NEPSE-listed companies only. "
+                    "content":"You are a NEPSE (Nepal Stock Exchange) financial analyst. "
+                    "Analyze the provided anomalies and web search results to identify correlations. "
+                    "Use the search context to validate or explain the detected anomalies. "
                     "Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; "
                     "(2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; "
                     "(3) Market events: sector news, competitor moves, macroeconomic changes; "
                     "(4) Company news: executive changes, major contracts, product launches. "
-                    "Search 2 weeks before to 2 weeks after each anomaly date. Correlate findings with technical anomalies. "
-                    "Report only what you find—do not speculate or invent facts."
+                    "Report only what you find in the search results—do not speculate or invent facts."
                 },
                 {
                     "role":"user",

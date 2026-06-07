@@ -1,5 +1,7 @@
+import React from 'react'
 import { useState } from 'react'
 import { login } from '../api'
+import { Link } from 'react-router-dom'
 
 export default function LoginPage({ onSuccess }) {
   const [username, setUsername] = useState('')
@@ -48,7 +50,6 @@ export default function LoginPage({ onSuccess }) {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               autoComplete="username"
-              placeholder="Username or email"
               required
             />
           </label>
@@ -67,7 +68,7 @@ export default function LoginPage({ onSuccess }) {
           </button>
           {error ? <div className="form-error">{error}</div> : null}
           <p className="auth-footer">
-            Don't have an account? <a href="/register">Create one</a>
+            Don't have an account? <Link to="/register" className="highlighted-text">Create one</Link>
           </p>
         </form>
       </div>

@@ -1,3 +1,4 @@
+import React from "react"
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { BrowserRouter } from "react-router-dom"
 import RegisterPage from "../pages/RegisterPage"
@@ -34,10 +35,10 @@ describe("RegisterPage", () => {
         <RegisterPage />
       </BrowserRouter>
     )
-    const usernameInput = screen.getByPlaceholderText(/Choose a username/i)
-    const emailInput = screen.getByPlaceholderText(/you@example.com/i)
-    const passwordInput = screen.getByPlaceholderText(/At least 6 characters/i)
-    const confirmInput = screen.getByPlaceholderText(/Confirm your password/i)
+    const usernameInput = screen.getByLabelText(/Username/i)
+    const emailInput = screen.getByLabelText(/Email/i)
+    const passwordInput = screen.getByLabelText(/^Password/i)
+    const confirmInput = screen.getByLabelText(/Confirm password/i)
     const submitBtn = screen.getByText(/Create account/i)
 
     fireEvent.change(usernameInput, { target: { value: "newuser" } })
@@ -57,10 +58,10 @@ describe("RegisterPage", () => {
         <RegisterPage />
       </BrowserRouter>
     )
-    const usernameInput = screen.getByPlaceholderText(/Choose a username/i)
-    const emailInput = screen.getByPlaceholderText(/you@example.com/i)
-    const passwordInput = screen.getByPlaceholderText(/At least 6 characters/i)
-    const confirmInput = screen.getByPlaceholderText(/Confirm your password/i)
+    const usernameInput = screen.getByLabelText(/Username/i)
+    const emailInput = screen.getByLabelText(/Email/i)
+    const passwordInput = screen.getByLabelText(/^Password/i)
+    const confirmInput = screen.getByLabelText(/Confirm password/i)
     const submitBtn = screen.getByText(/Create account/i)
 
     fireEvent.change(usernameInput, { target: { value: "newuser" } })

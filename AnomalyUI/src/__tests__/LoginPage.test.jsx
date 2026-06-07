@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
@@ -22,7 +23,7 @@ describe("LoginPage", () => {
     expect(screen.getByText(/Sign in to Anomaly Engine/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
-    expect(screen.getByText(/Sign in/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sign in/i })).toBeInTheDocument();
   });
 
   it("calls login with correct credentials", async () => {
@@ -33,9 +34,9 @@ describe("LoginPage", () => {
       </BrowserRouter>
     );
 
-    const usernameInput = screen.getByDisplayValue("");
-    const passwordInput = screen.getAllByDisplayValue("")[1];
-    const submitBtn = screen.getByText(/Sign in/i);
+    const usernameInput = screen.getByLabelText(/Username/i);
+    const passwordInput = screen.getByLabelText(/Password/i);
+    const submitBtn = screen.getByRole('button', { name: /Sign in/i });
 
     fireEvent.change(usernameInput, { target: { value: "analyst" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
@@ -54,9 +55,9 @@ describe("LoginPage", () => {
       </BrowserRouter>
     );
 
-    const usernameInput = screen.getByDisplayValue("");
-    const passwordInput = screen.getAllByDisplayValue("")[1];
-    const submitBtn = screen.getByText(/Sign in/i);
+    const usernameInput = screen.getByLabelText(/Username/i);
+    const passwordInput = screen.getByLabelText(/Password/i);
+    const submitBtn = screen.getByRole('button', { name: /Sign in/i });
 
     fireEvent.change(usernameInput, { target: { value: "analyst" } });
     fireEvent.change(passwordInput, { target: { value: "wrongpassword" } });
@@ -80,9 +81,9 @@ describe("LoginPage", () => {
       </BrowserRouter>
     );
 
-    const usernameInput = screen.getByDisplayValue("");
-    const passwordInput = screen.getAllByDisplayValue("")[1];
-    const submitBtn = screen.getByText(/Sign in/i);
+    const usernameInput = screen.getByLabelText(/Username/i);
+    const passwordInput = screen.getByLabelText(/Password/i);
+    const submitBtn = screen.getByRole('button', { name: /Sign in/i });
 
     fireEvent.change(usernameInput, { target: { value: "analyst" } });
     fireEvent.change(passwordInput, { target: { value: "password" } });

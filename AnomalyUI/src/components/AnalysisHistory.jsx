@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { fetchAnalyses, fetchAnalysisData, toggleFavorite } from "../api";
 

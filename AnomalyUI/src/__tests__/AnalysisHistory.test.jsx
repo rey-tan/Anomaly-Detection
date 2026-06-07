@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import AnalysisHistory from "../components/AnalysisHistory";
 import * as api from "../api";

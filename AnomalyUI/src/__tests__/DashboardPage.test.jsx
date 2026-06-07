@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import DashboardPage from "../pages/Dashboard";
 import { vi } from "vitest";
@@ -38,7 +39,7 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={() => {}}
         />
@@ -53,15 +54,17 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={() => {}}
         />
       </BrowserRouter>
     );
-    expect(screen.getByText("API")).toBeInTheDocument();
-    expect(screen.getByText("1D")).toBeInTheDocument();
-    expect(screen.getByText("2024-01-01 – 2026-01-01")).toBeInTheDocument();
+    const latestSection = screen.getByText(/Latest Analysis/i).closest('.dashboard-card');
+    expect(latestSection).toBeInTheDocument();
+    expect(within(latestSection).getByText("API")).toBeInTheDocument();
+    expect(within(latestSection).getByText("1D")).toBeInTheDocument();
+    expect(within(latestSection).getByText("2024-01-01 – 2026-01-01")).toBeInTheDocument();
   });
 
   it("displays anomaly count from results", () => {
@@ -69,13 +72,15 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={() => {}}
         />
       </BrowserRouter>
     );
-    expect(screen.getByText("1")).toBeInTheDocument(); // 1 anomaly with cluster -1
+    const anomalySection = screen.getByText(/Flagged anomalies/i).closest('.stat-card');
+    expect(anomalySection).toBeInTheDocument();
+    expect(within(anomalySection).getByRole('heading', { name: '1' })).toBeInTheDocument();
   });
 
   it("displays metrics count", () => {
@@ -83,7 +88,7 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={() => {}}
         />
@@ -98,7 +103,7 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={onOpenLastRun}
         />
@@ -114,7 +119,7 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={adminUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={() => {}}
         />
@@ -129,7 +134,7 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={mockResults}
           onOpenLastRun={() => {}}
         />
@@ -144,7 +149,7 @@ describe("DashboardPage", () => {
       <BrowserRouter>
         <DashboardPage
           user={mockUser}
-          lastConfig={mockConfig}
+          selectedAnalysis={mockConfig}
           results={null}
           onOpenLastRun={() => {}}
         />

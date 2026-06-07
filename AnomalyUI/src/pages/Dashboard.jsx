@@ -5,14 +5,16 @@ import FavoritesPanel from '../components/FavoritesPanel'
 export default function DashboardPage({ user, selectedAnalysis, results, onOpenLastRun }) {
   const navigate = useNavigate();
   const lastAnalysis = selectedAnalysis || {};
-  const stock = lastAnalysis?.stock ;
+  const stock = lastAnalysis?.stock;
   const timeframe = lastAnalysis?.timeframe;
   const startDate = lastAnalysis?.start_date;
   const endDate = lastAnalysis?.end_date;
   const mode = lastAnalysis?.mode;
   const featureCount = lastAnalysis?.features?.length || 0;
-  const anomalyCount = results?.data ? results.data.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length : lastAnalysis?.anomaly_count??0;
-  const activeMetricCount = results?.models ? Object.keys(results?.models || {}).length - 1 : (lastAnalysis?.metrics? Object.keys(lastAnalysis.metrics).length-1 : 0);
+  const anomalyCount = results?.data
+    ? results.data.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length
+    : lastAnalysis?.anomalyCount ?? 0;
+  const activeMetricCount = results?.models ? Object.keys(results?.models || {}).length - 1 : (lastAnalysis?.metrics ? Object.keys(lastAnalysis.metrics).length - 1 : 0);
   const isAdmin = user?.role === 'admin';
   return (
     <>
@@ -75,7 +77,7 @@ export default function DashboardPage({ user, selectedAnalysis, results, onOpenL
           </div> */}
         </article>
       
-      <FavoritesPanel token={localStorage.getItem('anomalyui_token') || ''} onSelect={onOpenLastRun} />
+      <FavoritesPanel token={typeof localStorage !== 'undefined' ? localStorage.getItem('anomalyui_token') || '' : ''} onSelect={onOpenLastRun} />
 
       </section>
 

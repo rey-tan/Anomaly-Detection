@@ -1,3 +1,4 @@
+import React from 'react'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { registerRequest, verifyOTP } from '../api'
@@ -36,8 +37,8 @@ export default function RegisterPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.')
       return
     }
 
@@ -104,7 +105,6 @@ export default function RegisterPage() {
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   autoComplete="username"
-                  placeholder="Choose a username"
                   required
                 />
               </label>
@@ -115,7 +115,6 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
-                  placeholder="you@example.com"
                   required
                 />
               </label>
@@ -126,7 +125,6 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   autoComplete="new-password"
-                  placeholder="At least 6 characters"
                   required
                 />
               </label>
@@ -137,7 +135,6 @@ export default function RegisterPage() {
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   autoComplete="new-password"
-                  placeholder="Confirm your password"
                   required
                 />
               </label>
@@ -170,7 +167,7 @@ export default function RegisterPage() {
           {error ? <div className="form-error">{error}</div> : null}
           {success ? <div className="form-success">{success}</div> : null}
           <p className="auth-footer">
-            Already have an account? <Link to="/login">Sign in</Link>
+            Already have an account? <Link to="/login" className="highlighted-text">Sign in</Link>
           </p>
         </form>
       </div>

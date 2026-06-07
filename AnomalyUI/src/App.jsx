@@ -31,6 +31,44 @@ function extractMetricsAndParams(data) {
   };
 }
 
+function countAnomalyRows(data) {
+  if (!Array.isArray(data)) return 0;
+  return data.filter(isAnomalyRow).length;
+}
+
+function deriveAnomalyCount(metrics, dataLength = 0) {
+  if (!metrics || typeof metrics !== 'object') return null;
+  if (typeof metrics.anomaly_count === 'number') {
+    return metrics.anomaly_count;
+  }
+  if (typeof metrics.n_noise === 'number') {
+    return metrics.n_noise;
+  }
+  if (typeof metrics.anomaly_rate === 'number' && dataLength > 0) {
+    return Math.round(metrics.anomaly_rate * dataLength);
+  }
+  return null;
+}
+
+async function enrichAnalysisWithAnomalyCount(analysis, token, fallbackData = null) {
+  if (!analysis) return analysis;
+  let anomalyCount = null;
+  if (Array.isArray(fallbackData)) {
+    anomalyCount = countAnomalyRows(fallbackData);
+  }
+  if (anomalyCount === null) {
+    anomalyCount = deriveAnomalyCount(analysis.metrics, Array.isArray(analysis.data) ? analysis.data.length : 0);
+  }
+  if (anomalyCount === null && analysis.id && token) {
+    try {
+      const payload = await fetchAnalysisData(token, analysis.id);
+      anomalyCount = countAnomalyRows(payload.data || []);
+    } catch (err) {
+      anomalyCount = 0;
+    }
+  }
+  return { ...analysis, anomalyCount: anomalyCount ?? 0 };
+}
 
 function isAnomalyRow(row) {
   return (
@@ -72,12 +110,18 @@ function App() {
     if (!token || selectedAnalysis) return;
 
     let active = true;
-    fetchAnalyses(token)
-      .then((analyses) => {
+    (async () => {
+      try {
+        const analyses = await fetchAnalyses(token);
         if (!active || !analyses?.length) return;
-        setSelectedAnalysis(analyses[0]);
-      })
-      .catch(() => {});
+        const latest = analyses[0];
+        const enriched = await enrichAnalysisWithAnomalyCount(latest, token);
+        if (!active) return;
+        setSelectedAnalysis(enriched);
+      } catch (err) {
+        // ignore errors on initial history load
+      }
+    })();
 
     return () => {
       active = false;
@@ -113,11 +157,12 @@ function App() {
     try {
       const response = await analyze(token, payload);
       setResults(response);
-      let selected = payload;
+      const currentAnomalyCount = countAnomalyRows(response.data || []);
+      let selected = { ...payload, anomalyCount: currentAnomalyCount };
       try {
         const analyses = await fetchAnalyses(token);
         if (analyses?.length) {
-          selected = analyses[0];
+          selected = await enrichAnalysisWithAnomalyCount(analyses[0], token, response.data);
         }
       } catch (err) {
         // If the history lookup fails, keep using the request payload as a fallback.
@@ -142,8 +187,9 @@ function App() {
     setError("");
     try {
       if (payload && analysis) {
+        const enriched = analysis.anomalyCount != null ? analysis : { ...analysis, anomalyCount: countAnomalyRows(payload.data || []) };
         setResults(payload);
-        setSelectedAnalysis(analysis);
+        setSelectedAnalysis(enriched);
         setAiExplanation(null);
         setAiError("");
         navigate('/results');

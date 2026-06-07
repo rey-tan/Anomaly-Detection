@@ -30,17 +30,16 @@ def get_users(db: Session) -> List[models.User]:
 def create_user(
     db: Session,
     username: str,
+    email: str,
     password: str,
-    email: Optional[str] = None,
     role: str = "user",
     permissions: Optional[Dict[str, Any]] = None,
-    email_verified: bool = False,
+    email_verified: bool = True,
 ):
     hashed_password = get_password_hash(password)
-    email_to_use = email or f"{username}@example.com"
     user = models.User(
         username=username,
-        email=email_to_use,
+        email=email,
         hashed_password=hashed_password,
         email_verified=email_verified,
         role=role,

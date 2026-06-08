@@ -22,7 +22,7 @@ def test_create_explanation_inserts_row(monkeypatch):
     db.commit()
     db.refresh(user)
 
-    explanation_obj = {"summary": "test", "highlights": ["a"], "anomaly_count": 1}
+    explanation_obj = {"summary": "test", "anomaly_count": 1}
     entry = crud.create_explanation(db, user_id=user.id, explanation=explanation_obj, analysis_id=None, metadata={"k": "v"}, artifact_path="/tmp/x.json", artifact_hash="abc123")
     assert entry.id is not None
     assert entry.user_id == user.id

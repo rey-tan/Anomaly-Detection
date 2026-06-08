@@ -33,7 +33,6 @@ def create_user(
     email: str,
     password: str,
     role: str = "user",
-    permissions: Optional[Dict[str, Any]] = None,
     email_verified: bool = True,
 ):
     hashed_password = get_password_hash(password)
@@ -43,7 +42,6 @@ def create_user(
         hashed_password=hashed_password,
         email_verified=email_verified,
         role=role,
-        permissions=permissions,
     )
     db.add(user)
     db.commit()
@@ -98,11 +96,6 @@ def update_user_role(db: Session, user: models.User, role: str):
     return user
 
 
-def update_user_permissions(db: Session, user: models.User, permissions: Dict[str, Any]):
-    user.permissions = permissions
-    db.commit()
-    db.refresh(user)
-    return user
 
 
 def delete_user(db: Session, user: models.User):
@@ -263,45 +256,8 @@ def get_user_analyses(db: Session, user_id: int, limit: Optional[int] = None):
     return query.all()
 
 
-def create_notification(
-    db: Session,
-    user_id: int,
-    title: str,
-    message: str,
-    type: str = "info",
-    is_read: bool = False,
-    analysis_id: Optional[int] = None,
-):
-    notification = models.Notification(
-        user_id=user_id,
-        analysis_id=analysis_id,
-        title=title,
-        message=message,
-        type=type,
-        is_read=is_read,
-    )
-    db.add(notification)
-    db.commit()
-    db.refresh(notification)
-    return notification
 
 
-def get_user_notifications(db: Session, user_id: int, unread_only: bool = False):
-    query = db.query(models.Notification).filter(models.Notification.user_id == user_id)
-    if unread_only:
-        query = query.filter(models.Notification.is_read == False)
-    return query.order_by(models.Notification.created_at.desc()).all()
-
-
-def mark_notification_read(db: Session, notification_id: int):
-    notification = db.query(models.Notification).filter(models.Notification.id == notification_id).first()
-    if notification is None:
-        return None
-    notification.is_read = True
-    notification.read_at = datetime.utcnow()
-    db.commit()
-    db.refresh(notification)
-    return notification
 
 
 def create_explanation(db: Session, user_id: int, explanation: Dict[str, Any], analysis_id: Optional[int] = None, metadata: Optional[Dict[str, Any]] = None, artifact_path: Optional[str] = None, artifact_hash: Optional[str] = None):
@@ -314,7 +270,6 @@ def create_explanation(db: Session, user_id: int, explanation: Dict[str, Any], a
         artifact_path=artifact_path,
         artifact_hash=artifact_hash,
         summary=explanation.get("summary") or explanation.get("raw_summary"),
-        highlights=explanation.get("highlights"),
         anomaly_count=explanation.get("anomaly_count"),
         meta=metadata,
     )

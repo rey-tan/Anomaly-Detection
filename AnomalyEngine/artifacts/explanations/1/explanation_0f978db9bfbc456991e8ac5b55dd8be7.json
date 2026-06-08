@@ -1,0 +1,307 @@
+{
+  "explanation": {
+    "anomaly_count": 4,
+    "entries": [],
+    "raw_summary": "**Row 1: 2026-02-08 (API)**\n- **Technical Indicators:**\n  - Isolation Forest flagged anomaly.\n  - Close price: 301.9 (flat, no change from previous day).\n  - Volume: 585,301 (above normal mean of ~525,015).\n  - Z-score: -0.11 (not extreme).\n  - Bollinger Band width: 0 (no volatility).\n- **News/Event Correlation:**\n  - NEPSE slipped 10.25 points on this date, with turnover hitting Rs... (source: Nepal News Evening Economic Brief).\n  - No API-specific financial, real-world, or company news found.\n- **Explanation:**\n  - The anomaly is primarily technical: elevated volume with flat price and zero volatility, flagged by Isolation Forest.\n  - The NEPSE index decline may have contributed to unusual trading behavior, but no direct API-specific event is reported.\n\n---\n\n**Row 2: 2026-03-09 (API)**\n- **Technical Indicators:**\n  - Combined, DBSCAN flagged anomaly.\n  - Close price: 340 (up sharply from previous close of 317).\n  - Z-score: 3.60 (significant positive deviation).\n  - Volume: 47,031 (much lower than normal mean).\n  - Bollinger Band width: 0.14 (higher volatility).\n- **News/Event Correlation:**\n  - No API-specific news found.\n  - Buddha Air announced an event (not directly related to API or power sector).\n  - No sector-wide or macroeconomic news affecting API detected.\n- **Explanation:**\n  - The anomaly is technical: a sharp price jump with unusually low volume, flagged by multiple detectors.\n  - No financial, real-world, or company-specific news explains the move.\n\n---\n\n**Row 3: 2026-04-05 (API)**\n- **Technical Indicators:**\n  - Combined, DBSCAN, Isolation Forest flagged anomaly.\n  - Close price: 325 (down sharply from previous close of 353).\n  - Z-score: -4.16 (extreme negative deviation).\n  - Volume: 979,663 (well above normal mean).\n  - Bollinger Band width: 0.15 (high volatility).\n- **News/Event Correlation:**\n  - Share Hub records a -7.93% price drop for API on this date.\n  - No API-specific financial, real-world, or company news found.\n- **Explanation:**\n  - The anomaly is technical: a large price drop with high volume and extreme z-score, flagged by all detectors.\n  - No external news explains the drop; the event is likely driven by market dynamics or sentiment.\n\n---\n\n**Row 4: 2026-04-06 (API)**\n- **Technical Indicators:**\n  - Combined, DBSCAN flagged anomaly.\n  - Close price: 346 (up sharply from previous close of 325).\n  - Z-score: 3.19 (significant positive deviation).\n  - Volume: 936,872 (well above normal mean).\n  - Bollinger Band width: 0.12 (high volatility).\n- **News/Event Correlation:**\n  - Share Hub records a +6.46% price jump for API on this date.\n  - No API-specific financial, real-world, or company news found.\n- **Explanation:**\n  - The anomaly is technical: a sharp price recovery with high volume and significant z-score, flagged by multiple detectors.\n  - No external news explains the move; likely market-driven reversal.\n\n---\n\n**Overall Summary:**\n- All anomalies for API between 2026-02-07 and 2026-06-07 are primarily technical, characterized by sharp price movements, extreme z-scores, and unusual volume, with multiple detectors in agreement.\n- No financial events (earnings, dividends, regulatory changes), real-world events (political, natural disasters), market events (sector news, competitor moves), or company-specific news (executive changes, contracts) were found in the search results for the flagged dates.\n- The only external context is a general NEPSE index decline on 2026-02-08, which may have influenced trading behavior but does not directly explain API anomalies.\n- The anomalies are best explained by technical factors—price and volume behavior—rather than news or events.",
+    "source": "openai/gpt-4.1",
+    "summary": "- All anomalies for API between 2026-02-07 and 2026-06-07 are primarily technical, characterized by sharp price movements, extreme z-scores, and unusual volume, with multiple detectors in agreement.\n- No financial events (earnings, dividends, regulatory changes), real-world events (political, natural disasters), market events (sector news, competitor moves), or company-specific news (executive changes, contracts) were found in the search results for the flagged dates.\n- The only external context is a general NEPSE index decline on 2026-02-08, which may have influenced trading behavior but does not directly explain API anomalies.\n- The anomalies are best explained by technical factors—price and volume behavior—rather than news or events."
+  },
+  "request": {
+    "analysis_id": null,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Anomaly_Score_IF": -4.88,
+        "Anomaly_Z_Score": -0.10792324652064983,
+        "IF_Anomaly_Score": -4.88,
+        "Lower_BB": 301.9,
+        "RSI": 50,
+        "SMA_10": 301.9,
+        "SMA_20": 301.9,
+        "SMA_50": 301.9,
+        "Upper_BB": 301.9,
+        "adjacent_rows": [
+          {
+            "close": 297,
+            "date": "2026-02-09",
+            "volume": 448876
+          },
+          {
+            "close": 302,
+            "date": "2026-02-10",
+            "volume": 416755
+          },
+          {
+            "close": 303,
+            "date": "2026-02-11",
+            "volume": 276403
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 301.9,
+        "cluster": 1,
+        "cluster_dbscan": 1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": 1,
+        "date": "2026-02-08",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 311,
+        "low": 299.6,
+        "open": 305,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 301.9,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 585301,
+        "z_score": -0.10792324652064983
+      },
+      {
+        "Anomaly_Score_IF": -5.18,
+        "Anomaly_Z_Score": 3.597331081560776,
+        "IF_Anomaly_Score": -5.18,
+        "Lower_BB": 280.5575928990893,
+        "RSI": 75.9183673469388,
+        "SMA_10": 306.77,
+        "SMA_20": 304.97333333333336,
+        "SMA_50": 304.97333333333336,
+        "Upper_BB": 329.38907376757743,
+        "adjacent_rows": [
+          {
+            "close": 312.4,
+            "date": "2026-02-26",
+            "volume": 1054543
+          },
+          {
+            "close": 316,
+            "date": "2026-03-01",
+            "volume": 1049844
+          },
+          {
+            "close": 317,
+            "date": "2026-03-03",
+            "volume": 483492
+          },
+          {
+            "close": 341,
+            "date": "2026-03-10",
+            "volume": 1842222
+          },
+          {
+            "close": 340,
+            "date": "2026-03-11",
+            "volume": 1303521
+          },
+          {
+            "close": 336.3,
+            "date": "2026-03-12",
+            "volume": 719166
+          }
+        ],
+        "average_volume": 426910.64285714284,
+        "bb_width": 0.1436220025543769,
+        "close": 340,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": -1,
+        "date": "2026-03-09",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 345,
+        "low": 323,
+        "open": 323,
+        "previous_close": 317,
+        "returns": 0.0725552050473186,
+        "rolling_mean": 304.97333333333336,
+        "rolling_std": 0.023179869004764576,
+        "volatility": 0.023179869004764576,
+        "volume": 47031,
+        "z_score": 3.597331081560776
+      },
+      {
+        "Anomaly_Score_IF": -4.71,
+        "Anomaly_Z_Score": -4.1586483870614455,
+        "IF_Anomaly_Score": -4.71,
+        "Lower_BB": 320.7280526710763,
+        "RSI": 42.127659574468076,
+        "SMA_10": 353.23,
+        "SMA_20": 345.41499999999996,
+        "SMA_50": 328.05757575757576,
+        "Upper_BB": 370.10194732892364,
+        "adjacent_rows": [
+          {
+            "close": 358.1,
+            "date": "2026-03-31",
+            "volume": 1143683
+          },
+          {
+            "close": 350,
+            "date": "2026-04-01",
+            "volume": 1304796
+          },
+          {
+            "close": 353,
+            "date": "2026-04-02",
+            "volume": 787287
+          },
+          {
+            "close": 346,
+            "date": "2026-04-06",
+            "volume": 936872
+          },
+          {
+            "close": 341.5,
+            "date": "2026-04-07",
+            "volume": 428867
+          },
+          {
+            "close": 349,
+            "date": "2026-04-08",
+            "volume": 472857
+          }
+        ],
+        "average_volume": 1016388.95,
+        "bb_width": 0.15191967587029956,
+        "close": 325,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": -1,
+        "cluster_zscore": -1,
+        "date": "2026-04-05",
+        "detector_flags": [
+          "combined",
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 350.5,
+        "low": 324.6,
+        "open": 350.5,
+        "previous_close": 353,
+        "returns": -0.07932011331444755,
+        "rolling_mean": 345.41499999999996,
+        "rolling_std": 0.028883726373798123,
+        "volatility": 0.028883726373798123,
+        "volume": 979663,
+        "z_score": -4.1586483870614455
+      },
+      {
+        "Anomaly_Score_IF": -5.2,
+        "Anomaly_Z_Score": 3.191859771812195,
+        "IF_Anomaly_Score": -5.2,
+        "Lower_BB": 326.1120902484039,
+        "RSI": 56.00739371534197,
+        "SMA_10": 353.03000000000003,
+        "SMA_20": 346.86499999999995,
+        "SMA_50": 328.58529411764704,
+        "Upper_BB": 367.617909751596,
+        "adjacent_rows": [
+          {
+            "close": 350,
+            "date": "2026-04-01",
+            "volume": 1304796
+          },
+          {
+            "close": 353,
+            "date": "2026-04-02",
+            "volume": 787287
+          },
+          {
+            "close": 325,
+            "date": "2026-04-05",
+            "volume": 979663
+          },
+          {
+            "close": 341.5,
+            "date": "2026-04-07",
+            "volume": 428867
+          },
+          {
+            "close": 349,
+            "date": "2026-04-08",
+            "volume": 472857
+          },
+          {
+            "close": 352.2,
+            "date": "2026-04-09",
+            "volume": 740288
+          }
+        ],
+        "average_volume": 1012879.9,
+        "bb_width": 0.11995901590517956,
+        "close": 346,
+        "cluster": -1,
+        "cluster_dbscan": -1,
+        "cluster_isolation_forest": 1,
+        "cluster_zscore": -1,
+        "date": "2026-04-06",
+        "detector_flags": [
+          "combined",
+          "DBSCAN"
+        ],
+        "high": 348,
+        "low": 324,
+        "open": 325,
+        "previous_close": 325,
+        "returns": 0.06461538461538452,
+        "rolling_mean": 346.86499999999995,
+        "rolling_std": 0.032122886101249096,
+        "volatility": 0.032122886101249096,
+        "volume": 936872,
+        "z_score": 3.191859771812195
+      }
+    ],
+    "end_date": "2026-06-07",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.04054054054054054,
+        "n_clusters": 1,
+        "n_noise": 3,
+        "volatility_anomaly_mean": 0.028062160493270597,
+        "volatility_normal_mean": 0.018305036535150476,
+        "volume_anomaly_mean": 654522,
+        "volume_normal_mean": 525015.352112676
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.02702702702702703,
+        "n_clusters": 1,
+        "n_noise": 2,
+        "volatility_anomaly_mean": 0.014441863186899061,
+        "volatility_normal_mean": 0.018818893737523573,
+        "volume_anomaly_mean": 782482,
+        "volume_normal_mean": 523259.6111111111
+      },
+      "zscore": {
+        "anomaly_rate": 0.04054054054054054,
+        "n_clusters": 1,
+        "n_noise": 3,
+        "volatility_anomaly_mean": 0.028062160493270597,
+        "volatility_normal_mean": 0.018305036535150476,
+        "volume_anomaly_mean": 654522,
+        "volume_normal_mean": 525015.352112676
+      }
+    },
+    "start_date": "2026-02-07",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-07T18:09:35.587541",
+  "user_id": 1
+}

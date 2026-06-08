@@ -5,7 +5,6 @@ import DashboardPage from '../pages/Dashboard'
 import AnalysisPage from '../pages/AnalysisPage'
 import ResultsPage from '../pages/ResultsPage'
 import UsersPage from '../pages/UsersPage'
-import NotificationsPage from '../pages/NotificationsPage'
 import DataPage from '../pages/DataPage'
 import ActivityPage from '../pages/ActivityPage'
 import LoginPage from '../pages/LoginPage'
@@ -34,7 +33,6 @@ export default function AppRoutes(props) {
     loading,
     error,
     onLogout,
-    onOpenNotifications,
     setActivityUser,
     handleLogin,
   } = props;
@@ -62,7 +60,6 @@ export default function AppRoutes(props) {
             analyses={analyses}
             setAnalyses={setAnalyses}
             onLogout={onLogout}
-            onOpenNotifications={onOpenNotifications}
             handleOpenLastRun={handleOpenLastRun}
             handleSelectAnalysis={handleSelectAnalysis}
           />
@@ -100,10 +97,7 @@ export default function AppRoutes(props) {
             )
           }
         />
-        <Route
-          path="notifications"
-          element={<NotificationsPage token={token} analyses={analyses} setAnalyses={setAnalyses} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} onSelectAnalysis={handleSelectAnalysis} />}
-        />
+       
         <Route
           path="data"
           element={

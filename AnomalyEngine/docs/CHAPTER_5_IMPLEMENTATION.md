@@ -10,7 +10,6 @@
   - SQLAlchemy (ORM)
   - Pydantic (request/response schemas)
   - Uvicorn (ASGI server)
-  - Streamlit (internal demo UI)
   - React + Vite (AnomalyUI production UI)
   - pytest (testing)
 - Database platforms: SQLite for development; instructions provided for Alembic migrations targeting PostgreSQL or MySQL for production.
@@ -18,8 +17,8 @@
 
 5.1.2. Implementation Details of Modules
 
-Overview
-- The system separates concerns between: API (FastAPI), persistence (SQLAlchemy models, CRUD), artifact I/O (`src/utils/io.py`), AI integration (`src/api/ai_services.py`), and frontend clients (Streamlit and React UI).
+ Overview
+ - The system separates concerns between: API (FastAPI), persistence (SQLAlchemy models, CRUD), artifact I/O (`src/utils/io.py`), AI integration (`src/api/ai_services.py`), and frontend clients (React UI).
 
 Modules and responsibilities
 

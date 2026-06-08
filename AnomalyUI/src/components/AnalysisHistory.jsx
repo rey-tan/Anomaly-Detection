@@ -54,9 +54,10 @@ export default function AnalysisHistory({ token, onSelectAnalysis }) {
                 <small>{new Date(a.executed_at).toLocaleString()}</small>
               </div>
               <div className="analysis-meta">
-                <span>{a.mode}</span>
-                <span>{a.timeframe}</span>
                 <span>{a.status}</span>
+                <span>{a.start_date} - {a.end_date}</span>
+                <span>{a.timeframe}</span>
+
               </div>
             </div>
             <div className="button-row">

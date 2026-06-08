@@ -7,7 +7,7 @@ This file documents the exact implementation details required to support explana
 - Backend: FastAPI app at `src/api/app.py`.
 - ORM: SQLAlchemy declarative models in `src/api/models.py` and CRUD helpers in `src/api/crud.py`.
 - Artifact I/O: `src/utils/io.py` contains `write_explanation_artifact` and related helpers.
-- Frontend: Streamlit (`main.py`) for internal demos and React UI in `AnomalyUI` for production UI.
+ - Frontend: React UI in `AnomalyUI` for production UI.
 - Storage: Explanation JSON artifacts are stored under `artifacts/explanations/{user_id}/` on local disk (development) and referenced in the DB by path + hash.
 
 ## DB Schema (explanations table)

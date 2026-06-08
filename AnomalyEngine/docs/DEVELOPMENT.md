@@ -25,11 +25,12 @@ API docs (Swagger UI): `http://localhost:8000/docs`
 ### 3. Start Frontend (new terminal)
 
 ```bash
-source venv/bin/activate
-streamlit run main.py
+cd AnomalyUI
+npm install
+npm run dev
 ```
 
-Frontend available at `http://localhost:8501`
+Frontend available at the AnomalyUI dev server (typically `http://localhost:5173` for Vite)
 
 ## Code Structure
 
@@ -37,7 +38,7 @@ Frontend available at `http://localhost:8501`
 
 - `app.py` — Main app, routes (`/login`, `/me`, `/analyze`, `/users`, `/cache`)
 - `database.py` — SQLAlchemy engine, session factory
-- `models.py` — SQLAlchemy ORM models (`User`, `PipelineCache`, `UserActivity`, `Notification`, `UserAnalysis`)
+ - `models.py` — SQLAlchemy ORM models (`User`, `UserActivity`, `Notification`, `UserAnalysis`)
 - `schemas.py` — Pydantic request/response models
 - `crud.py` — Database CRUD operations + config hashing + activity logging
 - `security.py` — JWT token, password hashing, role-based authorization
@@ -129,7 +130,7 @@ def plot_analysis(symbol, df, timeframe):
     return fig
 ```
 
-Then restart Streamlit (`main.py` auto-reloads on save).
+Then restart the AnomalyUI dev server if needed (Vite will auto-reload on save).
 
 ### Change database (SQLite → PostgreSQL)
 
@@ -164,7 +165,6 @@ Check database:
 ```bash
 sqlite3 anomaly_engine.db
 > SELECT * FROM users;
-> SELECT COUNT(*) FROM pipeline_cache;
 ```
 
 Test pipeline directly:

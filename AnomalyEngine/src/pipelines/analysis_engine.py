@@ -24,7 +24,6 @@ class AnalysisRequest:
     end_date: str
     timeframe: str
     features: Optional[list[str]] = None
-    mode: str = "static"
 
     @classmethod
     def from_mapping(cls, config: dict[str, Any]) -> "AnalysisRequest":
@@ -34,7 +33,6 @@ class AnalysisRequest:
             end_date=config["end_date"],
             timeframe=config["timeframe"],
             features=config.get("features"),
-            mode=config.get("mode", "static"),
         )
 
 
@@ -99,12 +97,11 @@ class AnomalyDetectorService:
         return np.where(np.abs(z_scores) > threshold, -1, 1)
 
 
-class StaticAnalysisPipeline:
+class AnalysisEngine:
     def __init__(
         self,
         config: dict[str, Any] | AnalysisRequest,
         best_params: dict[str, Any],
-        *,
         data_loader: DataLoader | None = None,
         preprocessor: Preprocessor | None = None,
         feature_engineer: FeatureEngineering | None = None,
@@ -129,8 +126,11 @@ class StaticAnalysisPipeline:
         if clean_data.empty:
             raise ValueError("No data available after preprocessing")
 
-        features = load_config(CONFIG / "config.yaml").get("features", [])
-        print("features",features)
+        features = self.config.features
+        if features is None:
+            features = load_config(CONFIG / "config.yaml").get("features", [])
+
+        print("features", features)
         if not features:
             raise ValueError("No features configured for analysis")
 

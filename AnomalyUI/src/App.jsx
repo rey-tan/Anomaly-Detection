@@ -100,11 +100,7 @@ function App() {
       setSelectedAnalysis(selected);
       setAiExplanation(null);
       setAiError("");
-      try {
-        window.dispatchEvent(new CustomEvent('notificationsUpdated'));
-      } catch (e) {
-        // ignore if browser does not support CustomEvent in this environment
-      }
+      
       navigate('/results');
     } catch (err) {
       setError(err.message || "Analysis failed");
@@ -295,7 +291,6 @@ function App() {
       loading={loading}
       error={error}
       onLogout={handleLogout}
-      onOpenNotifications={() => navigate('/notifications')}
       setActivityUser={setActivityUser}
       handleLogin={handleLogin}
     />

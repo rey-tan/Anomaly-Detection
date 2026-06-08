@@ -19,7 +19,6 @@ class UserCreate(BaseModel):
     email: str
     password: str
     role: Optional[str] = "analyst"
-    permissions: Optional[Dict[str, Any]] = None
 
 
 class UserRead(BaseModel):
@@ -28,8 +27,6 @@ class UserRead(BaseModel):
     email: str
     email_verified: bool
     role: str
-    permissions: Optional[Dict[str, Any]] = None
-    is_active: bool
     created_at: Optional[datetime]
 
     class Config:
@@ -51,8 +48,6 @@ class UserRoleUpdate(BaseModel):
     role: str
 
 
-class UserPermissionsUpdate(BaseModel):
-    permissions: Dict[str, Any]
 
 
 class UserActivityRead(BaseModel):
@@ -86,28 +81,6 @@ class UserAnalysisRead(BaseModel):
     class Config:
         from_attributes = True
 
-
-class NotificationRead(BaseModel):
-    id: int
-    user_id: int
-    analysis_id: Optional[int] = None
-    title: str
-    message: str
-    type: str
-    is_read: bool
-    created_at: Optional[datetime]
-    read_at: Optional[datetime]
-
-    class Config:
-        from_attributes = True
-
-
-class NotificationCreate(BaseModel):
-    user_id: int
-    analysis_id: Optional[int] = None
-    title: str
-    message: str
-    type: Optional[str] = "info"
 
 
 class AnalyzeConfig(BaseModel):
@@ -148,7 +121,6 @@ class AnomalyExplanationEntry(BaseModel):
 class AnomalyExplanationResponse(BaseModel):
     raw_summary: Optional[str] = None
     summary: str
-    highlights: List[str]
     entries: Optional[List[AnomalyExplanationEntry]] = None
     anomaly_count: int
     source: str

@@ -1,12 +1,12 @@
 # Anomaly Engine (NEPSE stock anomaly detection)
 
-A production-ready stock anomaly detection system with a FastAPI backend and Streamlit dashboard. Detects unusual price behavior using DBSCAN clustering and supports both static and realtime simulation modes with result caching, user authentication, role-based authorization, and comprehensive audit trails.
+A production-ready stock anomaly detection system with a FastAPI backend and a React frontend (AnomalyUI). Detects unusual price behavior using DBSCAN clustering and supports both static and realtime simulation modes with result caching, user authentication, role-based authorization, and comprehensive audit trails.
 
 ## Architecture
 
 ```
 Anomaly Engine/
-├── main.py                      # Streamlit dashboard (frontend + admin UI)
+├── AnomalyUI/                   # React frontend (AnomalyUI)
 ├── flask.py                     # Alternative Flask API (legacy)
 ├── src/
 │   ├── api/                     # FastAPI backend
@@ -49,7 +49,7 @@ Anomaly Engine/
    - `/users` — Admin user management (CRUD operations)
    - `/users/{id}/activity` — Admin audit log access
 
-2. **Frontend (Streamlit)**: Interactive dashboard with role-based UI
+2. **Frontend (AnomalyUI)**: Interactive React dashboard with role-based UI
    - Login required before access
    - Role-specific features (admin panel for user management)
    - Real-time visual feedback and notifications
@@ -84,14 +84,15 @@ This will:
 - Create the default admin user: `admin` / `admin123`
 - Start the backend on `http://localhost:8000`
 
-### 3. Start the Streamlit frontend (in a new terminal)
+### 3. Start the AnomalyUI frontend (in a new terminal)
 
 ```bash
-source venv/bin/activate   # If not already activated
-streamlit run main.py
+cd AnomalyUI
+npm install
+npm run dev
 ```
 
-The dashboard opens at `http://localhost:8501`
+The frontend dev server typically runs at `http://localhost:5173` (Vite default).
 
 ### 4. Log in
 
@@ -114,7 +115,7 @@ The dashboard opens at `http://localhost:8501`
 
 ### Result Caching
 
-- Automatic cache on `/analyze` endpoint: the backend computes a deterministic `config_hash` and writes a `PipelineCache` entry on cache miss.
+- Automatic cache on `/analyze` endpoint: the backend computes a deterministic `config_hash` and writes a compact analysis cache entry on cache miss.
 - Full artifact persistence: the backend also writes a gzipped JSON artifact containing `{ metrics, data, best_params }` to `artifacts/results/{user_id}/{config_hash}.json.gz` and records the path in `UserAnalysis.data_path` for retrieval.
 - Explicit cache save via `/cache` endpoint remains available but is no longer required for the common workflow.
 
@@ -193,8 +194,8 @@ Edit hyperparameters in `artifacts/hyperparams/{SYMBOL}.json`:
 # Terminal 1: Backend
 uvicorn src.api.app:app --reload
 
-# Terminal 2: Frontend
-streamlit run main.py
+# Terminal 2: Frontend (AnomalyUI)
+cd AnomalyUI && npm install && npm run dev
 ```
 
 ### For production

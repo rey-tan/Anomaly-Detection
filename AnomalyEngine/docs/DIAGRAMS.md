@@ -11,117 +11,25 @@ This document describes the diagrams recommended for the Anomaly Engine project,
 5. ER Diagram
 6. Deployment Diagram (optional)
 
----
 
-## 1. Component Diagram
 
-### Purpose
-
-Shows the major application pieces and how they connect.
-
-### What to include
-
-- Streamlit frontend (`main.py`)
-- FastAPI backend (`src/api/app.py`)
-- SQLite database (`src/api/database.py`, `src/api/models.py`)
-- Pipeline modules (`src/pipelines/`)
-- Feature engineering / visualization modules (`src/components/`)
-- Config and hyperparameter files (`configs/`, `artifacts/hyperparams/`)
-
-### Why it matters
-
-It gives a high-level architecture overview for developers and stakeholders.
-
----
-
-## 2. Data Flow Diagram (DFD)
-
-### Purpose
-
-Shows how data moves through the system.
-
-### What to include
-
-- User login request from Streamlit to FastAPI (`/login`)
-- Token issuance with role and return
-- User profile requests (`/me`, `/me/notifications`)
-- Analysis request from Streamlit to `/analyze`
-- Role/permission validation
-- Activity logging to `UserActivity`
-- Cache lookup in SQLite
-- Pipeline execution when cache misses
-- Analysis logging to `UserAnalysis`
-- Notification creation
-- Response returned to Streamlit
-- Admin user management flows (`/users` endpoints)
-- Cache management (`/cache` endpoints)
-
-### Why it matters
-
-It clarifies how information travels and where decisions are taken.
-
----
-
-## 3. Sequence Diagram
-
-*** End Patch
----
-
-## Updated diagrams (artifact persistence & favorites)
-
-The system now persists full analysis artifacts (gzipped JSON) to the workspace under `artifacts/results/{user_id}/{config_hash}.json.gz` and records the file path in `UserAnalysis.data_path`. Users can mark important analyses with `UserAnalysis.is_favorite` which is exposed by the API and surfaced in the UI.
-
-### Updated Component Diagram (summary)
-
-### Explanation Artifact Persistence (Update - June 2026)
-
-Add the following to component/data-flow diagrams:
-
-- Explanation generation: `/analyze/explain` endpoint -> `ai_services` -> produces explanation JSON
-- Artifact storage: explanation JSON written to `artifacts/explanations/{user_id}/explanation_<uuid>.json`
-- Hashing: Backend computes SHA256 over the stable JSON dump and stores the digest as `artifact_hash` for integrity and deduplication
-- DB history: A lightweight `explanations` DB table stores `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `user_id`, `created_at` and minimal `metadata` (e.g., request summary)
-- UI behaviour: The UI shows a history list (not full content). To view full content, the UI may fetch the artifact file via an API route that reads the JSON file.
-
-Update your ER diagram to add an `explanations` table with attributes: `id`, `analysis_id` (FK), `user_id` (FK), `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `metadata`, `created_at`.
-
-If you maintain a visual deployment diagram, show `Artifacts Storage` (disk) and the `SQLite DB` with the lightweight `explanations` table.
-
-```mermaid
-flowchart TB
-  Browser["Browser / React UI (AnomalyUI)"] -->|Login / Analyze / List analyses| FastAPI["FastAPI Backend"]
-  Streamlit["Streamlit App\n(main.py)"] -->|API requests| FastAPI
-  FastAPI -->|Reads/Writes| DB["SQLite / SQLAlchemy DB"]
-  FastAPI -->|Loads hyperparams| Hyperparams["artifacts/hyperparams"]
-  FastAPI -->|Calls| AnalysisEngine["src/pipelines/analysis_engine.py"]
-  FastAPI -->|Calls wrappers| StaticPipeline["src/pipelines/anomaly_detection_pipeline.py"]
-  FastAPI -->|Calls wrappers| RealtimePipeline["src/pipelines/realtime_detection_pipeline.py"]
-  FastAPI -->|Uses| Components["src/components/*"]
-  FastAPI -->|Writes explanation artifacts| Explanations["artifacts/explanations/{user_id}/ (JSON)"]
-  FastAPI -->|Reads explanation artifacts| Explanations
-  Browser -->|Requests analyses list| FastAPI
-  Browser -->|Requests artifact| FastAPI
-```
 
 ### Report-ready ER Diagram
 
 This ER diagram is suitable to include in a technical report. It lists primary keys (PK), foreign keys (FK), and attributes relevant for compliance and data retention reviews.
 
 ```mermaid
+
+
 erDiagram
+
   USER {
     int id PK
     string username UK
     string hashed_password
     string role
-    json permissions
-    bool is_active
     datetime created_at
   }
-
-  USER ||--o{ USER_ACTIVITY : logs
-  USER ||--o{ NOTIFICATION : receives
-  USER ||--o{ USER_ANALYSIS : performs
 
   USER_ACTIVITY {
     int id PK
@@ -132,27 +40,14 @@ erDiagram
     datetime created_at
   }
 
-  NOTIFICATION {
-    int id PK
-    int user_id FK
-    string title
-    string message
-    string type
-    bool is_read
-    datetime created_at
-    datetime read_at
-  }
-
   USER_ANALYSIS {
     int id PK
     int user_id FK
     string config_hash
     string stock
-    string mode
     string timeframe
     date start_date
     date end_date
-    json features
     json best_params
     json metrics
     string data_path
@@ -161,6 +56,7 @@ erDiagram
     int duration_seconds
     datetime executed_at
   }
+
 
   EXPLANATION {
     int id PK
@@ -178,52 +74,321 @@ erDiagram
     datetime created_at
   }
 
+  USER ||--o{ USER_ACTIVITY : logs
+  USER ||--o{ USER_ANALYSIS : performs
   USER ||--o{ EXPLANATION : creates
   USER_ANALYSIS ||--o{ EXPLANATION : has
 
+
 ```
 
-## System Flowchart (Mermaid)
+## System Flowchart (Mermaid) 2026-06-07
 
 This flowchart shows the high-level runtime interactions between the UI, API, pipeline engine, storage and auxiliary services.
 
 ```mermaid
+
+---
+config:
+  theme: default
+---
 flowchart LR
-  subgraph UI
-    Browser["Browser / AnomalyUI (React)"]
-    Streamlit["Streamlit App (optional)"]
+ subgraph UI["UI"]
+        Browser["Browser / AnomalyUI (React)"]
   end
-
-  Browser -->|Login / Analyze / List| FastAPI["FastAPI Backend\n(src/api/app.py)"]
-  Streamlit -->|API calls| FastAPI
-
-  FastAPI -->|Authenticate / Token| Security["security.py"]
-  FastAPI -->|DB read/write| DB["SQLite / SQLAlchemy\n(src/api/models.py)"]
-  FastAPI -->|Cache lookup / save| Cache["PipelineCache (DB)"]
-  FastAPI -->|Load hyperparams| Hyperparams["artifacts/hyperparams/*.json"]
-  FastAPI -->|Run pipeline| PipelineRunner["anomaly_detection_pipeline.run_pipeline"]
-
-  PipelineRunner --> AnalysisEngine["StaticAnalysisPipeline\n(src/pipelines/analysis_engine.py)"]
-  AnalysisEngine --> DataLoader["DataLoader (src/components/data_loader.py)"]
-  AnalysisEngine --> Preprocessor["Preprocessor (src/components/preprocessing.py)"]
-  AnalysisEngine --> FeatureEng["FeatureEngineering (src/components/feature_engineering.py)"]
-  AnalysisEngine --> Scaler["FeatureScaler (src/components/scaling.py)"]
-  AnalysisEngine --> Detector["AnomalyDetectorService (models)"]
-
-  AnalysisEngine -->|Writes artifact| Artifacts["artifacts/results/{user_id}/{config_hash}.json.gz"]
-  FastAPI -->|Write explanation artifact| Explanations["artifacts/explanations/{user_id}/"]
-  FastAPI -->|Call LLM / ai_services| AI["ai_services / LLM"]
-
-  FastAPI -->|Create notifications / log activity| Notifications["UserActivity / Notification tables"]
-  Browser <--|Receive responses / artifacts| FastAPI
-
-  style FastAPI fill:#f9f,stroke:#333,stroke-width:1px
-  style DB fill:#fffbcc,stroke:#333,stroke-width:1px
-  style AnalysisEngine fill:#ccf,stroke:#333,stroke-width:1px
+    Browser -- Login / Analyze / List --> FastAPI["FastAPI Backend (src/api/app.py)"]
+    FastAPI -- Authenticate / Token --> Security["security.py"]
+    FastAPI -- DB read/write --> DB["SQLite / SQLAlchemy"]
+    FastAPI -- Run pipeline --> AnalysisEngine["AnalysisEngine"]
+    AnalysisEngine --> DataLoader["DataLoader"] & Preprocessor["Preprocessor"] & FeatureEng["FeatureEngineering"] & Scaler["FeatureScaler"] & Detector["AnomalyDetectorService"]
+    Detector --> DBSCAN["DBSCAN"] & IsolationForest["IsolationForest"]
+    AnalysisEngine -- Detection Output --> FeatureStore["Anomaly Rows + Model Outputs"]
+    FastAPI -- Generate explanation request --> ExplanationEngine["ExplanationEngine"]
+    ExplanationEngine -- Consumes --> FeatureStore
+    ExplanationEngine -- "LLM-powered reasoning" --> LLM["Azure/OpenAI ChatCompletions API"]
+    ExplanationEngine -- Optional context retrieval --> NewsAPI["Tavily News Search API"]
+    ExplanationEngine -- Fallback if AI fails --> Heuristic["Rule-based Heuristic"]
+    FastAPI -- Log User Activity --> Notifications["UserActivity"]
+    FastAPI -- Return results --> Browser
 ```
+
+Note: Z-Score is included as an optional side analysis feature in the flowchart. The main anomaly detection path is through `DBSCAN` and `IsolationForest`, with AI explanation context enriched by the News API.
 
 Refer to the other diagrams in this document for more detailed component, sequence and ER diagrams.
 
-Notes:
-- `ARTIFACT_STORE` in the ER above was a conceptual placeholder representing files on disk. The project now uses a concrete `explanations` table (lightweight history) and explanation JSON files on disk under `artifacts/explanations/{user_id}/`. The DB stores `artifact_path` and `artifact_hash` plus minimal metadata for listing and deduplication.
+
+## 7. Class Diagrams
+
+### 7.1 Analyst Class Diagram
+
+```mermaid
+classDiagram
+    class User {
+        +id: int
+        +username: str
+        +email: str
+        +role: str = "admin"
+        +email_verified : bool
+        +created_at : datetime
+        +hashed_password: str
+    }
+
+    class AnalysisEngine {
+        +config: AnalysisRequest
+        +best_params: dict
+        +run()
+        +_prepare_features()
+        +_build_metrics()
+        +_attach_labels()
+    }
+
+    class ExplanationEngine {
+        +request: AnomalyExplanationRequest
+        +explain()
+        +build_prompt(payload, search_context)
+        +_extract_anomaly_rows(data)
+        +_build_search_context(stock, rows)
+    }
+
+    class UserAnalysis {
+        +id: int
+        +user_id: int
+        +stock: str
+        +timeframe: str
+        +best_params: json
+        +metrics: json
+        +data_path: str
+        +is_favorite: bool
+        +executed_at: datetime
+    }
+
+    class Explanation {
+        +id: int
+        +analysis_id: int
+        +user_id: int
+        +artifact_path: str
+        +artifact_hash: str
+        +summary: str
+        +entries: json
+        +anomaly_count: int
+        +created_at: datetime
+    }
+
+    User --> AnalysisEngine : executes analysis
+    User --> ExplanationEngine : requests explanation
+    User --> UserAnalysis : reads/ creates
+    AnalysisEngine --> UserAnalysis : generates results
+    ExplanationEngine --> Explanation : produces explanation
+```
+
+### 7.2 Admin Class Diagram
+
+```mermaid
+classDiagram
+    class User {
+        +id: int
+        +username: str
+        +email: str
+        +role: str = "admin"
+        +email_verified : bool
+        +created_at : datetime
+        +hashed_password: str
+    }
+
+    class AnalysisEngine {
+        +config: AnalysisRequest
+        +best_params: dict
+        +run()
+        +_prepare_features()
+        +_build_metrics()
+        +_attach_labels()
+    }
+
+    class ExplanationEngine {
+        +request: AnomalyExplanationRequest
+        +explain()
+        +build_prompt(payload, search_context)
+        +_extract_anomaly_rows(data)
+        +_build_search_context(stock, rows)
+    }
+
+    class UserAnalysis {
+        +id: int
+        +user_id: int
+        +stock: str
+        +timeframe: str
+        +best_params: json
+        +metrics: json
+        +data_path: str
+        +is_favorite: bool
+        +executed_at: datetime
+    }
+
+    class Explanation {
+        +id: int
+        +analysis_id: int
+        +user_id: int
+        +artifact_path: str
+        +artifact_hash: str
+        +summary: str
+        +entries: json
+        +anomaly_count: int
+        +created_at: datetime
+    }
+
+
+    class UserActivity {
+        +id: int
+        +user_id: int
+        +action: str
+        +resource: str
+        +details: json
+        +created_at: datetime
+    }
+
+ 
+
+    User --> AnalysisEngine : executes analysis
+    User --> ExplanationEngine : requests explanation
+    User --> UserAnalysis : reads / creates
+    User --> UserActivity : reads activity logs
+    AnalysisEngine --> UserAnalysis : generates results
+    ExplanationEngine --> Explanation : produces explanation
+```
+
+## 8. Component Diagram
+
+```mermaid
+flowchart TB
+    Browser[Browser / UI]
+    Backend[Backend / FastAPI]
+    AnalysisEngine[AnalysisEngine]
+    ExplanationEngine[ExplanationEngine]
+    DB[SQLite Database]
+    Artifacts[Artifact Storage]
+    Scraper[Scraper Service]
+
+    Browser -->|login / analyze / explain| Backend
+    Backend -->|runs analysis| AnalysisEngine
+    Backend -->|requests explanation| ExplanationEngine
+    Backend -->|reads/writes| DB
+    Backend -->|stores artifacts| Artifacts
+    Backend -->|starts scrape job| Scraper
+    Scraper -->|updates data files| Artifacts
+```
+
+## 9. Deployment Diagram
+
+```mermaid
+flowchart TB
+    Browser[Browser / React UI]
+    WebApp[AnomalyUI Web Client]
+    API[FastAPI Backend Server]
+    LocalDisk[Local Storage / artifacts/]
+    Database[SQLite Database File]
+    AIService[External AI Service]
+    ScraperService[Scraper Task]
+
+    Browser --> WebApp
+    WebApp --> API
+    API --> Database
+    API --> LocalDisk
+    API --> AIService
+    API --> ScraperService
+    ScraperService --> LocalDisk
+```
+
+## 10. Object Diagram
+
+```mermaid
+objectDiagram
+    object analyst : Analyst {
+        id: 1
+        username: "analyst_user"
+        role: "analyst"
+    }
+    object analysisEngine : AnalysisEngine {
+        config: {stock: "SBI", timeframe: "1D"}
+    }
+    object explanationEngine : ExplanationEngine {
+        request: {stock: "SBI", timeframe: "1D"}
+    }
+    object userAnalysis : UserAnalysis {
+        id: 101
+        stock: "SBI"
+        is_favorite: false
+    }
+    object explanation : Explanation {
+        id: 201
+        anomaly_count: 3
+    }
+
+    analyst --> analysisEngine
+    analyst --> explanationEngine
+    analysisEngine --> userAnalysis
+    explanationEngine --> explanation
+```
+
+## 11. State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> AnalysisRequested : submit analysis
+    AnalysisRequested --> AnalysisRunning : run pipeline
+    AnalysisRunning --> AnalysisCompleted : success
+    AnalysisRunning --> AnalysisFailed : failure
+    AnalysisCompleted --> Favorited : mark favorite
+    AnalysisCompleted --> ExplanationRequested : request explanation
+    ExplanationRequested --> ExplanationGenerating : generate explanation
+    ExplanationGenerating --> ExplanationStored : save artifact
+    ExplanationStored --> Viewed : view
+    Viewed --> [*]
+```
+
+## 12. Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Analyst
+    participant Backend
+    participant AnalysisEngine
+    participant DB
+    participant ExplanationEngine
+    participant Storage
+
+    Analyst->>Backend: POST /analyze
+    Backend->>AnalysisEngine: execute(config)
+    AnalysisEngine->>DB: read stock data
+    AnalysisEngine-->>Backend: results
+    Backend->>Storage: save artifact
+    Backend->>DB: create UserAnalysis
+    Backend-->>Analyst: return analysis response
+
+    Analyst->>Backend: POST /analyze/explain
+    Backend->>ExplanationEngine: explain(request)
+    ExplanationEngine->>Storage: optional search/context
+    ExplanationEngine-->>Backend: explanation
+    Backend->>DB: create Explanation
+    Backend-->>Analyst: return explanation response
+```
+
+## 13. Activity Diagram
+
+```mermaid
+flowchart TD
+    Start([Start])
+    Login[Analyst logs in]
+    Submit[Submit analysis request]
+    RunPipeline[Run AnalysisPipeline]
+    StoreResult[Store UserAnalysis]
+    ReturnResult[Return results to user]
+    RequestExplain[Request explanation]
+    GenerateExplain[Generate explanation]
+    StoreExplain[Store Explanation artifact]
+    ReturnExplain[Return explanation to user]
+    End([End])
+
+    Start --> Login --> Submit --> RunPipeline --> StoreResult --> ReturnResult --> RequestExplain --> GenerateExplain --> StoreExplain --> ReturnExplain --> End
+```
 

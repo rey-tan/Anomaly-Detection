@@ -1,6 +1,5 @@
 import React from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import NotificationsDropdown from '../components/NotificationsDropdown'
 import FavoritesPanel from '../components/FavoritesPanel'
 import NavButton from '../components/ui/NavButton'
 
@@ -21,7 +20,6 @@ export default function MainLayout({
   setResults,
   setSelectedAnalysis,
   onLogout,
-  onOpenNotifications,
   handleOpenLastRun,
   handleSelectAnalysis,
   setActivityUser,
@@ -51,7 +49,6 @@ export default function MainLayout({
           </p>
         </div>
         <div className="topbar-actions">
-          <NotificationsDropdown token={token} onOpenAll={onOpenNotifications} onSelectAnalysis={handleSelectAnalysis} />
           <div className="user-chip">
             <div>
               <span>Signed in as</span>

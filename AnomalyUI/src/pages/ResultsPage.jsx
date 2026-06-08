@@ -94,11 +94,11 @@ export default function ResultsPage({
                 <div className="section-heading compact">
                   <div>
                     <p className="eyebrow">AI explanation</p>
-                    <h3>Why these points were flagged</h3>
-                    <p>Generated from the latest analyzed result set.</p>
                   </div>
                   <div className="results-ai-source">Source: {aiExplanation?.source || 'AI'}</div>
                 </div>
+                <h3>Why these points were flagged</h3>
+                    <p>Generated from the latest analyzed result set.</p>
                 <div className="results-ai-markdown">
                   <ReactMarkdown>{aiExplanationMarkdown}</ReactMarkdown>
                 </div>

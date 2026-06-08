@@ -119,8 +119,10 @@ def test_analyze_successful_run_returns_expected_payload(test_db_with_user, monk
 
     dummy_df = pd.DataFrame({"date": ["2024-01-01"], "close": [100.0]})
     monkeypatch.setattr(
-        "src.api.app.run_pipeline",
-        lambda config, best_params: {"data": dummy_df, "metrics": {"dbscan": {"score": 0.5}}, "labels": {}, "best_params": {}},
+        "src.api.app.AnalysisEngine.run",
+        lambda self: type("R", (), {
+            "as_response": lambda self: {"data": dummy_df, "metrics": {"dbscan": {"score": 0.5}}, "labels": {}, "best_params": {}}
+        })(),
     )
     monkeypatch.setattr("src.api.app.write_result_artifact", lambda payload, user_id, cache_key: "dummy_path.json.gz")
 

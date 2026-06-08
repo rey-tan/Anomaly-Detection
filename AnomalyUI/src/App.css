@@ -1697,6 +1697,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .results-ai-card{
   margin-top:40px;
 }
+.ai-explanation-section .alert-box{
+  margin-top:40px;
+}
 .results-ai-markdown{
   margin-top:20px;
   background: linear-gradient(180deg, rgba(15,23,42,0.6), rgba(2,6,23,0.6));

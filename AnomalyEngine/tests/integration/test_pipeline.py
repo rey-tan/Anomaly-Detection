@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from src.pipelines.analysis_engine import StaticAnalysisPipeline, AnomalyDetectorService
+from src.pipelines.analysis_engine import AnalysisEngine, AnomalyDetectorService
 from src.components.preprocessing import Preprocessor
 from src.components.feature_engineering import FeatureEngineering
 from src.components.scaling import FeatureScaler
@@ -35,19 +35,10 @@ def test_static_pipeline_basic_run():
         'start_date': str(df.index[0].date()),
         'end_date': str(df.index[-1].date()),
         'timeframe': '1D',
-        'features': ['close', 'volume'],
-        'mode': 'static',
     }
 
-    pipeline = StaticAnalysisPipeline(
-        config,
-        best_params={},
-        data_loader=loader,
-        preprocessor=Preprocessor(),
-        feature_engineer=FeatureEngineering(),
-        scaler=FeatureScaler(),
-    )
-    res = pipeline.run()
+    engine = AnalysisEngine(config, best_params={}, data_loader=loader)
+    res = engine.run()
 
     assert res.data is not None
     assert 'dbscan' in res.metrics

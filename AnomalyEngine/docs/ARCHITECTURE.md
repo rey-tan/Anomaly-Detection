@@ -4,7 +4,7 @@
 
 Anomaly Engine is a distributed stock anomaly detection system with:
 - **FastAPI backend** for pipeline execution, authentication, authorization, caching, and user management
-- **Streamlit frontend** for interactive dashboard, visualization, and admin controls
+ - **Frontend**: AnomalyUI (React) for interactive dashboard, visualization, and admin controls
 - **SQLite database** for user management, audit trails, notifications, and result persistence
 
 ## Component Design
@@ -86,15 +86,10 @@ Anomaly Engine is a distributed stock anomaly detection system with:
 - `duration_seconds`
 - `executed_at`
 
-**PipelineCache**
-- `id` (PK)
-- `config_hash` (unique) — SHA256 of config JSON
-- `stock`, `mode`, `timeframe`, `start_date`, `end_date`
-- `features` (JSON)
-- `best_params` (JSON)
-- `metrics` (JSON)
-- `data` (JSON) — full result dataframe as list of dicts
-- `created_at`
+### Analysis cache (DB)
+- Cache stores compact analysis results keyed by a deterministic `config_hash` (SHA256 of config JSON)
+- Stored fields: `id` (PK), `config_hash` (unique), `stock`, `mode`, `timeframe`, `start_date`, `end_date`, `features` (JSON), `best_params` (JSON), `metrics` (JSON), `created_at`
+ - Full large data blobs are persisted as gzipped artifacts under `artifacts/results/` and not stored inline in the DB.
 
 ### Artifact persistence & favorites (new)
 
@@ -121,15 +116,15 @@ When `/analyze` is called:
 1. **Validate** request against `AnalyzeConfig` schema
 2. **Log activity** — record analysis attempt in `user_activity` table
 3. **Hash** the config to generate `config_hash`
-4. **Check cache** in `pipeline_cache` table
-   - If hit: return cached data
-   - If miss: continue
+4. **Check for an existing result** by `config_hash`
+    - If found: return the stored result
+    - If not found: continue
 5. **Load hyperparams** from `artifacts/hyperparams/{stock}.json`
 6. **Execute pipeline** (static or realtime mode)
     - `StaticAnalysisPipeline` via `run_pipeline()` for static analysis
     - `RealtimeAnalysisPipeline` via `run_realtime_pipeline()` for rolling-window simulation
 7. **Serialize results** to JSON (convert DataFrame, handle pandas Timestamps)
-8. **Save to cache** in database
+8. **Persist result metadata** in the database (store compact metadata, write large data to artifact files)
 9. **Log analysis** — record completion in `user_analysis` table
 10. **Create notification** — notify user of analysis completion
 11. **Return** results to client
@@ -155,31 +150,11 @@ When `/analyze` is called:
 - **Delivery**: Stored in database, retrieved via `/me/notifications`
 - **Management**: Mark as read, automatic cleanup of old notifications
 
-### Frontend (Streamlit)
+### Frontend (AnomalyUI)
 
-**Entry point:** `main.py`
+**Entry point:** `AnomalyUI` (React + Vite)
 
-#### Session State
-
-```python
-st.session_state["authenticated"]  # Boolean
-st.session_state["auth_token"]     # JWT string
-st.session_state["username"]       # Username string
-st.session_state["role"]           # User role (user/analyst/admin)
-st.session_state["results"]        # Analysis results dict
-```
-
-#### Flow
-
-1. **Login check** — if not authenticated, show login form
-2. **API login** — POST credentials to backend, store token and role
-3. **Role-based UI** — show appropriate controls based on user role
-4. **Dashboard** — show analysis controls (stock, date range, timeframe, mode)
-5. **Analysis** — POST analysis config to `/analyze`, get results
-6. **Cache save** — POST results to `/cache` (non-blocking, warnings only)
-7. **Visualization** — render plots using Plotly
-8. **Admin panel** — if admin role, show user management interface
-9. **Notifications** — display unread notifications in sidebar
+The production frontend is implemented in the `AnomalyUI` React app. It communicates with the FastAPI backend over authenticated HTTP requests and renders history, analysis controls, and visualizations. The UI stores authentication tokens in memory or secure local storage and requests artifacts on demand via the API.
 
 #### API Integration (`main.py` functions)
 
@@ -311,16 +286,16 @@ classDiagram
 ```mermaid
 erDiagram
     User ||--o{ UserActivity : "logs"
-    User ||--o{ Notification : "receives"
     User ||--o{ UserAnalysis : "performs"
-    User ||--o{ PipelineCache : "owns"
+    User ||--o{ Notification : "receives"
+    UserAnalysis ||--o{ Notification : "related to"
+    # Analysis records and external artifact files represent persisted results
 
     User {
         int id PK
         string username UK
         string hashed_password
         string role
-        json permissions
         bool is_active
         datetime created_at
     }
@@ -337,6 +312,7 @@ erDiagram
     Notification {
         int id PK
         int user_id FK
+        int analysis_id FK
         string title
         string message
         bool is_read
@@ -360,20 +336,7 @@ erDiagram
         datetime created_at
     }
 
-    PipelineCache {
-        int id PK
-        string config_hash UK
-        string stock
-        string mode
-        string timeframe
-        date start_date
-        date end_date
-        json features
-        json best_params
-        json metrics
-        json data
-        datetime created_at
-    }
+    %% Entity omitted from ER export
 
     User ||--o{ Explanation : "creates"
     Explanation {
@@ -392,10 +355,8 @@ erDiagram
 
 ```
 ┌─────────────────┐
-│  Streamlit UI   │
-│  (Login +       │
-│   Dashboard +   │
-│   Admin Panel)  │
+│  AnomalyUI (React) UI  │
+│  (Login + Dashboard + Admin Panel)
 └────────┬────────┘
          │ 1. POST /login (username, password)
          ▼
@@ -404,16 +365,16 @@ erDiagram
 │  ┌──────────────────────────────────┐  │
 │  │ 1. Validate credentials          │  │
 │  │ 2. Generate JWT token + role     │  │
-│  │ 3. Return token to Streamlit     │  │
+│  │ 3. Return token to UI             │  │
 │  └──────────────────────────────────┘  │
 │  ┌──────────────────────────────────┐  │
 │  │ POST /analyze                    │  │
 │  │ 1. Check role permissions        │  │
 │  │ 2. Log activity to UserActivity  │  │
-│  │ 3. Hash config → cache_key       │  │
-│  │ 4. Lookup in PipelineCache DB    │  │
-│  │ 5. If miss: Run pipeline()       │  │
-│  │ 6. Save to cache                 │  │
+│  │ 3. Hash config → config_key      │  │
+│  │ 4. Check for existing result     │  │
+│  │ 5. If not found: Run pipeline()  │  │
+│  │ 6. Persist result metadata       │  │
 │  │ 7. Log to UserAnalysis           │  │
 │  │ 8. Create Notification           │  │
 │  │ 9. Return {metrics, data}        │  │
@@ -423,7 +384,6 @@ erDiagram
 │  │ - GET/POST/DELETE /users         │  │
 │  │ - PATCH /users/{id}/role         │  │
 │  │ - GET /users/{id}/activity       │  │
-│  │ - DELETE /cache/{hash}           │  │
 │  └──────────────────────────────────┘  │
 │              ▲                          │
 │              │ 2. JWT in header         │
@@ -498,8 +458,8 @@ Operational note: Keep an artifact retention policy to control disk usage (e.g.,
   ```
 
 ### Frontend Deployment
-- Streamlit Cloud, AWS EC2, or Docker
-- Set `API_URL` environment variable or hardcode in `main.py`
+- Host AnomalyUI on Vercel, Netlify, AWS S3 + CloudFront, or Docker
+- Set `API_URL` environment variable in the frontend build/runtime configuration
 - Consider Nginx reverse proxy for HTTPS
 
 ### Environment Variables
@@ -531,8 +491,8 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_
 ```python
 @app.delete("/cache/{config_hash}")
 def invalidate_cache(config_hash: str, db: Session = Depends(database.get_db)):
-    db.query(models.PipelineCache).filter(models.PipelineCache.config_hash == config_hash).delete()
-    db.commit()
+    # Use CRUD helper to remove compact cache entries and optionally delete artifacts
+    crud.invalidate_cache_by_hash(db, config_hash)
     return {"status": "deleted"}
 ```
 
@@ -549,10 +509,12 @@ uvicorn src.api.app:app --reload &
 curl http://localhost:8000/login -X POST -d "username=admin&password=admin123"
 ```
 
-Test frontend:
+Test frontend (AnomalyUI):
 ```bash
-streamlit run main.py
-# Navigate to http://localhost:8501 and test login flow
+cd AnomalyUI
+npm install
+npm run dev
+# Navigate to the frontend dev server (Vite default: http://localhost:5173)
 ```
 
 ## Troubleshooting
@@ -564,8 +526,8 @@ streamlit run main.py
 ### Cache not working
 - Verify database file is writable
 - Check that same config is used (hash must match)
-- Inspect `PipelineCache` table for entries
+ - Inspect the analysis cache table for entries (or use cache CRUD helpers)
 
 ### API timeout
-- Increase Streamlit timeout: `timeout=600` in `requests.post()`
+ - Increase client HTTP timeout for long-running requests (e.g., `timeout=600` seconds)
 - Optimize pipeline (reduce data, features, or model complexity)

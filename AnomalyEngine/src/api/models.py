@@ -15,8 +15,6 @@ class User(Base):
     otp_code = Column(String, nullable=True)
     otp_expires_at = Column(DateTime(timezone=True), nullable=True)
     role = Column(String, nullable=False, default="user")
-    permissions = Column(JSON, nullable=True)
-    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -90,7 +88,6 @@ class Explanation(Base):
     artifact_path = Column(String, nullable=True)
     artifact_hash = Column(String, nullable=True, index=True)
     summary = Column(String, nullable=True)
-    highlights = Column(JSON, nullable=True)
     entries = Column(JSON, nullable=True)
     anomaly_count = Column(Integer, nullable=True)
     meta = Column(JSON, nullable=True)

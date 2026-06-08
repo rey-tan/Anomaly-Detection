@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import os
 import math
+import logging
 
 from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -14,7 +15,8 @@ import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from src.pipelines.anomaly_detection_pipeline import run_pipeline
+from src.pipelines.analysis_engine import AnalysisEngine
+
 import time
 from src.utils.load import load_json
 from src.utils.paths import HYPERPARAMS, DATA
@@ -23,13 +25,15 @@ from src.utils.io import write_result_artifact, write_explanation_artifact, read
 from src.utils.paths import ARTIFACTS
 from src.utils.otp import generate_otp, get_otp_expiration, send_otp_email
 from src.components.sharesansar_scraper import ShareSansarScraper
-from . import crud, database, models, schemas, security, ai_services
-from dotenv import load_dotenv
+from . import crud, database, models, schemas, security
 load_dotenv()
+logger = logging.getLogger(__name__)
 print("MODE:", os.getenv("ENV"))
 
 
 from contextlib import asynccontextmanager
+
+from src.components.explanation_engine import ExplanationEngine
 
 
 
@@ -141,7 +145,6 @@ def test_register_request(request: schemas.UserCreate, db: Session = Depends(dat
         email=request.email,
         password=request.password,
         role="analyst",
-        permissions=None,
         email_verified=False,
     )
     otp_code = '123456'
@@ -277,7 +280,6 @@ def register_request(request: schemas.UserCreate, db: Session = Depends(database
         email=request.email,
         password=request.password,
         role="analyst",
-        permissions=None,
         email_verified=False,
     )
     otp_code = generate_otp()
@@ -501,14 +503,20 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
     start_ts = time.time()
     try:
         print(f"Starting pipeline for {config['stock']} with timeframe {config['timeframe']}", flush=True)
-        results = run_pipeline(config, best_params)
-    except Exception as exc:
-        print(f"Pipeline raised exception: {exc}", flush=True)
-        results = None
+      
+        engine = AnalysisEngine(config, best_params)
+        analysis_result = engine.run()
+        results = analysis_result.as_response()
+
+    except KeyError as e:
+        logger.error("Missing config key: %s", e)
+    except ValueError as e:
+        logger.error("Value error: %s", e)
+    except Exception:
+        logger.exception("Unexpected error running pipeline")
     finally:
         end_ts = time.time()
         print(f"Pipeline execution time: {end_ts - start_ts:.2f}s", flush=True)
-   
 
     if results is None:
         crud.log_user_activity(
@@ -589,21 +597,16 @@ def analyze(request: schemas.AnalyzeConfig, db: Session = Depends(database.get_d
         status="success",
         duration_seconds=None,
     )
-    crud.create_notification(
-        db=db,
-        user_id=current_user.id,
-        title="Analysis Complete",
-        message=f"Your analysis for {config['stock']} completed successfully.",
-        type="analysis_complete",
-        analysis_id=analysis.id,
-    )
+   
 
     return format_analyze_response(metrics, data, best_params)
 
 
 @app.post("/analyze/explain", response_model=schemas.AnomalyExplanationResponse)
 def explain_analysis(request: schemas.AnomalyExplanationRequest, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
-    explanation = ai_services.call_ai_explanation(request)
+    explanation_engine = ExplanationEngine(request)
+
+    explanation = explanation_engine.explain()
     try:
         artifact_payload = {
             "requested_at": datetime.utcnow().isoformat(),
@@ -644,21 +647,7 @@ def explain_analysis(request: schemas.AnomalyExplanationRequest, db: Session = D
     except Exception:
         # don't break functionality if activity logging fails
         pass
-
-    # Create notification
-    try:
-        notification = models.Notification(
-            user_id=current_user.id,
-            analysis_id=request.analysis_id,
-            title="AI Explanation Retrieved",
-            message=f"Explanation generated for {request.stock} analysis",
-            type="explanation_generated",
-        )
-        db.add(notification)
-        db.commit()
-    except Exception:
-        # don't break functionality if notification creation fails
-        pass
+  
 
     return {
         "raw_summary": explanation.get("raw_summary", explanation.get("summary", "")),
@@ -726,7 +715,6 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(database.get_
         email=request.email,
         password=request.password,
         role=role,
-        permissions=request.permissions,
         email_verified=True,
     )
     return user
@@ -843,28 +831,11 @@ def read_my_analyses(db: Session = Depends(database.get_db), current_user: model
     return crud.get_user_analyses(db, current_user.id)
 
 
-@app.get("/me/notifications", response_model=List[schemas.NotificationRead])
-def read_my_notifications(db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
-    return crud.get_user_notifications(db, current_user.id)
 
 
-@app.post("/me/notifications/{notification_id}/read", response_model=schemas.NotificationRead)
-def mark_my_notification_read(notification_id: int, db: Session = Depends(database.get_db), current_user: models.User = Depends(get_current_user)):
-    updated = crud.mark_notification_read(db, notification_id)
-    if updated is None or updated.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found")
-    return updated
 
 
-@app.post("/notifications", response_model=schemas.NotificationRead, dependencies=[Depends(require_role(["admin"]))])
-def create_notification(request: schemas.NotificationCreate, db: Session = Depends(database.get_db)):
-    return crud.create_notification(
-        db=db,
-        user_id=request.user_id,
-        title=request.title,
-        message=request.message,
-        type=request.type or "info",
-    )
+
 
 
 

@@ -50,10 +50,10 @@ def test_explain_endpoint_writes_artifact(monkeypatch, tmp_path):
 
     # mock AI service to return a deterministic explanation
     def fake_call_ai_explanation(request):
-        return {"summary": "ok", "raw_summary": "ok", "highlights": ["h"], "entries": [], "anomaly_count": 1}
+        return {"summary": "ok", "raw_summary": "ok", "entries": [], "anomaly_count": 1}
 
-    import src.api.ai_services as ai_services
-    monkeypatch.setattr(ai_services, "call_ai_explanation", fake_call_ai_explanation)
+    import src.components.explanation_engine as ee
+    monkeypatch.setattr(ee.ExplanationEngine, "explain", fake_call_ai_explanation)
 
     client = TestClient(app)
     payload = {

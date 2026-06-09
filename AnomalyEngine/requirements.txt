@@ -8,7 +8,7 @@ python-multipart>=0.0.6
 PyYAML>=6.0
 python-dotenv>=1.0.0
 requests>=2.31.0
-azure-ai-inference>=1.0.0
+azure-ai-inference>=1.0.0b1
 tavily>=1.0.0
 
 # Web scraping

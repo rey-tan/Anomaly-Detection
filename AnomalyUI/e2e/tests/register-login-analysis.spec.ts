@@ -51,10 +51,12 @@ test('System test: Register -> Login -> Analysis -> Results -> AI explanation ->
   await page.getByRole('button', { name: /sign in/i }).click()
 
   await expect(page).toHaveURL(/dashboard|analysis|results/)
-
+  // confirm we're authenticated (sign-out button present) before navigating
+  await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 10000 })
 
   await page.goto(`${uiBase}/analysis`)
-  await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible()
+  // give the analysis panel a bit more time to render in CI/slow environments
+  await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible({ timeout: 15000 })
   await page.getByLabel('Start date').fill('2025-05-01')
   await page.getByLabel('End date').fill('2026-01-01')
   await page.getByRole('button', { name: /run analysis/i }).click()

@@ -5,10 +5,7 @@ export default defineConfig({
   timeout: 120_000,
   use: {
     baseURL: 'http://localhost:5173',
-    headless: false,
-    launchOptions:{
-      slowMo: 100,
-    },
+    headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
   },

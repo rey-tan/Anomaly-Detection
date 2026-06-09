@@ -1,0 +1,475 @@
+{
+  "explanation": {
+    "anomaly_count": 6,
+    "entries": [
+      {
+        "bullets": [
+          "Close: 305.82",
+          "Volume: 1,287,648",
+          "BB width 0.000 shows extremely compressed bands",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2025-05-04",
+        "row_number": 1,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 318.46",
+          "Volume: 1,223,562",
+          "BB width 0.094 indicates notable volatility change",
+          "RSI 74 indicates overbought conditions",
+          "Flagged by DBSCAN"
+        ],
+        "date": "2025-05-08",
+        "row_number": 2,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 312.07",
+          "Volume: 806,211",
+          "BB width 0.076 indicates notable volatility change",
+          "RSI 76 indicates overbought conditions",
+          "Flagged by DBSCAN"
+        ],
+        "date": "2025-07-22",
+        "row_number": 3,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 320.52",
+          "Volume: 864,614",
+          "BB width 0.101 indicates notable volatility change",
+          "RSI 79 indicates overbought conditions",
+          "Flagged by DBSCAN"
+        ],
+        "date": "2025-07-23",
+        "row_number": 4,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 260.1",
+          "Volume: 22,003",
+          "BB width 0.125 indicates notable volatility change",
+          "RSI 17 indicates oversold conditions",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2025-09-18",
+        "row_number": 5,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 286.1",
+          "Volume: 228,050",
+          "BB width 0.113 indicates notable volatility change",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2025-09-21",
+        "row_number": 6,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      }
+    ],
+    "raw_summary": "Detected 6 anomalous rows. Price anomalies shown via z-score deviation. Volatility changes via Bollinger Band width. RSI indicates momentum extremes. Volume spikes show trading strength.",
+    "source": "heuristic",
+    "summary": "Detected 6 anomalous rows. Price anomalies shown via z-score deviation. Volatility changes via Bollinger Band width. RSI indicates momentum extremes. Volume spikes show trading strength."
+  },
+  "request": {
+    "analysis_id": 2,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Lower_BB": 305.82,
+        "RSI": 50,
+        "SMA_10": 305.82,
+        "SMA_20": 305.82,
+        "SMA_50": 305.82,
+        "Upper_BB": 305.82,
+        "adjacent_rows": [
+          {
+            "close": 298.7,
+            "date": "2025-05-05",
+            "volume": 440554
+          },
+          {
+            "close": 304.59,
+            "date": "2025-05-06",
+            "volume": 568864
+          },
+          {
+            "close": 311.24,
+            "date": "2025-05-07",
+            "volume": 811121
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 305.82,
+        "date": "2025-05-04",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 313,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -3.74,
+        "low": 297,
+        "open": 299,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 305.82,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 1287648,
+        "z_score": 0.00647872936296499,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 292.8456841009584,
+        "RSI": 73.51190476190474,
+        "SMA_10": 307.762,
+        "SMA_20": 307.762,
+        "SMA_50": 307.762,
+        "Upper_BB": 322.6783158990416,
+        "adjacent_rows": [
+          {
+            "close": 298.7,
+            "date": "2025-05-05",
+            "volume": 440554
+          },
+          {
+            "close": 304.59,
+            "date": "2025-05-06",
+            "volume": 568864
+          },
+          {
+            "close": 311.24,
+            "date": "2025-05-07",
+            "volume": 811121
+          },
+          {
+            "close": 312.81,
+            "date": "2025-05-11",
+            "volume": 586482
+          },
+          {
+            "close": 305.54,
+            "date": "2025-05-13",
+            "volume": 521728
+          },
+          {
+            "close": 295.76,
+            "date": "2025-05-14",
+            "volume": 380162
+          }
+        ],
+        "average_volume": 777046.75,
+        "bb_width": 0.09367779877561762,
+        "close": 318.46,
+        "date": "2025-05-08",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 327,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -5.96,
+        "low": 305,
+        "open": 315,
+        "previous_close": 311.24,
+        "returns": 0.023197532450841774,
+        "rolling_mean": 307.762,
+        "rolling_std": 0.02001092606185059,
+        "volatility": 0.02001092606185059,
+        "volume": 1223562,
+        "z_score": 1.3370733471594438,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 283.4268063018397,
+        "RSI": 75.56422401783217,
+        "SMA_10": 298.842,
+        "SMA_20": 295.363,
+        "SMA_50": 296.93760000000003,
+        "Upper_BB": 307.2991936981603,
+        "adjacent_rows": [
+          {
+            "close": 304.55,
+            "date": "2025-07-17",
+            "volume": 334212
+          },
+          {
+            "close": 303.33,
+            "date": "2025-07-20",
+            "volume": 365383
+          },
+          {
+            "close": 302.99,
+            "date": "2025-07-21",
+            "volume": 225064
+          },
+          {
+            "close": 320.52,
+            "date": "2025-07-23",
+            "volume": 864614
+          },
+          {
+            "close": 326.63,
+            "date": "2025-07-24",
+            "volume": 744394
+          },
+          {
+            "close": 320.46,
+            "date": "2025-07-27",
+            "volume": 847098
+          }
+        ],
+        "average_volume": 169464.55,
+        "bb_width": 0.07649689940180286,
+        "close": 312.07,
+        "date": "2025-07-22",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 314.1,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -6.99,
+        "low": 304,
+        "open": 304,
+        "previous_close": 302.99,
+        "returns": 0.029967985742103576,
+        "rolling_mean": 295.363,
+        "rolling_std": 0.010876814360683934,
+        "volatility": 0.010876814360683934,
+        "volume": 806211,
+        "z_score": 1.7254219238231876,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 280.56324538047267,
+        "RSI": 79.06921241050111,
+        "SMA_10": 301.50699999999995,
+        "SMA_20": 296.809,
+        "SMA_50": 297.0918,
+        "Upper_BB": 313.0547546195274,
+        "adjacent_rows": [
+          {
+            "close": 303.33,
+            "date": "2025-07-20",
+            "volume": 365383
+          },
+          {
+            "close": 302.99,
+            "date": "2025-07-21",
+            "volume": 225064
+          },
+          {
+            "close": 312.07,
+            "date": "2025-07-22",
+            "volume": 806211
+          },
+          {
+            "close": 326.63,
+            "date": "2025-07-24",
+            "volume": 744394
+          },
+          {
+            "close": 320.46,
+            "date": "2025-07-27",
+            "volume": 847098
+          },
+          {
+            "close": 319.79,
+            "date": "2025-07-28",
+            "volume": 516878
+          }
+        ],
+        "average_volume": 203379.65,
+        "bb_width": 0.10137123811011707,
+        "close": 320.52,
+        "date": "2025-07-23",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 323.5,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -6.8,
+        "low": 313,
+        "open": 318,
+        "previous_close": 312.07,
+        "returns": 0.027077258307431018,
+        "rolling_mean": 296.809,
+        "rolling_std": 0.011918230719219566,
+        "volatility": 0.011918230719219566,
+        "volume": 864614,
+        "z_score": 1.559611772495978,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 275.5507382968358,
+        "RSI": 16.830727658753176,
+        "SMA_10": 288.816,
+        "SMA_20": 291.783,
+        "SMA_50": 297.99,
+        "Upper_BB": 308.01526170316424,
+        "adjacent_rows": [
+          {
+            "close": 290.42,
+            "date": "2025-09-04",
+            "volume": 103704
+          },
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 286.1,
+            "date": "2025-09-21",
+            "volume": 228050
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          }
+        ],
+        "average_volume": 106723.2,
+        "bb_width": 0.12481554558373106,
+        "close": 260.1,
+        "date": "2025-09-18",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 281.6,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.09,
+        "low": 258.8,
+        "open": 281.6,
+        "previous_close": 287.28,
+        "returns": -0.09461152882205492,
+        "rolling_mean": 291.783,
+        "rolling_std": 0.0226125237701437,
+        "volatility": 0.0226125237701437,
+        "volume": 22003,
+        "z_score": -5.420373945545333,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 275.0427099018119,
+        "RSI": 45.52248590533632,
+        "SMA_10": 287.53700000000003,
+        "SMA_20": 291.18850000000003,
+        "SMA_50": 297.8488,
+        "Upper_BB": 307.33429009818815,
+        "adjacent_rows": [
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 260.1,
+            "date": "2025-09-18",
+            "volume": 22003
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          },
+          {
+            "close": 290,
+            "date": "2025-09-25",
+            "volume": 65656
+          }
+        ],
+        "average_volume": 97605.85,
+        "bb_width": 0.11286815867310811,
+        "close": 286.1,
+        "date": "2025-09-21",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 286.1,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.99,
+        "low": 260.1,
+        "open": 260.5,
+        "previous_close": 260.1,
+        "returns": 0.09996155324875056,
+        "rolling_mean": 291.18850000000003,
+        "rolling_std": 0.0326647452039823,
+        "volatility": 0.0326647452039823,
+        "volume": 228050,
+        "z_score": 5.740205151396146,
+        "z_score_label": -1
+      }
+    ],
+    "end_date": "2026-01-01",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.040268456375838924,
+        "n_clusters": 1,
+        "n_noise": 6
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.020134228187919462,
+        "n_clusters": 1,
+        "n_noise": 3
+      },
+      "z_score": {
+        "anomaly_rate": 0.013422818791946308,
+        "n_clusters": 1,
+        "n_noise": 2
+      }
+    },
+    "start_date": "2025-05-01",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-09T09:23:02.026041",
+  "user_id": 3
+}

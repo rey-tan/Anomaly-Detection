@@ -1,0 +1,339 @@
+{
+  "explanation": {
+    "anomaly_count": 4,
+    "entries": [
+      {
+        "bullets": [
+          "**Date:** 2025-10-09",
+          "**Technical anomaly:** Isolation Forest flagged; close=282.1, volume=114,738, z_score=-0.09 (not extreme), rolling_std=0 (no volatility), bb_width=0 (no price range).",
+          "**Adjacent days:** Slight price decline and volume increase on 2025-10-12 (close=278, volume=149,572).",
+          "**Event correlation:**",
+          "**Real-world events:** No direct news for API. However, context shows ongoing Gen Z protests in Nepal (noted for September 2025, but referenced in October), which could impact market sentiment and trading activity.",
+          "**Financial/Company/Market events:** No earnings, dividend, or company-specific news found.",
+          "**Conclusion:** The anomaly is likely due to technical factors (low volatility, moderate volume) with possible indirect influence from ongoing protests, but no direct event for API."
+        ],
+        "date": null,
+        "row_number": 1,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2026-03-09",
+          "**Technical anomaly:** DBSCAN flagged; close=340 (up from 317), z_score=4.26 (very high), volume=47,031 (much lower than average 371,122.9), bb_width=0.13 (moderate price range).",
+          "**Adjacent days:** Large price jump from 317 to 340, followed by continued high closes and surging volumes (March 10: volume=1,842,222).",
+          "**Event correlation:**",
+          "**Real-world events:** Nepal scheduled to vote for a new government on March 5, 2026. This is a major political event, likely to affect investor sentiment and market volatility.",
+          "**Financial/Company/Market events:** No API-specific news found.",
+          "**Conclusion:** The anomaly coincides with national elections, which typically drive uncertainty and speculative trading. The sharp price increase and low volume on anomaly day suggest a reaction to political developments."
+        ],
+        "date": null,
+        "row_number": 2,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2026-04-05",
+          "**Technical anomaly:** DBSCAN & Isolation Forest flagged; close=325 (down from 353), z_score=-4.84 (very low), volume=979,663 (near average), bb_width=0.15 (moderate price range).",
+          "**Adjacent days:** Preceded by high closes (358.1, 350, 353) and high volumes; followed by price recovery (346, 341.5, 349).",
+          "**Event correlation:**",
+          "**Real-world events:** April 5, 2026, is the date of the AI Summit Nepal in Lalitpur. No direct link to API found. Gen Z protests from September 2025 are referenced but not active at this date.",
+          "**Financial/Company/Market events:** No API-specific news found.",
+          "**Conclusion:** No direct news for API. The sharp price drop and high volume suggest a technical correction or market reaction, possibly influenced by sector-wide sentiment or spillover from recent political events."
+        ],
+        "date": null,
+        "row_number": 3,
+        "summary": ""
+      },
+      {
+        "bullets": [
+          "**Date:** 2026-04-06",
+          "**Technical anomaly:** DBSCAN & Isolation Forest flagged; close=346 (up from 325), z_score=3.78 (very high), volume=936,872 (near average), bb_width=0.12 (moderate price range).",
+          "**Adjacent days:** Follows the sharp drop on April 5; price rebounds strongly, volume remains high.",
+          "**Event correlation:**",
+          "**Company-specific news:** Stock price information for API is available, but no news or financial event is reported for this date.",
+          "**Real-world events:** Gen Z protests referenced, but not active at this date.",
+          "**Financial/Market events:** No API-specific or sector-wide news found.",
+          "**Conclusion:** The anomaly is a technical rebound after the previous day's sharp drop, with no direct news or event. High volume and price recovery suggest speculative trading or short-term correction."
+        ],
+        "date": null,
+        "row_number": 4,
+        "summary": ""
+      }
+    ],
+    "raw_summary": "**Row 1:**\n- **Date:** 2025-10-09\n- **Technical anomaly:** Isolation Forest flagged; close=282.1, volume=114,738, z_score=-0.09 (not extreme), rolling_std=0 (no volatility), bb_width=0 (no price range).\n- **Adjacent days:** Slight price decline and volume increase on 2025-10-12 (close=278, volume=149,572).\n- **Event correlation:** \n  - **Real-world events:** No direct news for API. However, context shows ongoing Gen Z protests in Nepal (noted for September 2025, but referenced in October), which could impact market sentiment and trading activity.\n  - **Financial/Company/Market events:** No earnings, dividend, or company-specific news found.\n- **Conclusion:** The anomaly is likely due to technical factors (low volatility, moderate volume) with possible indirect influence from ongoing protests, but no direct event for API.\n\n---\n\n**Row 2:**\n- **Date:** 2026-03-09\n- **Technical anomaly:** DBSCAN flagged; close=340 (up from 317), z_score=4.26 (very high), volume=47,031 (much lower than average 371,122.9), bb_width=0.13 (moderate price range).\n- **Adjacent days:** Large price jump from 317 to 340, followed by continued high closes and surging volumes (March 10: volume=1,842,222).\n- **Event correlation:** \n  - **Real-world events:** Nepal scheduled to vote for a new government on March 5, 2026. This is a major political event, likely to affect investor sentiment and market volatility.\n  - **Financial/Company/Market events:** No API-specific news found.\n- **Conclusion:** The anomaly coincides with national elections, which typically drive uncertainty and speculative trading. The sharp price increase and low volume on anomaly day suggest a reaction to political developments.\n\n---\n\n**Row 3:**\n- **Date:** 2026-04-05\n- **Technical anomaly:** DBSCAN & Isolation Forest flagged; close=325 (down from 353), z_score=-4.84 (very low), volume=979,663 (near average), bb_width=0.15 (moderate price range).\n- **Adjacent days:** Preceded by high closes (358.1, 350, 353) and high volumes; followed by price recovery (346, 341.5, 349).\n- **Event correlation:** \n  - **Real-world events:** April 5, 2026, is the date of the AI Summit Nepal in Lalitpur. No direct link to API found. Gen Z protests from September 2025 are referenced but not active at this date.\n  - **Financial/Company/Market events:** No API-specific news found.\n- **Conclusion:** No direct news for API. The sharp price drop and high volume suggest a technical correction or market reaction, possibly influenced by sector-wide sentiment or spillover from recent political events.\n\n---\n\n**Row 4:**\n- **Date:** 2026-04-06\n- **Technical anomaly:** DBSCAN & Isolation Forest flagged; close=346 (up from 325), z_score=3.78 (very high), volume=936,872 (near average), bb_width=0.12 (moderate price range).\n- **Adjacent days:** Follows the sharp drop on April 5; price rebounds strongly, volume remains high.\n- **Event correlation:** \n  - **Company-specific news:** Stock price information for API is available, but no news or financial event is reported for this date.\n  - **Real-world events:** Gen Z protests referenced, but not active at this date.\n  - **Financial/Market events:** No API-specific or sector-wide news found.\n- **Conclusion:** The anomaly is a technical rebound after the previous day's sharp drop, with no direct news or event. High volume and price recovery suggest speculative trading or short-term correction.\n\n---\n\n**Overall Summary:**\n- Most anomalies for API between 2025-10-09 and 2026-06-09 are flagged by multiple detectors and feature extreme z-scores, indicating significant price and volume deviations.\n- **Row 2 (2026-03-09)** is directly correlated with Nepal's national elections, a major political event likely to drive market volatility and speculative activity.\n- **Row 1 (2025-10-09)** may be indirectly influenced by ongoing Gen Z protests, but no direct API news is found.\n- **Rows 3 and 4 (2026-04-05 and 2026-04-06)** show sharp price movements and high volumes, but no company-specific or sector news is found; these are likely technical corrections or reactions to broader market sentiment.\n- No financial events (earnings, dividends, regulatory changes) or company-specific news (executive changes, contracts) are found for API in the flagged periods.\n- Where news is absent, anomalies are explained by technical factors: extreme price movements, volume deviations, and detector agreement. Political events (elections, protests) provide partial context for market-wide volatility.",
+    "source": "openai/gpt-4.1",
+    "summary": "- Most anomalies for API between 2025-10-09 and 2026-06-09 are flagged by multiple detectors and feature extreme z-scores, indicating significant price and volume deviations.\n- **Row 2 (2026-03-09)** is directly correlated with Nepal's national elections, a major political event likely to drive market volatility and speculative activity.\n- **Row 1 (2025-10-09)** may be indirectly influenced by ongoing Gen Z protests, but no direct API news is found.\n- **Rows 3 and 4 (2026-04-05 and 2026-04-06)** show sharp price movements and high volumes, but no company-specific or sector news is found; these are likely technical corrections or reactions to broader market sentiment.\n- No financial events (earnings, dividends, regulatory changes) or company-specific news (executive changes, contracts) are found for API in the flagged periods.\n- Where news is absent, anomalies are explained by technical factors: extreme price movements, volume deviations, and detector agreement. Political events (elections, protests) provide partial context for market-wide volatility."
+  },
+  "request": {
+    "analysis_id": 2,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Lower_BB": 282.1,
+        "RSI": 50,
+        "SMA_10": 282.1,
+        "SMA_20": 282.1,
+        "SMA_50": 282.1,
+        "Upper_BB": 282.1,
+        "adjacent_rows": [
+          {
+            "close": 278,
+            "date": "2025-10-12",
+            "volume": 149572
+          },
+          {
+            "close": 280,
+            "date": "2025-10-13",
+            "volume": 71584
+          },
+          {
+            "close": 275.4,
+            "date": "2025-10-14",
+            "volume": 54458
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 282.1,
+        "date": "2025-10-09",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 300,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.61,
+        "low": 281,
+        "open": 285.6,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 282.1,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 114738,
+        "z_score": -0.09075298114783142,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 281.27027085021336,
+        "RSI": 75.9183673469388,
+        "SMA_10": 306.77,
+        "SMA_20": 303.255,
+        "SMA_50": 296.24199999999996,
+        "Upper_BB": 325.2397291497866,
+        "adjacent_rows": [
+          {
+            "close": 312.4,
+            "date": "2026-02-26",
+            "volume": 1054543
+          },
+          {
+            "close": 316,
+            "date": "2026-03-01",
+            "volume": 1049844
+          },
+          {
+            "close": 317,
+            "date": "2026-03-03",
+            "volume": 483492
+          },
+          {
+            "close": 341,
+            "date": "2026-03-10",
+            "volume": 1842222
+          },
+          {
+            "close": 340,
+            "date": "2026-03-11",
+            "volume": 1303521
+          },
+          {
+            "close": 336.3,
+            "date": "2026-03-12",
+            "volume": 719166
+          }
+        ],
+        "average_volume": 371122.9,
+        "bb_width": 0.12932193617521548,
+        "close": 340,
+        "date": "2026-03-09",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 345,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -5.7,
+        "low": 323,
+        "open": 323,
+        "previous_close": 317,
+        "returns": 0.0725552050473186,
+        "rolling_mean": 303.255,
+        "rolling_std": 0.020989189239241434,
+        "volatility": 0.020989189239241434,
+        "volume": 47031,
+        "z_score": 4.2570991592961684,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 320.728052671076,
+        "RSI": 42.127659574468076,
+        "SMA_10": 353.23,
+        "SMA_20": 345.41499999999996,
+        "SMA_50": 317.55400000000003,
+        "Upper_BB": 370.1019473289239,
+        "adjacent_rows": [
+          {
+            "close": 358.1,
+            "date": "2026-03-31",
+            "volume": 1143683
+          },
+          {
+            "close": 350,
+            "date": "2026-04-01",
+            "volume": 1304796
+          },
+          {
+            "close": 353,
+            "date": "2026-04-02",
+            "volume": 787287
+          },
+          {
+            "close": 346,
+            "date": "2026-04-06",
+            "volume": 936872
+          },
+          {
+            "close": 341.5,
+            "date": "2026-04-07",
+            "volume": 428867
+          },
+          {
+            "close": 349,
+            "date": "2026-04-08",
+            "volume": 472857
+          }
+        ],
+        "average_volume": 1016388.95,
+        "bb_width": 0.1519196758703013,
+        "close": 325,
+        "date": "2026-04-05",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 350.5,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.41,
+        "low": 324.6,
+        "open": 350.5,
+        "previous_close": 353,
+        "returns": -0.07932011331444755,
+        "rolling_mean": 345.41499999999996,
+        "rolling_std": 0.028883726373798123,
+        "volatility": 0.028883726373798123,
+        "volume": 979663,
+        "z_score": -4.843990522542206,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 326.11209024840355,
+        "RSI": 56.00739371534197,
+        "SMA_10": 353.03000000000003,
+        "SMA_20": 346.86499999999995,
+        "SMA_50": 318.698,
+        "Upper_BB": 367.61790975159636,
+        "adjacent_rows": [
+          {
+            "close": 350,
+            "date": "2026-04-01",
+            "volume": 1304796
+          },
+          {
+            "close": 353,
+            "date": "2026-04-02",
+            "volume": 787287
+          },
+          {
+            "close": 325,
+            "date": "2026-04-05",
+            "volume": 979663
+          },
+          {
+            "close": 341.5,
+            "date": "2026-04-07",
+            "volume": 428867
+          },
+          {
+            "close": 349,
+            "date": "2026-04-08",
+            "volume": 472857
+          },
+          {
+            "close": 352.2,
+            "date": "2026-04-09",
+            "volume": 740288
+          }
+        ],
+        "average_volume": 1012879.9,
+        "bb_width": 0.11995901590518153,
+        "close": 346,
+        "date": "2026-04-06",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 348,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.17,
+        "low": 324,
+        "open": 325,
+        "previous_close": 325,
+        "returns": 0.06461538461538452,
+        "rolling_mean": 346.86499999999995,
+        "rolling_std": 0.032122886101249096,
+        "volatility": 0.032122886101249096,
+        "volume": 936872,
+        "z_score": 3.7813074468034285,
+        "z_score_label": -1
+      }
+    ],
+    "end_date": "2026-06-09",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.02,
+        "n_clusters": 1,
+        "n_noise": 3
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.02,
+        "n_clusters": 1,
+        "n_noise": 3
+      },
+      "z_score": {
+        "anomaly_rate": 0.02,
+        "n_clusters": 1,
+        "n_noise": 3
+      }
+    },
+    "start_date": "2025-10-09",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-06-09T09:13:39.968944",
+  "user_id": 1
+}

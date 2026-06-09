@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        working-directory: AnomalyEngine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with pylint (optional)
+        working-directory: AnomalyEngine
+        run: |
+          pip install pylint
+          pylint src/ --disable=all --enable=E || true
+
+      - name: Run unit tests
+        working-directory: AnomalyEngine
+        run: python -m pytest tests/unit -v
+
+      - name: Run integration tests
+        working-directory: AnomalyEngine
+        run: python -m pytest tests/integration -v
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['18.x', '20.x']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        working-directory: AnomalyUI
+        run: npm install
+
+      - name: Run tests
+        working-directory: AnomalyUI
+        run: npm run test
+
+      - name: Build UI
+        working-directory: AnomalyUI
+        run: npm run build
+
+  scraper-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: AnomalyEngine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate scraper module
+        working-directory: AnomalyEngine
+        run: python -c "from src.components.sharesansar_scraper import ShareSansarScraper; print('Scraper module imports successfully')"

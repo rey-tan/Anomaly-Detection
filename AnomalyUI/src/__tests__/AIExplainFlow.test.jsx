@@ -14,8 +14,8 @@ import ResultsPage from '../pages/ResultsPage'
 
 const mockResults = {
   data: [
-    { date: '2026-06-01', close: 100, cluster: -1, RSI: 50, bb_width: 1.4 },
-    { date: '2026-06-02', close: 101, cluster: 0, RSI: 55, bb_width: 1.1 },
+    { date: '2026-06-01', close: 100, dbscan_label: -1, RSI: 50, bb_width: 1.4 },
+    { date: '2026-06-02', close: 101, dbscan_label: 0, RSI: 55, bb_width: 1.1 },
   ],
   models: {
     DBSCAN: { metrics: { precision: 0.9 }, params: { eps: 0.5 } },

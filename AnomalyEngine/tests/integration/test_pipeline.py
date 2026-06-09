@@ -42,7 +42,7 @@ def test_pipeline_basic_run():
 
     assert res.data is not None
     assert 'dbscan' in res.metrics
-    assert 'zscore' in res.metrics
+    assert 'z_score' in res.metrics
 
 
 def test_anomaly_detector_service_predicts_labels():
@@ -52,9 +52,9 @@ def test_anomaly_detector_service_predicts_labels():
 
     labels = detector.predict(X, df, {})
 
-    assert set(labels.keys()) == {'dbscan_label', 'isolation_forest_label', 'isolation_forest_score', 'z_score'}
+    assert set(labels.keys()) == {'dbscan_label', 'isolation_forest_label', 'isolation_forest_score', 'z_score_label', 'z_score'}
     assert len(labels['dbscan_label']) == len(df)
-    assert len(labels['zscore']) == len(df)
+    assert len(labels['z_score']) == len(df)
 
 
 

@@ -33,7 +33,7 @@ class AnomalyDetector:
         if "returns" not in df.columns:
             if "close" not in df.columns:
                 return np.ones(len(df), dtype=int)
-            series = df["close"].fillna(method="ffill").fillna(0)
+            series = df["close"].ffill().fillna(0)
         else:
             series = df["returns"].fillna(0)
 

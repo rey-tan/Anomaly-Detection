@@ -1,27 +1,81 @@
-# React + Vite
+﻿# Anomaly Engine UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The Anomaly Engine UI is a React + Vite frontend for the NEPSE anomaly detection platform. This app connects to the FastAPI backend in `../AnomalyEngine` and lets users run analysis, inspect results, and manage admin workflows.
 
-## Expanding the ESLint configuration
+## What this UI includes
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- User login and role-based access control
+- Analysis run flow with results dashboard
+- AI explanation requests for flagged anomalies
+- Admin user management (create / delete users)
+- Admin activity audit log
 
-## Frontend changes
+## Repository layout
 
-- Anomaly overlay update: the anomaly marker rendering was changed to avoid overlapping markers hiding each other. Markers now use numeric x-indices with small horizontal offsets and show the original date in the tooltip title. This improves visibility when multiple detectors flag the same timestamp. If you want different behavior (vertical jitter, larger offset, or an interactive legend toggle), adjust `AnomalyChart.jsx` in `src/components`.
-# React + Vite
+- `src/` — frontend source code
+- `public/` — static assets
+- `e2e/` — Playwright end-to-end tests
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Prerequisites
 
-Currently, two official plugins are available:
+- Node.js 18 or newer
+- `npm` installed
+- Backend API available at `http://localhost:8000`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Frontend setup
 
-## React Compiler
+Install dependencies:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+cd AnomalyUI
+npm install
+```
 
-## Expanding the ESLint configuration
+Start the frontend:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+cd AnomalyUI
+npm run dev
+```
+
+Open the app at `http://localhost:5173`.
+
+## Backend setup
+
+The backend lives in `AnomalyEngine`. Run it in a separate terminal:
+
+```bash
+cd AnomalyEngine
+.venv\Scripts\Activate.ps1
+python -m uvicorn src.api.app:app --reload --host 127.0.0.1 --port 8000
+```
+
+## Environment configuration
+
+The UI reads `VITE_API_BASE_URL` to locate the backend service. Configure it in `AnomalyUI/.env` if needed:
+
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+The backend also uses `.env` configuration for auth keys and AI integration. See `AnomalyEngine/docs` for backend environment details.
+
+## Testing
+
+Run unit tests for the frontend:
+
+```bash
+cd AnomalyUI
+npm test
+```
+
+Run end-to-end tests:
+
+```bash
+cd AnomalyUI
+npm run test:e2e
+```
+
+## Notes
+
+This UI is designed to work with the FastAPI backend in `AnomalyEngine`. Both services should be running for end-to-end workflows to function correctly.

@@ -74,88 +74,88 @@ async function login(page: any, username: string, password: string) {
   await expect(page).toHaveURL(/dashboard|analysis|results/)
 }
 
-// test('Register -> OTP verification -> Login', async ({ page }) => {
-//   const username = `e2e-register-${Date.now()}`
-//   const email = `${username}@example.com`
-//   const password = 'Password123!'
+test('Register -> OTP verification -> Login', async ({ page }) => {
+  const username = `e2e-register-${Date.now()}`
+  const email = `${username}@example.com`
+  const password = 'Password123!'
 
-//   await page.route(`${apiBase}/register/request`, route => route.fulfill({
-//     status: 200,
-//     contentType: 'application/json',
-//     body: JSON.stringify({ message: 'OTP sent to your email. Verify within 10 minutes.', email, user_id: 1 }),
-//   }))
+  await page.route(`${apiBase}/register/request`, route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ message: 'OTP sent to your email. Verify within 10 minutes.', email, user_id: 1 }),
+  }))
 
-//   await page.route(`${apiBase}/register/verify`, route => route.fulfill({
-//     status: 200,
-//     contentType: 'application/json',
-//     body: JSON.stringify({ id: 1, username, email, role: 'analyst', email_verified: true }),
-//   }))
+  await page.route(`${apiBase}/register/verify`, route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ id: 1, username, email, role: 'analyst', email_verified: true }),
+  }))
 
-//   await page.goto('/register')
-//   await expect(page.getByRole('heading', { name: /Create an account/i })).toBeVisible()
-//   await page.getByLabel('Username').fill(username)
-//   await page.getByLabel('Email').fill(email)
-//   await page.getByLabel('Password', { exact: true }).fill(password)
-//   await page.getByLabel('Confirm password', { exact: true }).fill(password)
-//   await page.getByRole('button', { name: /create account/i }).click()
+  await page.goto('/register')
+  await expect(page.getByRole('heading', { name: /Create an account/i })).toBeVisible()
+  await page.getByLabel('Username').fill(username)
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(password)
+  await page.getByLabel('Confirm password', { exact: true }).fill(password)
+  await page.getByRole('button', { name: /create account/i }).click()
 
-//   await expect(page.getByText(/OTP sent to your email/i)).toBeVisible()
-//   await page.getByLabel('OTP code').fill('123456')
-//   await page.getByRole('button', { name: /verify otp/i }).click()
+  await expect(page.getByText(/OTP sent to your email/i)).toBeVisible()
+  await page.getByLabel('OTP code').fill('123456')
+  await page.getByRole('button', { name: /verify otp/i }).click()
 
-//   await expect(page.getByRole('heading', { name: /Sign in to Anomaly Engine/i })).toBeVisible()
-// })
+  await expect(page.getByRole('heading', { name: /Sign in to Anomaly Engine/i })).toBeVisible()
+})
 
-// test('Login -> Analysis -> Results', async ({ page }) => {
-//   const username = `e2e-login-${Date.now()}`
-//   const password = 'Password123!'
+test('Login -> Analysis -> Results', async ({ page }) => {
+  const username = `e2e-login-${Date.now()}`
+  const password = 'Password123!'
 
-//   await stubLoginRoutes(page, 'login-token', username, `${username}@example.com`)
-//   await stubAnalysisRoutes(page)
+  await stubLoginRoutes(page, 'login-token', username, `${username}@example.com`)
+  await stubAnalysisRoutes(page)
 
-//   await login(page, username, password)
+  await login(page, username, password)
 
-//   await page.goto('/analysis')
-//   await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible()
-//   await page.getByRole('button', { name: /run analysis/i }).click()
+  await page.goto('/analysis')
+  await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible()
+  await page.getByRole('button', { name: /run analysis/i }).click()
 
-//   await page.waitForURL('**/results', { timeout: 15000 })
-//   await expect(page.getByRole('heading', { name: /Inspect the latest analysis outputs/i })).toBeVisible()
-// })
+  await page.waitForURL('**/results', { timeout: 15000 })
+  await expect(page.getByRole('heading', { name: /Inspect the latest analysis outputs/i })).toBeVisible()
+})
 
 
 
-// test('Results -> Analyze with AI -> explanation displayed', async ({ page }) => {
-//   const username = `e2e-ai-${Date.now()}`
-//   const password = 'Password123!'
+test('Results -> Analyze with AI -> explanation displayed', async ({ page }) => {
+  const username = `e2e-ai-${Date.now()}`
+  const password = 'Password123!'
 
-//   await stubLoginRoutes(page, 'ai-token', username, `${username}@example.com`)
-//   await stubAnalysisRoutes(page)
+  await stubLoginRoutes(page, 'ai-token', username, `${username}@example.com`)
+  await stubAnalysisRoutes(page)
 
-//   await login(page, username, password)
+  await login(page, username, password)
 
-//   await page.goto('/analysis')
-//   await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible()
-//   await page.getByRole('button', { name: /run analysis/i }).click()
+  await page.goto('/analysis')
+  await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible()
+  await page.getByRole('button', { name: /run analysis/i }).click()
 
-//   await page.waitForURL('**/results', { timeout: 15000 })
-//   await expect(page.getByRole('button', { name: /analyze with AI/i })).toBeVisible()
-//   await page.getByRole('button', { name: /analyze with AI/i }).click()
-//   await expect(page.getByText(/AI generated summary/i)).toBeVisible()
-// })
+  await page.waitForURL('**/results', { timeout: 15000 })
+  await expect(page.getByRole('button', { name: /analyze with AI/i })).toBeVisible()
+  await page.getByRole('button', { name: /analyze with AI/i }).click()
+  await expect(page.getByText(/AI generated summary/i)).toBeVisible()
+})
 
-// test('Sign out returns to login', async ({ page }) => {
-//   const username = `e2e-signout-${Date.now()}`
-//   const password = 'Password123!'
+test('Sign out returns to login', async ({ page }) => {
+  const username = `e2e-signout-${Date.now()}`
+  const password = 'Password123!'
 
-//   await stubLoginRoutes(page, 'signout-token', username, `${username}@example.com`)
-//   await page.route(`${apiBase}/me/analyses`, route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }))
+  await stubLoginRoutes(page, 'signout-token', username, `${username}@example.com`)
+  await page.route(`${apiBase}/me/analyses`, route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }))
 
-//   await login(page, username, password)
+  await login(page, username, password)
 
-//   await page.getByRole('button', { name: /sign out/i }).click()
-//   await expect(page.getByRole('heading', { name: /Sign in to Anomaly Engine/i })).toBeVisible()
-// })
+  await page.getByRole('button', { name: /sign out/i }).click()
+  await expect(page.getByRole('heading', { name: /Sign in to Anomaly Engine/i })).toBeVisible()
+})
 
 test('Returning user journey: Login → view analysis history → run new analysis → compare results → sign out', async ({ page }) => {
   const username = `e2e-returning-${Date.now()}`
@@ -262,7 +262,7 @@ test('Returning user journey: Login → view analysis history → run new analys
   await expect(page.getByRole('heading', { name: /Sign in to Anomaly Engine/i })).toBeVisible()
 })
 
-test('Admin journey: Login → create user → delete user → logout', async ({ page }) => {
+test('Admin journey: Login → create user → delete user → view activity log → logout', async ({ page }) => {
   const username = `e2e-admin-${Date.now()}`
   const password = 'Password123!'
   const newUsername = `newuser-${Date.now()}`
@@ -290,7 +290,7 @@ test('Admin journey: Login → create user → delete user → logout', async ({
     body: JSON.stringify([]),
   }))
 
-  await page.route(`${apiBase}/users`, async (route) => {
+  await page.route(`${apiBase}/admin/users`, async (route) => {
     const request = route.request()
     if (request.method() === 'GET') {
       return route.fulfill({
@@ -316,7 +316,7 @@ test('Admin journey: Login → create user → delete user → logout', async ({
     return route.continue()
   })
 
-  await page.route(new RegExp(`${apiBase}/users/\\d+$`), async (route) => {
+  await page.route(new RegExp(`${apiBase}/admin/users/\\d+$`), async (route) => {
     const request = route.request()
     if (request.method() === 'DELETE') {
       const segments = new URL(request.url()).pathname.split('/')
@@ -331,13 +331,36 @@ test('Admin journey: Login → create user → delete user → logout', async ({
     return route.continue()
   })
 
+  await page.route(new RegExp(`${apiBase}/admin/users/\\d+/activity`), async (route) => {
+    const userId = Number(new URL(route.request().url()).pathname.split('/').slice(-2, -1)[0])
+    const activity = [
+      {
+        id: 1,
+        user_id: userId,
+        username: userId === 1 ? username : newUsername,
+        action: 'login',
+        resource: 'user',
+        details: { message: 'User logged in' },
+        created_at: '2026-06-09T10:00:00Z',
+      },
+    ]
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(activity),
+    })
+  })
+
   await login(page, username, password)
   await page.goto('/users')
 
   await expect(page.getByRole('heading', { name: /User management/i })).toBeVisible()
+  await page.getByPlaceholder('email').fill(`${newUsername}@example.com`)
   await page.getByPlaceholder('username').fill(newUsername)
   await page.getByPlaceholder('password').fill(password)
+  const createUserRequest = page.waitForRequest((request) => request.url().endsWith('/admin/users') && request.method() === 'POST')
   await page.getByRole('button', { name: /create user/i }).click()
+  await createUserRequest
 
   await expect(page.getByText(newUsername)).toBeVisible()
 
@@ -346,15 +369,12 @@ test('Admin journey: Login → create user → delete user → logout', async ({
 
   await expect(page.locator(`text=${newUsername}`)).not.toBeVisible()
 
-  // Run an analysis and request AI explanation as part of the admin flow
-  await stubAnalysisRoutes(page)
-  await page.goto('/analysis')
-  await expect(page.getByRole('button', { name: /run analysis/i })).toBeVisible()
-  await page.getByRole('button', { name: /run analysis/i }).click()
-  await page.waitForURL('**/results', { timeout: 15000 })
-  await expect(page.getByRole('button', { name: /analyze with AI/i })).toBeVisible()
-  await page.getByRole('button', { name: /analyze with AI/i }).click()
-  await expect(page.getByText(/AI generated summary/i)).toBeVisible()
+  await page.getByRole('button', { name: /Activity/i }).click()
+  await expect(page).toHaveURL(/\/activity$/)
+  await expect(page.getByRole('heading', { name: /Audit log/i })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Show details/i })).toBeVisible()
+  await page.getByRole('button', { name: /Show details/i }).click()
+  await expect(page.getByText(/User logged in/i)).toBeVisible()
 
   await page.getByRole('button', { name: /sign out/i }).click()
   await expect(page.getByRole('heading', { name: /Sign in to Anomaly Engine/i })).toBeVisible()

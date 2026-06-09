@@ -65,8 +65,7 @@ def format_analyze_response(
     """Format analysis response by embedding params with their corresponding metrics."""
     models = {}
     for model_name, model_metrics in metrics.items():
-        # Handle both 'zscore' and 'z_score' keys for consistency
-        param_key = model_name if model_name in best_params else ('z_score' if model_name == 'zscore' else model_name)
+        param_key = model_name 
         models[model_name] = {
             "metrics": model_metrics,
             "params": best_params.get(param_key, {}),
@@ -136,8 +135,8 @@ def analyze(
         logger.error("Missing config key: %s", e)
     except ValueError as e:
         logger.error("Value error: %s", e)
-    except Exception:
-        logger.exception("Unexpected error running pipeline")
+    except Exception as e:
+        logger.exception("Unexpected error running pipeline",e)
     finally:
         end_ts = time.time()
         print(f"Pipeline execution time: {end_ts - start_ts:.2f}s", flush=True)

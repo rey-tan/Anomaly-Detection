@@ -21,9 +21,9 @@ class ExplanationEngine:
     def explain(self) -> Dict[str, Any]:
         
         github_token = os.getenv("TOKEN", "").strip()
-        # if github_token:
+        if github_token:
           
-        #     return self._call_github_ai_explanation(github_token, self.request)
+            return self._call_github_ai_explanation(github_token, self.request)
         return self._heuristic_anomaly_explanation(self.request)
 
     def _call_github_ai_explanation(
@@ -89,8 +89,9 @@ class ExplanationEngine:
             }
 
         entries: List[Dict[str, Any]] = []
+        print("Printing anomaly rows:",anomaly_rows)
         for row in anomaly_rows:
-            z_score = row.get("z_score")
+            z_score = row.get("z_score_label")
             z_score_val = (
                 float(z_score)
                 if z_score is not None
@@ -105,17 +106,19 @@ class ExplanationEngine:
             average_volume = row.get("average_volume")
 
             detectors = []
-            if row.get("dbscan") == -1:
+            if row.get("dbscan_label") == -1:
                 detectors.append("DBSCAN")
-            if row.get("isolation_forest") == -1:
+            if row.get("isolation_forest_label") == -1:
                 detectors.append("Isolation Forest")
+
+            print("Detectors for row:", row.get("index"), detectors)
 
             bullets: List[str] = []
             if close is not None:
                 bullets.append(f"Close: {close}")
             if volume is not None:
                 bullets.append(f"Volume: {volume:,}")
-            if z_score_val is not None:
+            if z_score is not None:
                 direction = "above" if z_score_val > 0 else "below"
                 bullets.append(f"Price is {abs(z_score_val):.2f}σ {direction} mean")
 
@@ -126,13 +129,6 @@ class ExplanationEngine:
                     bullets.append(f"BB width {bb_width:.3f} shows extremely compressed bands")
                 else:
                     bullets.append(f"BB width {bb_width:.3f} indicates notable volatility change")
-
-            if average_volume is not None and volume is not None and isinstance(volume, (int, float)) and isinstance(average_volume, (int, float)) and average_volume > 0:
-                volume_ratio = volume / average_volume
-                if volume_ratio > 2.5:
-                    bullets.append(f"Volume {volume_ratio:.1f}× average signals strong trading activity")
-                elif volume_ratio < 0.3:
-                    bullets.append(f"Volume {volume_ratio:.1f}× average signals weak trading")
 
             if rsi is not None and isinstance(rsi, (int, float)):
                 if rsi > 70:
@@ -173,8 +169,7 @@ class ExplanationEngine:
     def _extract_anomaly_rows(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         rows: List[Dict[str, Any]] = []
         for index, row in enumerate(data or [], start=1):
-            cluster = row.get("cluster")
-            is_anomaly = row.get("anomaly") is True or cluster == -1 or row.get("cluster_dbscan") == -1 or row.get("cluster_isolation_forest") == -1
+            is_anomaly = row.get("dbscan_label") == -1 or row.get("isolation_forest_label") == -1
             if not is_anomaly:
                 continue
             rows.append({
@@ -182,10 +177,12 @@ class ExplanationEngine:
                 "date": row.get("date") or row.get("transaction_time"),
                 "close": row.get("close") or row.get("price") or row.get("adj_close"),
                 "volume": row.get("volume"),
-                "z_score": row.get("Anomaly_Z_Score") or row.get("z_score") or row.get("Z_Score"),
-                "cluster": cluster,
-                "dbscan": row.get("Anomaly_DBSCAN") or row.get("cluster_dbscan"),
-                "isolation_forest": row.get("Anomaly_Isolation_Forest") or row.get("cluster_isolation_forest"),
+                "z_score":row.get("z_score"),
+                "dbscan_label": row.get("dbscan_label"),
+                "isolation_forest_label": row.get("isolation_forest_label"),
+                "bb_width": row.get("bb_width"),
+                "RSI": row.get("RSI") or row.get("rsi"),
+                "average_volume": row.get("average_volume"),
             })
         return rows
 
@@ -245,16 +242,14 @@ class ExplanationEngine:
         row_summaries = []
         for index, row in enumerate(compact_rows, start=1):
             flags = []
-            if row.get("cluster") == -1:
-                flags.append("combined")
-            if row.get("dbscan") == -1:
+           
+            if row.get("dbscan_label") == -1:
                 flags.append("DBSCAN")
-            if row.get("isolation_forest") == -1:
+            if row.get("isolation_forest_label") == -1:
                 flags.append("Isolation Forest")
-            if row.get("anomaly") is True:
-                flags.append("anomaly")
+           
 
-            z_score = row.get("z_score") if row.get("z_score") is not None else row.get("Anomaly_Z_Score")
+            z_score = row.get("z_score")
             z_score_text = f"{float(z_score):.2f}" if isinstance(z_score, (int, float)) else str(z_score)
 
             detail_parts = [

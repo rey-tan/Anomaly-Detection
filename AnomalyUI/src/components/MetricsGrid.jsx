@@ -44,6 +44,7 @@ export default function MetricsGrid({ results = {} ,handleToggleFavorite = null}
         ))}
       </div>
       <div className="metric-grid">
+        {console.log("Rendering MetricsGrid with entries:", metricEntries)}
         {metricEntries.map(([model, modelData]) => {
           const { metrics, params } = modelData || {};
           

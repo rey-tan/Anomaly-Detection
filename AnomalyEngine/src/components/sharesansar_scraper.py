@@ -140,10 +140,8 @@ class ShareSansarScraper:
 
 if __name__ == '__main__':
     import sys
-    
-    # date = sys.argv[1] if len(sys.argv) > 1 else datetime.now().strftime('%Y-%m-%d')
 
-    date = '2026-05-22'
-    
+    date = sys.argv[1] if len(sys.argv) > 1 else datetime.now().strftime('%Y-%m-%d')
+
     scraper = ShareSansarScraper()
     scraper.scrape(date)

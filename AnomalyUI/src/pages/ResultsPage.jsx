@@ -28,7 +28,7 @@ export default function ResultsPage({
   };
 
   const dataRows = Array.isArray(results?.data) ? results.data : [];
-  const flaggedCount = dataRows.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length;
+  const flaggedCount = dataRows.filter((r) => r.dbscan_label === -1 || r.isolation_forest_label === -1).length;
 
   const rsiValues = dataRows.map((r) => r.RSI ?? r.rsi).filter((v) => Number.isFinite(Number(v))).map(Number);
   const avgRsi = rsiValues.length ? rsiValues.reduce((a, b) => a + b, 0) / rsiValues.length : null;

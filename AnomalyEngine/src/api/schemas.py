@@ -75,7 +75,6 @@ class UserAnalysisRead(BaseModel):
     status: str
     duration_seconds: Optional[int]
     executed_at: Optional[datetime]
-
     model_config = ConfigDict(from_attributes=True)
 
 

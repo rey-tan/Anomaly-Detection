@@ -38,15 +38,12 @@ export default function ExplainAnalysis({token,results,selectedAnalysis,flaggedC
 
         return aiExplanation.raw_summary || aiExplanation.summary || "";
     }, [aiExplanation]);
-
     const anomalyRows = useMemo(
         () =>
             (results?.data || []).filter(
                 (item) =>
-                    item.cluster === -1 ||
-                    item.anomaly === true ||
-                    item.cluster_dbscan === -1 ||
-                    item.cluster_isolation_forest === -1
+                    item.dbscan_label === -1 ||
+                    item.isolation_forest_label === -1
             ),
         [results]
     );
@@ -67,6 +64,8 @@ export default function ExplainAnalysis({token,results,selectedAnalysis,flaggedC
                     ? window.reduce((sum, item) => sum + (item.volume || 0), 0) / window.length
                     : null;
 
+                
+                
                 return {
                     ...row,
                     previous_close: previousRows.length ? previousRows[previousRows.length - 1].close : null,
@@ -81,17 +80,18 @@ export default function ExplainAnalysis({token,results,selectedAnalysis,flaggedC
                     average_volume: averageVolume,
                     detector_flags: [
                         row.cluster === -1 ? "combined" : null,
-                        row.cluster_dbscan === -1 ? "DBSCAN" : null,
-                        row.cluster_isolation_forest === -1 ? "Isolation Forest" : null,
+                        row.dbscan_label === -1 ? "DBSCAN" : null,
+                        row.isolation_forest_label === -1 ? "Isolation Forest" : null,
                     ].filter(Boolean),
-                    z_score: row.z_score ?? row.Anomaly_Z_Score ?? null,
-                    bb_width: row.bb_width ?? row.BB_width ?? row.bbWidth ?? null,
-                    RSI: row.RSI ?? row.rsi ?? null,
-                    Upper_BB: row.Upper_BB ?? row.upper_bb ?? null,
-                    Lower_BB: row.Lower_BB ?? row.lower_bb ?? null,
-                    Anomaly_Score_IF: row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? row.ifScore ?? null,
+                    z_score: row.z_score?? null,
+                    bb_width: row.bb_width ?? null,
+                    RSI: row.RSI ?? null,
+                    Upper_BB: row.Upper_BB ?? null,
+                    Lower_BB: row.Lower_BB ?? null,
+                    isolation_forest_score: row.isolation_forest_score ?? null
                 };
             });
+            console.log("Contextual rows for AI explanation:", contextualRows);
 
             const { metrics, bestParams } = extractMetricsAndParams(results);
             const selectedAnalysisParams = extractMetricsAndParams(selectedAnalysis);

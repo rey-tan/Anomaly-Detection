@@ -35,18 +35,18 @@ function getLabel(row) {
 }
 
 function getAnomalyState(row) {
-  const dbscan = row.Anomaly_DBSCAN ?? row.cluster_dbscan ?? row.cluster;
-  const isolationForest = row.Anomaly_Isolation_Forest ?? row.cluster_isolation_forest;
+  const dbscan = row.dbscan_label
+  const isolationForest = row.isolation_forest_label
 
   return {
     dbscan,
     isolationForest,
-    isAnomaly: dbscan === -1 || isolationForest === -1 || row.cluster === -1 || row.anomaly === true,
+    isAnomaly: dbscan === -1 || isolationForest === -1 || row.anomaly === true,
   };
 }
 
 function getAnomalyZScore(row, value, mean, stdDev) {
-  const raw = row.Anomaly_Z_Score ?? row.z_score ?? row.Z_Score;
+  const raw = row.z_score ?? null
   if (raw != null && Number.isFinite(Number(raw))) return Number(raw);
   if (!Number.isFinite(value) || !Number.isFinite(stdDev) || stdDev === 0) return null;
   return (value - mean) / stdDev;
@@ -382,7 +382,7 @@ function AnomalyOverlayChart({ data }) {
         dbscan: state.dbscan,
         isolationForest: state.isolationForest,
         index,
-        ifScore: row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? null,
+        ifScore: row.isolation_forest_score ??null,
       };
     })
     .filter(Boolean);
@@ -473,12 +473,10 @@ function AnomalyOverlayChart({ data }) {
               }
 
 
-              const zText = raw.z != null && Number.isFinite(raw.z) ? `${Number(raw.z).toFixed(2)} z-score` : "n/a";
               const ifScoreText = raw.ifScore != null ? `IF score: ${Number(raw.ifScore).toFixed(3)}` : raw.ifScore === null ? "IF score: n/a" : "IF score: n/a";
               return [
                 `${context.dataset.label}: Rs.${value}`,
                 `Reason: ${raw.reason || "n/a"}`,
-                `Reference: ${zText}`,
                 `Detector: ${detector}`,
                 ifScoreText,
               ];
@@ -532,7 +530,7 @@ function AnomalyRowsReport({ data }) {
           : state.dbscan === -1
             ? "DBSCAN"
             : "Isolation Forest";
-      const ifScore = row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? "n/a";
+      const ifScore = row.isolation_forest_score ?? "n/a";
 
       const rsiVal = row.RSI ?? row.rsi ?? null;
       const bbwVal = row.bb_width ?? row.BB_width ?? row.bbWidth ?? null;

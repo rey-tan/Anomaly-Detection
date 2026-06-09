@@ -32,7 +32,7 @@ class AnalysisRequest:
             start_date=config["start_date"],
             end_date=config["end_date"],
             timeframe=config["timeframe"],
-            features=config.get("features"),
+            features = load_config(CONFIG / "config.yaml").get("features", [])
         )
 
 
@@ -59,13 +59,14 @@ class AnomalyDetectorService:
     def predict(self, X: np.ndarray, df: pd.DataFrame, best_params: dict[str, Any]) -> dict[str, np.ndarray]:
         db_labels = self._predict_dbscan(X, best_params.get("dbscan", {}))
         if_labels, if_scores = self._predict_isolation_forest(X, best_params.get("isolation_forest", {}))
-        z_labels = self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 2.0))
+        z_labels,z_scores = self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 3.0))
 
         return {
-            "dbscan": db_labels,
-            "isolation_forest": if_labels,
+            "dbscan_label": db_labels,
+            "isolation_forest_label": if_labels,
             "isolation_forest_score": if_scores,
-            "zscore": z_labels,
+            "z_score_label": z_labels,
+            "z_score": z_scores
         }
 
     def _predict_dbscan(self, X: np.ndarray, params: dict[str, Any]) -> np.ndarray:
@@ -94,27 +95,24 @@ class AnomalyDetectorService:
             series = df["returns"].fillna(0)
 
         z_scores = zscore(series)
-        return np.where(np.abs(z_scores) > threshold, -1, 1)
+        labels = np.where(np.abs(z_scores) > threshold, -1, 1)
+
+        return labels,z_scores
 
 
 class AnalysisEngine:
     def __init__(
         self,
         config: dict[str, Any] | AnalysisRequest,
-        best_params: dict[str, Any],
-        data_loader: DataLoader | None = None,
-        preprocessor: Preprocessor | None = None,
-        feature_engineer: FeatureEngineering | None = None,
-        scaler: FeatureScaler | None = None,
-        detector: AnomalyDetectorService | None = None,
+        best_params: dict[str, Any]
     ) -> None:
         self.config = config if isinstance(config, AnalysisRequest) else AnalysisRequest.from_mapping(config)
         self.best_params = best_params or {}
-        self.data_loader = data_loader or DataLoader()
-        self.preprocessor = preprocessor or Preprocessor()
-        self.feature_engineer = feature_engineer or FeatureEngineering()
-        self.scaler = scaler or FeatureScaler()
-        self.detector = detector or AnomalyDetectorService()
+        self.data_loader = DataLoader()
+        self.preprocessor = Preprocessor()
+        self.feature_engineer = FeatureEngineering()
+        self.scaler = FeatureScaler()
+        self.detector = AnomalyDetectorService()
 
     def _prepare_features(self) -> pd.DataFrame:
         data = self.data_loader.load(self.config.stock, self.config.start_date, self.config.end_date)
@@ -123,19 +121,14 @@ class AnalysisEngine:
             raise ValueError(f"No processed data found for {self.config.stock}")
 
         clean_data = self.preprocessor.transform(data, timeframe=self.config.timeframe)
+
         if clean_data.empty:
             raise ValueError("No data available after preprocessing")
-
-        features = self.config.features
-        if features is None:
-            features = load_config(CONFIG / "config.yaml").get("features", [])
-
-        print("features", features)
-        if not features:
+       
+        if not self.config.features:
             raise ValueError("No features configured for analysis")
-
-        self.config.features = features
-        feature_df = self.feature_engineer.transform(clean_data, features)
+        
+        feature_df = self.feature_engineer.transform(clean_data, self.config.features)
         if feature_df.empty:
             raise ValueError("Feature engineering produced an empty dataset")
 
@@ -144,39 +137,18 @@ class AnalysisEngine:
     def _build_metrics(self, feature_df: pd.DataFrame, label_sets: dict[str, np.ndarray]) -> dict[str, Any]:
         evaluator = Evaluator()
         return {
-            "dbscan": evaluator.compute(feature_df, label_sets["dbscan"]),
-            "isolation_forest": evaluator.compute(feature_df, label_sets["isolation_forest"]),
-            "zscore": evaluator.compute(feature_df, label_sets["zscore"]),
+            "dbscan": evaluator.compute(feature_df, label_sets["dbscan_label"]),
+            "isolation_forest": evaluator.compute(feature_df, label_sets["isolation_forest_label"]),
+            "z_score": evaluator.compute(feature_df, label_sets["z_score_label"]),
         }
 
     def _attach_labels(self, feature_df: pd.DataFrame, label_sets: dict[str, np.ndarray]) -> pd.DataFrame:
         result_df = feature_df.copy()
-        result_df["cluster_dbscan"] = label_sets["dbscan"]
-        result_df["cluster_isolation_forest"] = label_sets["isolation_forest"]
-        result_df["cluster_zscore"] = label_sets["zscore"]
-        result_df["cluster"] = label_sets["dbscan"]
-        # attach isolation forest anomaly scores if available
-        if "isolation_forest_score" in label_sets and label_sets["isolation_forest_score"] is not None:
-            try:
-                result_df["Anomaly_Score_IF"] = label_sets["isolation_forest_score"]
-                result_df["IF_Anomaly_Score"] = label_sets["isolation_forest_score"]
-            except Exception:
-                pass
-
-        # attach z-score numeric values for downstream visualization
-        try:
-            if "returns" not in result_df.columns:
-                if "close" not in result_df.columns:
-                    series = pd.Series([0] * len(result_df), index=result_df.index)
-                else:
-                    series = result_df["close"].ffill().fillna(0)
-            else:
-                series = result_df["returns"].fillna(0)
-
-            result_df["Anomaly_Z_Score"] = zscore(series)
-        except Exception:
-            # if anything fails, leave column absent
-            pass
+        result_df["dbscan_label"] = label_sets["dbscan_label"]
+        result_df["isolation_forest_label"] = label_sets["isolation_forest_label"]
+        result_df["z_score_label"] = label_sets["z_score_label"]
+        result_df["isolation_forest_score"] = label_sets["isolation_forest_score"]
+        result_df["z_score"] = label_sets["z_score"]
 
         return result_df
 

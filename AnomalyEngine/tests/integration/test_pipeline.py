@@ -31,13 +31,13 @@ def test_pipeline_basic_run():
     df = make_mock_data()
     loader = MockLoader(df)
     config = {
-        'stock': 'MOCK',
+        'stock': 'ADBL',
         'start_date': str(df.index[0].date()),
         'end_date': str(df.index[-1].date()),
         'timeframe': '1D',
     }
 
-    engine = AnalysisEngine(config, best_params={}, data_loader=loader)
+    engine = AnalysisEngine(config, best_params={})
     res = engine.run()
 
     assert res.data is not None
@@ -52,8 +52,8 @@ def test_anomaly_detector_service_predicts_labels():
 
     labels = detector.predict(X, df, {})
 
-    assert set(labels.keys()) == {'dbscan', 'isolation_forest', 'isolation_forest_score', 'zscore'}
-    assert len(labels['dbscan']) == len(df)
+    assert set(labels.keys()) == {'dbscan_label', 'isolation_forest_label', 'isolation_forest_score', 'z_score'}
+    assert len(labels['dbscan_label']) == len(df)
     assert len(labels['zscore']) == len(df)
 
 

@@ -11,6 +11,10 @@ requests>=2.31.0
 azure-ai-inference>=1.0.0
 tavily>=1.0.0
 
+# Web scraping
+seaborn
+beautifulsoup4>=4.12.2
+
 # Data & ML
 numpy>=2.2.3
 pandas>=2.2.3

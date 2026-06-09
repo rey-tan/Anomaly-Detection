@@ -1,6 +1,10 @@
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { fetchSymbols } from "../api";
+import { analyze,fetchSymbols} from "../api";
+import { useNavigate } from "react-router-dom";
+import {  countAnomalyRows,  enrichAnalysisWithAnomalyCount } from '../utils/analysisHelpers';
+
+
 
 const today = new Date();
 const defaultStart = new Date(today);
@@ -9,22 +13,54 @@ defaultStart.setDate(defaultStart.getDate() - 365);
 const endDate = today.toISOString().split('T')[0];
 const startDate = defaultStart.toISOString().split('T')[0];
 
-export default function AnalysisPanel({ onSubmit, loading }) {
+export default function AnalysisPanel({ token,setError,setResults,setSelectedAnalysis}) {
   const [symbols, setSymbols] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+
+  
   const [form, setForm] = useState({
     stock: "API",
     timeframe: "1D",
     start_date: startDate,
     end_date: endDate,
   });
+  const onSubmit = async (payload) => {
+      setError("");
+      setLoading(true);
+      try {
+        const response = await analyze(token, payload);
+        setResults(response);
+        console.log(response);
+        const currentAnomalyCount = countAnomalyRows(response.data || []);
+        let selected = { ...payload, anomalyCount: currentAnomalyCount,analysis_id: response.analysis_id };
+        try {
+          const analyses = await fetchAnalyses(token);
+          if (analyses?.length) {
+            selected = await enrichAnalysisWithAnomalyCount(analyses[0], token, response.data);
+          }
+        } catch (err) {
+          // If the history lookup fails, keep using the request payload as a fallback.
+        }
+        setSelectedAnalysis(selected);
+        
+        
+        navigate('/results');
+      } catch (err) {
+        setError(err.message || "Analysis failed");
+      } finally {
+        setLoading(false);
+      }
+    };
 
   useEffect(() => {
     let active = true;
 
     async function loadSymbols() {
       try {
-        const availableSymbols = await fetchSymbols();
+        const availableSymbols = await fetchSymbols(token);
         if (!active) return;
 
         const normalized = Array.isArray(availableSymbols) ? availableSymbols : [];
@@ -35,6 +71,7 @@ export default function AnalysisPanel({ onSubmit, loading }) {
         }));
       } catch {
         if (!active) return;
+        console.log("Failed to load symbols, defaulting to API");
         setSymbols(["API"]);
         setForm((prev) => ({
           ...prev,
@@ -55,7 +92,9 @@ export default function AnalysisPanel({ onSubmit, loading }) {
   }, []);
 
   const canSubmit = useMemo(() => {
-    return form.stock.trim() && form.start_date && form.end_date;
+    const start = new Date(form.start_date);
+    const end = new Date(form.end_date);
+    return form.stock.trim() && form.start_date && form.end_date && start <= end;
   }, [form]);
 
   

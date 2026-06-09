@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./App.css";
 import { fetchProfile, analyze, fetchAnalyses, fetchAnalysisData, explainAnalysis } from "./api";
 import AppRoutes from './routes/AppRoutes'
-import {  countAnomalyRows,  deriveAnomalyCount,  enrichAnalysisWithAnomalyCount,  extractMetricsAndParams,  isAnomalyRow } from './utils/analysisHelpers';
+import {  countAnomalyRows,  deriveAnomalyCount,  enrichAnalysisWithAnomalyCount } from './utils/analysisHelpers';
 
 const STORAGE_KEY = "anomalyui_token";
 
@@ -15,11 +15,6 @@ function App() {
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
   const [analyses, setAnalyses] = useState([]);
   const [activityUser, setActivityUser] = useState(null);
-  const [aiExplanation, setAiExplanation] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,7 +60,7 @@ function App() {
       const profile = await fetchProfile(accessToken);
       setUser(profile);
     } catch (err) {
-      setError(err.message || "Unable to load profile");
+      console.log(err.message || "Unable to load profile");
     }
   };
 
@@ -75,49 +70,18 @@ function App() {
     setUser(null);
     setResults(null);
     setSelectedAnalysis(null);
-    setAiExplanation(null);
-    setAiLoading(false);
-    setAiError("");
-    setError("");
+    
   };
 
-  const handleAnalyze = async (payload) => {
-    setError("");
-    setLoading(true);
-    try {
-      const response = await analyze(token, payload);
-      setResults(response);
-      const currentAnomalyCount = countAnomalyRows(response.data || []);
-      let selected = { ...payload, anomalyCount: currentAnomalyCount };
-      try {
-        const analyses = await fetchAnalyses(token);
-        if (analyses?.length) {
-          selected = await enrichAnalysisWithAnomalyCount(analyses[0], token, response.data);
-        }
-      } catch (err) {
-        // If the history lookup fails, keep using the request payload as a fallback.
-      }
-      setSelectedAnalysis(selected);
-      setAiExplanation(null);
-      setAiError("");
-      
-      navigate('/results');
-    } catch (err) {
-      setError(err.message || "Analysis failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleOpenLastRun = async (payload, analysis) => {
-    setError("");
     try {
       if (payload && analysis) {
         const enriched = analysis.anomalyCount != null ? analysis : { ...analysis, anomalyCount: countAnomalyRows(payload.data || []) };
         setResults(payload);
         setSelectedAnalysis(enriched);
-        setAiExplanation(null);
-        setAiError("");
+        
         navigate('/results');
         return;
       }
@@ -126,24 +90,22 @@ function App() {
       const latest = analyses?.[0];
 
       if (!latest) {
-        setError("No saved analyses found yet.");
+        console.log("No saved analyses found yet.");
         return;
       }
 
       const latestPayload = await fetchAnalysisData(token, latest.id);
       setResults(latestPayload);
       setSelectedAnalysis(latest);
-      setAiExplanation(null);
-      setAiError("");
+      
       navigate('/results');
     } catch (err) {
-      setError(err.message || "Could not open the latest analysis");
+      console.log(err.message || "Could not open the latest analysis");
     }
   };
 
   const handleSelectAnalysis = async (analysisId) => {
     if (!token || !analysisId) return;
-    setError("");
     try {
       const payload = await fetchAnalysisData(token, analysisId);
       let analysis = analyses.find((item) => item.id === analysisId);
@@ -157,139 +119,24 @@ function App() {
         : { id: analysisId, anomalyCount: countAnomalyRows(payload.data || []), ...payload };
       setResults(payload);
       setSelectedAnalysis(enriched);
-      setAiExplanation(null);
-      setAiError("");
       navigate('/results');
     } catch (err) {
-      setError(err.message || "Failed to load historical analysis");
+      console.log(err.message || "Failed to load historical analysis");
       throw err;
     }
-  };
-
-  const aiExplanationMarkdown = useMemo(() => {
-    if (!aiExplanation) return "";
-
-    const entries = Array.isArray(aiExplanation.entries) ? aiExplanation.entries : [];
-    const isHeuristicFallback =
-      entries.length > 0 &&
-      typeof aiExplanation.raw_summary === "string" &&
-      aiExplanation.raw_summary.trim() === (aiExplanation.summary || "").trim();
-
-    if (isHeuristicFallback) {
-      const rowsMarkdown = entries
-        .map((entry) => {
-          const rowHeader = `**Row ${entry.row_number}${entry.date ? ` (${entry.date})` : ""}:**`;
-          const bullets = Array.isArray(entry.bullets)
-            ? entry.bullets.map((bullet) => `- ${bullet}`).join("\n")
-            : "";
-          const summaryLine = entry.summary ? `\n_${entry.summary}_` : "";
-          return [rowHeader, bullets, summaryLine].filter(Boolean).join("\n\n");
-        })
-        .join("\n\n");
-
-      const overall = aiExplanation.summary ? `**Overall summary:**\n${aiExplanation.summary}` : "";
-      return [overall, rowsMarkdown].filter(Boolean).join("\n\n");
-    }
-
-    return aiExplanation.raw_summary || aiExplanation.summary || "";
-  }, [aiExplanation]);
-
-  const anomalyRows = useMemo(
-    () =>
-      (results?.data || []).filter(
-        (item) =>
-          item.cluster === -1 ||
-          item.anomaly === true ||
-          item.cluster_dbscan === -1 ||
-          item.cluster_isolation_forest === -1
-      ),
-    [results]
-  );
-
-  const handleExplainWithAI = async () => {
-    if (!results?.data?.length) return;
-    setAiLoading(true);
-    setAiError("");
-    try {
-      const contextualRows = anomalyRows.map((row) => {
-        const index = results.data.findIndex((item) => item.date === row.date);
-        const previousRows = index > 0 ? results.data.slice(Math.max(0, index - 3), index) : [];
-        const nextRows = index < results.data.length - 1 ? results.data.slice(index + 1, index + 4) : [];
-        const windowStart = Math.max(0, index - 20);
-        const window = results.data.slice(windowStart, index);
-        const averageVolume = window.length
-          ? window.reduce((sum, item) => sum + (item.volume || 0), 0) / window.length
-          : null;
-
-        return {
-          ...row,
-          previous_close: previousRows.length ? previousRows[previousRows.length - 1].close : null,
-          adjacent_rows: [...previousRows, ...nextRows].map((item) => ({
-            date: item.date,
-            close: item.close,
-            volume: item.volume,
-            change: item.change,
-          })),
-          rolling_mean: row.SMA_20 ?? row.SMA_10 ?? null,
-          rolling_std: row.volatility ?? null,
-          average_volume: averageVolume,
-          detector_flags: [
-            row.cluster === -1 ? "combined" : null,
-            row.cluster_dbscan === -1 ? "DBSCAN" : null,
-            row.cluster_isolation_forest === -1 ? "Isolation Forest" : null,
-          ].filter(Boolean),
-          z_score: row.z_score ?? row.Anomaly_Z_Score ?? null,
-          bb_width: row.bb_width ?? row.BB_width ?? row.bbWidth ?? null,
-          RSI: row.RSI ?? row.rsi ?? null,
-          Upper_BB: row.Upper_BB ?? row.upper_bb ?? null,
-          Lower_BB: row.Lower_BB ?? row.lower_bb ?? null,
-          Anomaly_Score_IF: row.Anomaly_Score_IF ?? row.IF_Anomaly_Score ?? row.ifScore ?? null,
-        };
-      });
-
-      const { metrics, bestParams } = extractMetricsAndParams(results);
-      const selectedAnalysisParams = extractMetricsAndParams(selectedAnalysis);
-      
-      const payload = {
-        stock: selectedAnalysis?.stock || "",
-        mode: selectedAnalysis?.mode || "",
-        timeframe: selectedAnalysis?.timeframe || "",
-        start_date: selectedAnalysis?.start_date || "",
-        end_date: selectedAnalysis?.end_date || "",
-        metrics: metrics,
-        best_params: bestParams || selectedAnalysisParams.bestParams || {},
-        data: contextualRows,
-      };
-      const explanation = await explainAnalysis(token, payload);
-      setAiExplanation(explanation);
-    } catch (err) {
-      setAiError(err.message || "Failed to generate AI explanation");
-    } finally {
-      setAiLoading(false);
-    }
-  };
+  };  
 
   return (
     <AppRoutes
       user={user}
       token={token}
-      analyses={analyses}
-      setAnalyses={setAnalyses}
       results={results}
       selectedAnalysis={selectedAnalysis}
       setResults={setResults}
       setSelectedAnalysis={setSelectedAnalysis}
-      aiExplanation={aiExplanation}
-      aiExplanationMarkdown={aiExplanationMarkdown}
-      aiError={aiError}
-      aiLoading={aiLoading}
-      handleExplainWithAI={handleExplainWithAI}
       activityUser={activityUser}
       handleOpenLastRun={handleOpenLastRun}
-      handleAnalyze={handleAnalyze}
       handleSelectAnalysis={handleSelectAnalysis}
-      loading={loading}
-      error={error}
       onLogout={handleLogout}
       setActivityUser={setActivityUser}
       handleLogin={handleLogin}

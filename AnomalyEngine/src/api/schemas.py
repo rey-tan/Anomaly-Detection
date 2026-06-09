@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
@@ -29,8 +29,7 @@ class UserRead(BaseModel):
     role: str
     created_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OTPVerificationRequest(BaseModel):
@@ -59,8 +58,7 @@ class UserActivityRead(BaseModel):
     details: Optional[Dict[str, Any]]
     created_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserAnalysisRead(BaseModel):
@@ -78,9 +76,7 @@ class UserAnalysisRead(BaseModel):
     duration_seconds: Optional[int]
     executed_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AnalyzeConfig(BaseModel):
@@ -98,14 +94,15 @@ class ModelResult(BaseModel):
 class AnalyzeResponse(BaseModel):
     data: List[Dict[str, Any]]
     models: Dict[str, ModelResult]
+    analysis_id: int
 
 
 class AnomalyExplanationRequest(BaseModel):
+    analysis_id: int
     stock: Optional[str] = None
     timeframe: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
-    analysis_id: Optional[int] = None
     metrics: Optional[Dict[str, Any]] = None
     best_params: Optional[Dict[str, Any]] = None
     data: List[Dict[str, Any]]
@@ -128,21 +125,19 @@ class AnomalyExplanationResponse(BaseModel):
 
 class ExplanationRead(BaseModel):
     id: int
-    analysis_id: Optional[int] = None
+    analysis_id: int
     user_id: int
     model: Optional[str] = None
     model_version: Optional[str] = None
     artifact_path: Optional[str] = None
     artifact_hash: Optional[str] = None
     summary: Optional[str] = None
-    highlights: Optional[List[str]] = None
     entries: Optional[List[Dict[str, Any]]] = None
     anomaly_count: Optional[int] = 0
     meta: Optional[Dict[str, Any]] = None
     created_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CacheCreate(BaseModel):
@@ -164,8 +159,7 @@ class AdminDataAssetRead(BaseModel):
     last_date: Optional[str] = None
     preview: Optional[List[Dict[str, Any]]] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AdminDataSymbolRead(BaseModel):

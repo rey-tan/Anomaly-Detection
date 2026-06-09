@@ -295,8 +295,9 @@ function DensityChart({ data }) {
         bodyColor: "#e2e8f0",
         callbacks: {
           label: (context) => {
-            const { x, y, density: count, anomaly, dbscan, isolationForest } = context.raw || {};
+            const { x, y, density: count, label, anomaly, dbscan, isolationForest } = context.raw || {};
             return [
+              `Date: ${label}`,
               `Price: Rs.${Number(x).toFixed(2)}`,
               `Volume: ${Math.round(Number(y))}`,
               `Local density: ${count ?? 0}`,
@@ -459,17 +460,24 @@ function AnomalyOverlayChart({ data }) {
           label: (context) => {
             const raw = context.raw || {};
             const value = raw.y != null ? Number(raw.y).toFixed(2) : "n/a";
-              const detector =
-                raw.dbscan === -1 && raw.isolationForest === -1
-                  ? "IF + DBSCAN"
-                  : raw.dbscan === -1
-                    ? "DBSCAN"
-                    : "Isolation Forest";
-              const zText = raw.z != null && Number.isFinite(raw.z) ? `${Number(raw.z).toFixed(2)} z-score` : "z-score unavailable";
+              
+              let detector = 'n/a';
+              if(raw.dbscan === -1 && raw.isolationForest === -1){
+                detector = "IF + DBSCAN"
+              }
+              else if(raw.dbscan === -1){
+                detector = "DBSCAN"
+              }
+              else if(raw.isolationForest === -1){
+                detector = "Isolation Forest"
+              }
+
+
+              const zText = raw.z != null && Number.isFinite(raw.z) ? `${Number(raw.z).toFixed(2)} z-score` : "n/a";
               const ifScoreText = raw.ifScore != null ? `IF score: ${Number(raw.ifScore).toFixed(3)}` : raw.ifScore === null ? "IF score: n/a" : "IF score: n/a";
               return [
                 `${context.dataset.label}: Rs.${value}`,
-                `Reason: ${raw.reason || "Anomalous model signal"}`,
+                `Reason: ${raw.reason || "n/a"}`,
                 `Reference: ${zText}`,
                 `Detector: ${detector}`,
                 ifScoreText,

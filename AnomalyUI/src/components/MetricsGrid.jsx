@@ -20,22 +20,13 @@ function formatParamValue(val) {
   return String(val);
 }
 
-export default function MetricsGrid({ results = {} ,selectedAnalysis = null,handleToggleFavorite = null}) {
+export default function MetricsGrid({ results = {} ,handleToggleFavorite = null}) {
   const metricEntries = Object.entries(results || {}).filter(([model]) => model.toLowerCase() !== "zscore");
-  
   return (
     <div className="metrics-wrapper">
       <div className="section-heading compact results-title">
         <div style={{ width: "100%" }}>
-          {selectedAnalysis ? (
-            <div className="favorite-row">
               <h2>Analysis feedback</h2>
-              <button className="favorite-button" onClick={handleToggleFavorite}> 
-                {selectedAnalysis.is_favorite ? '★ Favorite' : '☆ Save to favorites'}
-              </button>
-            </div>
-          ) : null}
-        
           <p>Review model metrics, event counts, and tuning parameters.</p>
         </div>
         

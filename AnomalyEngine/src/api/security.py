@@ -5,7 +5,7 @@ from jose import JWTError, jwt
 
 SECRET_KEY = "i_am_a_very_secret_key_for_jwt_token_generation"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

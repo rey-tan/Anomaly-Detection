@@ -1,6 +1,15 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
+
+vi.mock('../api', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    explainAnalysis: vi.fn(() => Promise.resolve({ raw_summary: 'OK', summary: 'OK', entries: [], anomaly_count: 0, source: 'ai' })),
+  }
+})
+import * as api from '../api'
 import ResultsPage from '../pages/ResultsPage'
 
 const mockResults = {
@@ -14,21 +23,14 @@ const mockResults = {
 }
 
 describe('ResultsPage AI actions', () => {
-  it('shows the AI explanation button and calls the handler on click', () => {
-    const handleExplain = vi.fn()
-
+  it('shows the AI explanation button and calls the handler on click', async () => {
     render(
       <ResultsPage
         token="tok"
         results={mockResults}
-        selectedAnalysis={{ id: 1, stock: 'API', timeframe: '1D', mode: 'Static' }}
+        selectedAnalysis={{ id: 1, stock: 'API', timeframe: '1D', mode: 'Static', start_date: '2026-06-01', end_date: '2026-06-02' }}
         setResults={() => {}}
         setSelectedAnalysis={() => {}}
-        aiExplanation={null}
-        aiExplanationMarkdown=""
-        aiError=""
-        aiLoading={false}
-        handleExplainWithAI={handleExplain}
         handleSelectAnalysis={() => {}}
         navigate={() => {}}
       />
@@ -38,6 +40,6 @@ describe('ResultsPage AI actions', () => {
     expect(analyzeButton).toBeInTheDocument()
 
     fireEvent.click(analyzeButton)
-    expect(handleExplain).toHaveBeenCalled()
+    await waitFor(() => expect(api.explainAnalysis).toHaveBeenCalled())
   })
 })

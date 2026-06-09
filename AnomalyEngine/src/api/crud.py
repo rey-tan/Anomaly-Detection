@@ -257,22 +257,24 @@ def get_user_analyses(db: Session, user_id: int, limit: Optional[int] = None):
 
 
 
-
-
-
 def create_explanation(db: Session, user_id: int, explanation: Dict[str, Any], analysis_id: Optional[int] = None, metadata: Optional[Dict[str, Any]] = None, artifact_path: Optional[str] = None, artifact_hash: Optional[str] = None):
     # Store only compact metadata and artifact reference to keep DB lightweight
+
     entry = models.Explanation(
         analysis_id=analysis_id,
         user_id=user_id,
         model=explanation.get("source") or explanation.get("model"),
-        model_version=explanation.get("model_version"),
         artifact_path=artifact_path,
         artifact_hash=artifact_hash,
         summary=explanation.get("summary") or explanation.get("raw_summary"),
         anomaly_count=explanation.get("anomaly_count"),
-        meta=metadata,
     )
+    print(entry.artifact_hash)
+    print(entry.artifact_path)
+    print(entry.summary)
+
+
+
     db.add(entry)
     db.commit()
     db.refresh(entry)
@@ -304,6 +306,7 @@ def get_cache_entry(db: Session, config_hash: str):
 
 def create_cache_entry(
     db: Session,
+    analysis_id: Optional[int],
     config_hash: str,
     stock: str,
     timeframe: str,
@@ -314,6 +317,7 @@ def create_cache_entry(
     data: list,
 ):
     entry = models.PipelineCache(
+        analysis_id=analysis_id,
         config_hash=config_hash,
         stock=stock,
         timeframe=timeframe,
@@ -329,38 +333,3 @@ def create_cache_entry(
     return entry
 
 
-def create_or_update_cache_entry(
-    db: Session,
-    config_hash: str,
-    stock: str,
-    timeframe: str,
-    start_date: str,
-    end_date: str,
-    best_params: dict,
-    metrics: dict,
-    data: list,
-):
-    entry = get_cache_entry(db, config_hash)
-    if entry:
-        entry.best_params = best_params
-        entry.metrics = metrics
-        entry.data = data
-        entry.stock = stock
-        entry.timeframe = timeframe
-        entry.start_date = start_date
-        entry.end_date = end_date
-    else:
-        entry = models.PipelineCache(
-            config_hash=config_hash,
-            stock=stock,
-            timeframe=timeframe,
-            start_date=start_date,
-            end_date=end_date,
-            best_params=best_params,
-            metrics=metrics,
-            data=data,
-        )
-        db.add(entry)
-    db.commit()
-    db.refresh(entry)
-    return entry

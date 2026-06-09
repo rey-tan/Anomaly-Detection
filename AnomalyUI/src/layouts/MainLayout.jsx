@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import FavoritesPanel from '../components/FavoritesPanel'
 import NavButton from '../components/ui/NavButton'
 
+
 const NAV_ITEMS = [
   { id: 'dashboard', path: '/dashboard', label: 'Dashboard', description: 'Overview' },
   { id: 'analysis', path: '/analysis', label: 'Analysis', description: 'Run model' },
@@ -17,12 +18,8 @@ export default function MainLayout({
   token,
   results,
   selectedAnalysis,
-  setResults,
-  setSelectedAnalysis,
   onLogout,
   handleOpenLastRun,
-  handleSelectAnalysis,
-  setActivityUser,
 }) {
   const location = useLocation()
   const navigate = useNavigate()

@@ -1,6 +1,15 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
+
+vi.mock('../api', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    explainAnalysis: vi.fn(() => Promise.resolve({ raw_summary: 'OK', summary: 'OK', entries: [], anomaly_count: 0, source: 'ai' })),
+  }
+})
+import * as api from '../api'
 import ResultsPage from '../pages/ResultsPage'
 
 const mockResults = {
@@ -22,11 +31,6 @@ describe('ResultsPage', () => {
         selectedAnalysis={null}
         setResults={() => {}}
         setSelectedAnalysis={() => {}}
-        aiExplanation={null}
-        aiExplanationMarkdown=""
-        aiError=""
-        aiLoading={false}
-        handleExplainWithAI={() => {}}
         handleSelectAnalysis={() => {}}
         navigate={() => {}}
       />
@@ -36,20 +40,14 @@ describe('ResultsPage', () => {
     expect(screen.getByText(/Chart preview/i)).toBeInTheDocument()
   })
 
-  it('renders results summary and a working AI button', () => {
-    const handleExplain = vi.fn()
+  it('renders results summary and a working AI button', async () => {
     render(
       <ResultsPage
         token="tok"
         results={mockResults}
-        selectedAnalysis={{ id: 1, stock: 'API', timeframe: '1D', mode: 'Static' }}
+        selectedAnalysis={{ id: 1, stock: 'API', timeframe: '1D', mode: 'Static', start_date: '2026-06-01', end_date: '2026-06-02' }}
         setResults={() => {}}
         setSelectedAnalysis={() => {}}
-        aiExplanation={null}
-        aiExplanationMarkdown=""
-        aiError=""
-        aiLoading={false}
-        handleExplainWithAI={handleExplain}
         handleSelectAnalysis={() => {}}
         navigate={() => {}}
       />
@@ -57,6 +55,6 @@ describe('ResultsPage', () => {
 
     expect(screen.getByText(/Data points/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /Analyze with AI/i }))
-    expect(handleExplain).toHaveBeenCalled()
+    await waitFor(() => expect(api.explainAnalysis).toHaveBeenCalled())
   })
 })

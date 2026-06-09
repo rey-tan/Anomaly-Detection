@@ -1203,7 +1203,7 @@ select{
   gap: 16px;
 }
 
-.admin-panel-head h3 {
+.admin-panel-head h3,.admin-form-grid h3 {
   margin: 0;
   color: #f8fafc;
   font-size: 1.3rem;
@@ -1274,7 +1274,8 @@ select{
 .admin-form-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  margin-top:20px
 }
 
 .admin-input,

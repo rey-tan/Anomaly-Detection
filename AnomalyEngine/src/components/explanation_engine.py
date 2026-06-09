@@ -20,8 +20,9 @@ class ExplanationEngine:
 
     def explain(self) -> Dict[str, Any]:
         
-        # github_token = os.getenv("TOKEN", "").strip()
+        github_token = os.getenv("TOKEN", "").strip()
         # if github_token:
+          
         #     return self._call_github_ai_explanation(github_token, self.request)
         return self._heuristic_anomaly_explanation(self.request)
 

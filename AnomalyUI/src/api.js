@@ -60,8 +60,12 @@ export async function fetchProfile(token) {
   return unwrapResponse(response);
 }
 
-export async function fetchSymbols() {
-  const response = await fetch(`${BASE_URL}/symbols`);
+export async function fetchSymbols(token) {
+  const response = await fetch(`${BASE_URL}/symbols`,
+    {
+      headers: buildHeaders(token),
+    }
+  );
   return unwrapResponse(response);
 }
 
@@ -83,59 +87,26 @@ export async function explainAnalysis(token, payload) {
   return unwrapResponse(response);
 }
 
-export async function saveCache(token, config, results) {
-  // Convert new response format (with models) to old format for cache storage
-  let best_params = {};
-  let metrics = {};
-  
-  if (results.models) {
-    // New format: extract metrics and params from models
-    Object.entries(results.models).forEach(([modelName, modelResult]) => {
-      if (modelResult.metrics) metrics[modelName] = modelResult.metrics;
-      if (modelResult.params) {
-        // Map zscore back to z_score for consistency
-        const paramKey = modelName === 'zscore' ? 'z_score' : modelName;
-        best_params[paramKey] = modelResult.params;
-      }
-    });
-  } else {
-    // Old format: use directly
-    best_params = results.best_params || {};
-    metrics = results.metrics || {};
-  }
-  
-  const body = {
-    config,
-    best_params,
-    metrics,
-    data: results.data || [],
-  };
-  const response = await fetch(`${BASE_URL}/cache`, {
-    method: "POST",
-    headers: buildHeaders(token),
-    body: JSON.stringify(body),
-  });
-  return unwrapResponse(response);
-}
+
 
 export async function getUsers(token) {
-  const response = await fetch(`${BASE_URL}/users`, {
+  const response = await fetch(`${BASE_URL}/admin/users`, {
     headers: buildHeaders(token),
   });
   return unwrapResponse(response);
 }
 
-export async function createUser(token, username, password, role = "analyst") {
-  const response = await fetch(`${BASE_URL}/users`, {
+export async function createUser(token,email, username, password, role = "analyst") {
+  const response = await fetch(`${BASE_URL}/admin/users`, {
     method: "POST",
     headers: buildHeaders(token),
-    body: JSON.stringify({ username, password, role }),
+    body: JSON.stringify({ email:email,username:username,password:password, role : role}),
   });
   return unwrapResponse(response);
 }
 
 export async function updateUserRole(token, userId, role) {
-  const response = await fetch(`${BASE_URL}/users/${userId}/role`, {
+  const response = await fetch(`${BASE_URL}/admin/users/${userId}/role`, {
     method: "PATCH",
     headers: buildHeaders(token),
     body: JSON.stringify({ role }),
@@ -144,7 +115,7 @@ export async function updateUserRole(token, userId, role) {
 }
 
 export async function deleteUser(token, userId) {
-  const response = await fetch(`${BASE_URL}/users/${userId}`, {
+  const response = await fetch(`${BASE_URL}/admin/users/${userId}`, {
     method: "DELETE",
     headers: buildHeaders(token),
   });
@@ -222,7 +193,7 @@ export async function toggleFavorite(token, analysisId, favorite) {
 }
 
 export async function fetchUserActivity(token, userId, opts = {}) {
-  const url = new URL(`${BASE_URL}/users/${userId}/activity`);
+  const url = new URL(`${BASE_URL}/admin/users/${userId}/activity`);
   if (opts.q) url.searchParams.append("q", opts.q);
   if (opts.start) url.searchParams.append("start", opts.start);
   if (opts.end) url.searchParams.append("end", opts.end);
@@ -236,7 +207,7 @@ export async function fetchUserActivity(token, userId, opts = {}) {
 }
 
 export async function fetchActivity(token, opts = {}) {
-  const url = new URL(`${BASE_URL}/activity`);
+  const url = new URL(`${BASE_URL}/admin/activity`);
   if (opts.q) url.searchParams.append("q", opts.q);
   if (opts.start) url.searchParams.append("start", opts.start);
   if (opts.end) url.searchParams.append("end", opts.end);

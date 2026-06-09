@@ -1,9 +1,9 @@
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
 import AnomalyChart from '../components/AnomalyChart'
 import MetricsGrid from '../components/MetricsGrid'
 import AnalysisHistory from '../components/AnalysisHistory'
 import { toggleFavorite } from '../api'
+import ExplainAnalysis from './ExplainAnalysis'
 
 
 export default function ResultsPage({
@@ -12,17 +12,12 @@ export default function ResultsPage({
   selectedAnalysis,
   setResults,
   setSelectedAnalysis,
-  aiExplanation,
-  aiExplanationMarkdown,
-  aiError,
-  aiLoading,
-  handleExplainWithAI,
   handleSelectAnalysis,
   navigate,
 }) {
-
   const handleToggleFavorite = async () => {
     if (!selectedAnalysis) return;
+
     try {
       const updated = await toggleFavorite(token, selectedAnalysis.id, !selectedAnalysis.is_favorite);
       setSelectedAnalysis(updated);
@@ -79,32 +74,7 @@ export default function ResultsPage({
               <p>Run an analysis from the Analysis page to populate this view.</p>
             </section>}
         <div className="analysis-footer">
-          <div className="ai-explanation-section">
-            {results ? (
-              <div className="results-ai-actions">
-                <button className="primary-button ai-button" type="button" onClick={handleExplainWithAI} disabled={aiLoading || !flaggedCount}>
-                  {aiLoading ? 'Analyzing with AI…' : 'Analyze with AI'}
-                </button>
-                <span className="results-ai-note">{flaggedCount ? `${flaggedCount} flagged points available for explanation` : 'No flagged points to explain'}</span>
-              </div>
-            ) : null}
-            {aiError ? <div className="alert-box">{aiError}</div> : null}
-            {aiExplanation ? (
-              <section className="dashboard-card results-ai-card">
-                <div className="section-heading compact">
-                  <div>
-                    <p className="eyebrow">AI explanation</p>
-                  </div>
-                  <div className="results-ai-source">Source: {aiExplanation?.source || 'AI'}</div>
-                </div>
-                <h3>Why these points were flagged</h3>
-                    <p>Generated from the latest analyzed result set.</p>
-                <div className="results-ai-markdown">
-                  <ReactMarkdown>{aiExplanationMarkdown}</ReactMarkdown>
-                </div>
-              </section>
-            ) : null}
-          </div>
+            <ExplainAnalysis token={token} results ={results} selectedAnalysis={selectedAnalysis} flaggedCount={flaggedCount}/>
         </div>
         <AnalysisHistory token={token} onSelectAnalysis={handleSelectAnalysis} />
       </div>

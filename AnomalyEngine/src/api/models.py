@@ -22,6 +22,7 @@ class PipelineCache(Base):
     __tablename__ = "pipeline_cache"
 
     id = Column(Integer, primary_key=True, index=True)
+    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=True)
     config_hash = Column(String, unique=True, index=True, nullable=False)
     stock = Column(String, nullable=False)
     timeframe = Column(String, nullable=False)
@@ -63,32 +64,17 @@ class UserAnalysis(Base):
     duration_seconds = Column(Integer, nullable=True)
 
 
-class Notification(Base):
-    __tablename__ = "notifications"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=True)
-    title = Column(String, nullable=False)
-    message = Column(String, nullable=False)
-    type = Column(String, nullable=False, default="info")
-    is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    read_at = Column(DateTime(timezone=True), nullable=True)
 
 
 class Explanation(Base):
     __tablename__ = "explanations"
 
     id = Column(Integer, primary_key=True, index=True)
-    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=True)
+    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     model = Column(String, nullable=True)
-    model_version = Column(String, nullable=True)
     artifact_path = Column(String, nullable=True)
     artifact_hash = Column(String, nullable=True, index=True)
     summary = Column(String, nullable=True)
-    entries = Column(JSON, nullable=True)
     anomaly_count = Column(Integer, nullable=True)
-    meta = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

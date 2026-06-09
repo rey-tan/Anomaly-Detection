@@ -5,7 +5,7 @@ import { getUsers, createUser, updateUserRole, deleteUser } from "../api";
 export default function UsersPanel({ token, currentUser, onOpenActivity }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [newUser, setNewUser] = useState({ username: "", password: "", role: "analyst" });
+  const [newUser, setNewUser] = useState({ email: "", username: "", password: "", role: "analyst" });
   const [error, setError] = useState("");
   const [selectedUserId, setSelectedUserId] = useState(null);
 
@@ -56,8 +56,8 @@ export default function UsersPanel({ token, currentUser, onOpenActivity }) {
     e.preventDefault();
     setError("");
     try {
-      await createUser(token, newUser.username, newUser.password, newUser.role);
-      setNewUser({ username: "", password: "", role: "analyst" });
+      await createUser(token, newUser.email, newUser.username, newUser.password, newUser.role);
+      setNewUser({ email: "", username: "", password: "", role: "analyst" });
       await load();
     } catch (err) {
       setError(err.message || "Create failed");
@@ -132,7 +132,9 @@ export default function UsersPanel({ token, currentUser, onOpenActivity }) {
 
       <form onSubmit={handleCreate} className="admin-form">
         <div className="admin-form-grid">
-          <input className="admin-input" placeholder="username" value={newUser.username} onChange={(e) => setNewUser((p) => ({ ...p, username: e.target.value }))} required />
+          <h3>Create a new user</h3>
+          <input className="admin-input" placeholder="email" type="email" value={newUser.email} onChange={(e) => setNewUser((p) => ({ ...p, email: e.target.value }))} required />
+          <input className="admin-input" placeholder="username" type="text" value={newUser.username} onChange={(e) => setNewUser((p) => ({ ...p, username: e.target.value }))} required />
           <input className="admin-input" placeholder="password" type="password" value={newUser.password} onChange={(e) => setNewUser((p) => ({ ...p, password: e.target.value }))} required />
           <select className="admin-select" value={newUser.role} onChange={(e) => setNewUser((p) => ({ ...p, role: e.target.value }))}>
             <option value="analyst">analyst</option>

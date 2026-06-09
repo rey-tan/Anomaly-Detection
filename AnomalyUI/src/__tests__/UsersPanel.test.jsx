@@ -22,10 +22,11 @@ describe('UsersPanel', () => {
 
     render(<UsersPanel token="abc" currentUser={{ id: 1, username: 'admin', role: 'admin' }} />)
 
+    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'newuser@example.com' } })
     fireEvent.change(screen.getByPlaceholderText(/username/i), { target: { value: 'newuser' } })
     fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } })
     fireEvent.click(screen.getByRole('button', { name: /Create user/i }))
 
-    await waitFor(() => expect(api.createUser).toHaveBeenCalledWith('abc', 'newuser', 'password123', 'analyst'))
+    await waitFor(() => expect(api.createUser).toHaveBeenCalledWith('abc', 'newuser@example.com', 'newuser', 'password123', 'analyst'))
   })
 })

@@ -14,6 +14,9 @@ class DataLoader:
         
         if isinstance(end_date, str):
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+
+        if(start_date > end_date):
+            raise ValueError("Start date must be before end date.")
         
         df['date'] = pd.to_datetime(df['date'])
         df = df.set_index('date')

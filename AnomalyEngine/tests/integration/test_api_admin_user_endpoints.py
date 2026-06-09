@@ -4,7 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.api.app import app, _run_scrape_job
+from src.api.app import app
+from src.api.routes.admin import _run_scrape_job
 from src.api import models, database, crud, security
 
 
@@ -50,7 +51,7 @@ def test_admin_can_create_user(test_db_with_admin):
     headers = auth_headers(admin_user)
 
     response = client.post(
-        "/users",
+        "/admin/users",
         json={
             "username": "new_user",
             "email": "new_user@example.com",
@@ -81,7 +82,7 @@ def test_admin_can_delete_user(test_db_with_admin):
         role="analyst",
     )
 
-    response = client.delete(f"/users/{user_to_delete.id}", headers=headers)
+    response = client.delete(f"/admin/users/{user_to_delete.id}", headers=headers)
 
     assert response.status_code == 200
     assert crud.get_user_by_username(db, "delete_me") is None
@@ -92,7 +93,7 @@ def test_admin_cannot_delete_self(test_db_with_admin):
     client = TestClient(app)
     headers = auth_headers(admin_user)
 
-    response = client.delete(f"/users/{admin_user.id}", headers=headers)
+    response = client.delete(f"/admin/users/{admin_user.id}", headers=headers)
 
     assert response.status_code == 400
     assert response.json()["detail"] == "You cannot delete your own account"
@@ -106,7 +107,7 @@ def test_run_scrape_job_calls_share_sansar_scrape(monkeypatch):
         captured["scrape_date"] = scrape_date
         return {"success": True, "records_count": 5}
 
-    monkeypatch.setattr("src.api.app.ShareSansarScraper.scrape", fake_scrape)
+    monkeypatch.setattr("src.api.routes.admin.ShareSansarScraper.scrape", fake_scrape)
 
     result = _run_scrape_job("sharesansar", "2024-01-01", max_pages=1, output_format="json")
 

@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+
+actor Analyst
+actor Admin
+actor "Share Sansar" as SS
+
+rectangle "Anomaly Engine" {
+
+    (Register)
+    (Login)
+    (Verify OTP)
+
+    (Collect market data)
+
+    (Submit analysis request)
+    (View analysis results)
+    (Request AI explanation)
+    (View past analyses)
+    (Manage users)
+    (View activity log)
+
+    SS --> (Collect market data)
+
+    Analyst --> (Register)
+    Analyst --> (Login)
+    Analyst --> (Submit analysis request)
+    Analyst --> (View analysis results)
+    Analyst --> (View past analyses)
+
+    Admin --> (Register)
+    Admin --> (Login)
+    Admin --> (Submit analysis request)
+    Admin --> (View analysis results)
+    Admin --> (View past analyses)
+    Admin --> (Manage users)
+    Admin --> (View activity log)
+
+   
+
+    (Register) ..> (Verify OTP) : <<include>>
+    (Login) ..> (Verify OTP) : <<include>>
+    
+     (Request AI explanation) ..> (View analysis results) : <<extend>>
+}
+
+@enduml

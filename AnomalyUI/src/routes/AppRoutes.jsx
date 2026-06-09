@@ -15,23 +15,13 @@ export default function AppRoutes(props) {
   const {
     user,
     token,
-    analyses,
-    setAnalyses,
     results,
     selectedAnalysis,
     setResults,
-    setSelectedAnalysis,
-    aiExplanation,
-    aiExplanationMarkdown,
-    aiError,
-    aiLoading,
-    handleExplainWithAI,
+    setSelectedAnalysis,  
     activityUser,
     handleOpenLastRun,
-    handleAnalyze,
     handleSelectAnalysis,
-    loading,
-    error,
     onLogout,
     setActivityUser,
     handleLogin,
@@ -55,13 +45,8 @@ export default function AppRoutes(props) {
             token={token}
             results={results}
             selectedAnalysis={selectedAnalysis}
-            setResults={setResults}
-            setSelectedAnalysis={setSelectedAnalysis}
-            analyses={analyses}
-            setAnalyses={setAnalyses}
             onLogout={onLogout}
             handleOpenLastRun={handleOpenLastRun}
-            handleSelectAnalysis={handleSelectAnalysis}
           />
         ) : (
           <Navigate to="/login" replace />
@@ -69,8 +54,8 @@ export default function AppRoutes(props) {
       >
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage user={user} selectedAnalysis={selectedAnalysis} results={results} onOpenLastRun={handleOpenLastRun} />} />
-        <Route path="analysis" element={<AnalysisPage onSubmit={handleAnalyze} loading={loading} error={error} />} />
-        <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis} aiExplanation={aiExplanation} aiExplanationMarkdown={aiExplanationMarkdown} aiError={aiError} aiLoading={aiLoading} handleExplainWithAI={handleExplainWithAI} navigate={navigate} handleSelectAnalysis={handleSelectAnalysis} />} />
+        <Route path="analysis" element={<AnalysisPage  token = {token} setResults={setResults} setSelectedAnalysis = {setSelectedAnalysis}/>} />
+        <Route path="results" element={<ResultsPage token={token} results={results} selectedAnalysis={selectedAnalysis} setResults={setResults} setSelectedAnalysis={setSelectedAnalysis}  navigate={navigate} handleSelectAnalysis={handleSelectAnalysis} />} />
         <Route path="activity" element={
           user?.role === 'admin' ? (
             <ActivityPage token={token} initialUserId={activityUser} />

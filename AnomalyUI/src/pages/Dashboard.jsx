@@ -10,7 +10,6 @@ export default function DashboardPage({ user, selectedAnalysis, results, onOpenL
   const startDate = lastAnalysis?.start_date;
   const endDate = lastAnalysis?.end_date;
   const mode = lastAnalysis?.mode;
-  const featureCount = lastAnalysis?.features?.length || 0;
   const anomalyCount = results?.data
     ? results.data.filter((r) => r.cluster === -1 || r.anomaly === true || r.cluster_dbscan === -1 || r.cluster_isolation_forest === -1).length
     : lastAnalysis?.anomalyCount ?? 0;
@@ -34,7 +33,7 @@ export default function DashboardPage({ user, selectedAnalysis, results, onOpenL
         <article className="stat-card"><span>Current page</span><h3>Dashboard</h3><p>Use the sidebar to switch to analysis, results, or admin pages.</p></article>
         <article className="stat-card"><span>Latest symbol</span><h3>{stock || '—'}</h3><p>Most recent analysis target.</p></article>
         <article className="stat-card"><span>Flagged anomalies</span><h3>{anomalyCount}</h3><p>Count from the latest result set.</p></article>
-        <article className="stat-card"><span>Metrics groups</span><h3>{activeMetricCount}</h3><p>How many models are currently summarized.</p></article>
+        <article className="stat-card"><span>Active models</span><h3>{activeMetricCount}</h3><p>How many anomaly detection models are currently used.</p></article>
       </section>
 
       <section className="dashboard-grid">
@@ -68,7 +67,6 @@ export default function DashboardPage({ user, selectedAnalysis, results, onOpenL
             <div className="context-row"><span>Stock</span><strong>{stock || '—'}</strong></div>
             <div className="context-row"><span>Window</span><strong>{startDate && endDate ? `${startDate} – ${endDate}` : '—'}</strong></div>
             <div className="context-row"><span>Timeframe</span><strong>{timeframe || '—'}</strong></div>
-            <div className="context-row"><span>Feature count</span><strong>{featureCount}</strong></div>
           </div>
           {/* <div className="card-actions">
             <button className="primary-button last-run-button" type="button" onClick={onOpenLastRun} disabled={!stock}>

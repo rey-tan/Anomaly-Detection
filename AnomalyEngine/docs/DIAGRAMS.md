@@ -2,14 +2,7 @@
 
 This document describes the diagrams recommended for the Anomaly Engine project, what each diagram should show, and why each is useful.
 
-## Recommended Diagrams
 
-1. Component Diagram
-2. Data Flow Diagram (DFD)
-3. Sequence Diagram
-4. Activity Diagram
-5. ER Diagram
-6. Deployment Diagram (optional)
 
 
 
@@ -582,64 +575,106 @@ note bottom: GitHub Actions runner executes scheduled scraper jobs independently
 
 ## 11. State Diagram
 
-```mermaid
+
 stateDiagram-v2
-    [*] --> Idle
+    [*] --> Unauthenticated
+    Unauthenticated --> OTPPending : register / login
+    OTPPending --> Authenticated : verify OTP
+    Authenticated --> Idle : session started
     Idle --> AnalysisRequested : submit analysis
-    AnalysisRequested --> AnalysisRunning : run pipeline
-    AnalysisRunning --> AnalysisCompleted : success
-    AnalysisRunning --> AnalysisFailed : failure
+    AnalysisRequested --> AnalysisCompleted : success
+    AnalysisRequested --> AnalysisFailed : failure
     AnalysisCompleted --> Favorited : mark favorite
     AnalysisCompleted --> ExplanationRequested : request explanation
-    ExplanationRequested --> ExplanationGenerating : generate explanation
-    ExplanationGenerating --> ExplanationStored : save artifact
+    ExplanationRequested --> ExplanationStored : save artifact
     ExplanationStored --> Viewed : view
-    Viewed --> [*]
-```
+    Viewed --> Idle
+    Idle --> [*] : logout
+
+
+stateDiagram-v2
+    [*] --> Unauthenticated
+    Unauthenticated --> OTPPending : register / login
+    OTPPending --> Authenticated : verify OTP
+    Authenticated --> Idle : session started
+    Idle --> AnalysisRequested : submit analysis
+    AnalysisRequested --> AnalysisCompleted : success
+    AnalysisRequested --> AnalysisFailed : failure
+    AnalysisCompleted --> Favorited : mark favorite
+    AnalysisCompleted --> ExplanationRequested : request explanation
+    ExplanationRequested --> ExplanationStored : save artifact
+    ExplanationStored --> Viewed : view
+    Viewed --> Idle
+    Idle --> ManagingUsers : manage users
+    ManagingUsers --> Idle : done
+    Idle --> ViewingActivityLog : view activity log
+    ViewingActivityLog --> Idle : done
+    Idle --> [*] : logout
+
 
 ## 12. Sequence Diagram
 
 ```mermaid
+---
+config:
+  theme: neutral
+---
 sequenceDiagram
-    participant Analyst
+    actor Analyst
+    actor Admin
     participant Backend
+    participant Auth
     participant AnalysisEngine
-    participant DB
     participant ExplanationEngine
-    participant Storage
+    participant DB
+    participant ArtifactStore
+    participant MarketData
+    participant AIService
+    participant NewsAPI
+
+    Analyst->>Backend: POST /register
+    Backend->>DB: create user
+    Backend-->>Analyst: send OTP
+    Analyst->>Backend: POST /verify-otp
+    Backend-->>Analyst: verified
+
+    Analyst->>Backend: POST /login
+    Backend->>Auth: validate credentials
+    Backend-->>Analyst: JWT token
+
+    Admin->>Backend: POST /login
+    Backend->>Auth: validate credentials
+    Backend-->>Admin: JWT token
+
 
     Analyst->>Backend: POST /analyze
+    Backend->>Auth: validate token / RBAC
     Backend->>AnalysisEngine: execute(config)
-    AnalysisEngine->>DB: read stock data
+    AnalysisEngine->>MarketData: read market data
     AnalysisEngine-->>Backend: results
-    Backend->>Storage: save artifact
+    Backend->>ArtifactStore: save artifact
     Backend->>DB: create UserAnalysis
-    Backend-->>Analyst: return analysis response
+    Backend-->>Analyst: analysis response
 
     Analyst->>Backend: POST /analyze/explain
+    Backend->>Auth: validate token / RBAC
     Backend->>ExplanationEngine: explain(request)
-    ExplanationEngine->>Storage: optional search/context
+    ExplanationEngine->>AIService: call LLM API
+    ExplanationEngine->>NewsAPI: fetch context
     ExplanationEngine-->>Backend: explanation
     Backend->>DB: create Explanation
-    Backend-->>Analyst: return explanation response
+    Backend->>ArtifactStore: save explanation artifact
+    Backend-->>Analyst: explanation response
+
+    Admin->>Backend: GET /users
+    Backend->>Auth: validate token / RBAC
+    Backend->>DB: fetch users
+    Backend-->>Admin: users list
+
+    Admin->>Backend: GET /activity
+    Backend->>Auth: validate token / RBAC
+    Backend->>DB: fetch activity logs
+    Backend-->>Admin: activity logs
 ```
 
-## 13. Activity Diagram
-
-```mermaid
-flowchart TD
-    Start([Start])
-    Login[Analyst logs in]
-    Submit[Submit analysis request]
-    RunPipeline[Run AnalysisPipeline]
-    StoreResult[Store UserAnalysis]
-    ReturnResult[Return results to user]
-    RequestExplain[Request explanation]
-    GenerateExplain[Generate explanation]
-    StoreExplain[Store Explanation artifact]
-    ReturnExplain[Return explanation to user]
-    End([End])
-
-    Start --> Login --> Submit --> RunPipeline --> StoreResult --> ReturnResult --> RequestExplain --> GenerateExplain --> StoreExplain --> ReturnExplain --> End
-```
 

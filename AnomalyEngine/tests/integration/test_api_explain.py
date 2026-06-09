@@ -15,7 +15,7 @@ def override_get_db():
     yield None
 
 
-def test_explain_endpoint_writes_artifact(monkeypatch, tmp_path):
+def test_explain_analysis(monkeypatch, tmp_path):
     # setup in-memory DB
     engine = create_engine(
         "sqlite:///:memory:",
@@ -58,7 +58,6 @@ def test_explain_endpoint_writes_artifact(monkeypatch, tmp_path):
     client = TestClient(app)
     payload = {
         "stock": "NABIL",
-        "mode": "Static",
         "timeframe": "1D",
         "start_date": "2024-01-01",
         "end_date": "2024-01-10",

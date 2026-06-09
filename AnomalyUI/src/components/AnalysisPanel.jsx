@@ -33,7 +33,6 @@ export default function AnalysisPanel({ token,setError,setResults,setSelectedAna
       try {
         const response = await analyze(token, payload);
         setResults(response);
-        console.log(response);
         const currentAnomalyCount = countAnomalyRows(response.data || []);
         let selected = { ...payload, anomalyCount: currentAnomalyCount,analysis_id: response.analysis_id };
         try {

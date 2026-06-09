@@ -34,7 +34,7 @@ def test_login_and_me_endpoint():
     assert isinstance(protected.json(), list)
 
 
-def test_user_can_access_protected_endpoint():
+def test_view_analysis_history():
     client = TestClient(api_app.app)
     db = database.SessionLocal()
     username = "regular_user"

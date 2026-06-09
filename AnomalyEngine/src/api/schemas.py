@@ -98,7 +98,7 @@ class AnalyzeResponse(BaseModel):
 
 
 class AnomalyExplanationRequest(BaseModel):
-    analysis_id: int
+    analysis_id: Optional[int] = None
     stock: Optional[str] = None
     timeframe: Optional[str] = None
     start_date: Optional[str] = None

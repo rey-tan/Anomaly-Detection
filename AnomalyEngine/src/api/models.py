@@ -70,7 +70,7 @@ class Explanation(Base):
     __tablename__ = "explanations"
 
     id = Column(Integer, primary_key=True, index=True)
-    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=False)
+    analysis_id = Column(Integer, ForeignKey("user_analysis.id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     model = Column(String, nullable=True)
     artifact_path = Column(String, nullable=True)

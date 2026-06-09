@@ -27,7 +27,7 @@ class MockLoader:
         return self.df
 
 
-def test_static_pipeline_basic_run():
+def test_pipeline_basic_run():
     df = make_mock_data()
     loader = MockLoader(df)
     config = {

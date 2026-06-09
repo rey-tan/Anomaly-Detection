@@ -1,4 +1,4 @@
-# Backend
+# Backend core
 fastapi>=0.100.0
 uvicorn[standard]>=0.23.0
 sqlalchemy>=2.0
@@ -6,30 +6,22 @@ bcrypt>=4.0.0
 python-jose[cryptography]>=3.0.0
 python-multipart>=0.0.6
 PyYAML>=6.0
-seaborn
-
-# Frontend
+python-dotenv>=1.0.0
 requests>=2.31.0
+azure-ai-inference>=1.0.0
+tavily>=1.0.0
 
 # Data & ML
-numpy==2.2.3
-pandas==2.2.3
-scipy==1.15.2
-scikit-learn==1.6.1
-lxml
-azure-ai-inference
-python-dotenv
-
-# Visualization
-matplotlib==3.10.0
+numpy>=2.2.3
+pandas>=2.2.3
+scipy>=1.15.2
+scikit-learn>=1.6.1
+matplotlib>=3.10.0
 plotly>=5.0.0
 
-# Development (optional)
-jupyterlab>=4.3.5
-flask==3.1.0
+# Optional / development
 alembic>=1.11.1
 pytest>=7.4.0
 pytest-asyncio>=0.22.0
 httpx>=0.24.0
 
-tavily

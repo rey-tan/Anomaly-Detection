@@ -1,246 +1,144 @@
-# Anomaly Engine (NEPSE stock anomaly detection)
+﻿# Anomaly Engine Backend
 
-A production-ready stock anomaly detection system with a FastAPI backend and a React frontend (AnomalyUI). Detects unusual price behavior using DBSCAN clustering and supports both static and realtime simulation modes with result caching, user authentication, role-based authorization, and comprehensive audit trails.
+Anomaly Engine is the FastAPI backend for NEPSE stock anomaly detection. It manages authentication, user roles, anomaly analysis pipelines, caching, audit logs, and AI explanation artifacts.
 
-## Architecture
+## What this repository contains
 
-```
-Anomaly Engine/
-├── AnomalyUI/                   # React frontend (AnomalyUI)
-├── flask.py                     # Alternative Flask API (legacy)
-├── src/
-│   ├── api/                     # FastAPI backend
-│   │   ├── app.py               # FastAPI app with auth, RBAC, analyze endpoints
-│   │   ├── database.py          # SQLAlchemy setup (SQLite)
-│   │   ├── models.py            # SQLAlchemy models (User, Cache, Activity, etc.)
-│   │   ├── schemas.py           # Pydantic request/response models
-│   │   ├── crud.py              # Database operations
-│   │   ├── security.py          # JWT tokens, password hashing
-│   │   └── __init__.py
-│   ├── pipelines/               # Analysis pipelines
-│   │   ├── anomaly_detection_pipeline.py
-│   │   └── realtime_detection_pipeline.py
-│   ├── components/              # Feature engineering, scaling, visualization
-│   ├── models/                  # ML models (DBSCAN, etc.)
-│   ├── analysis/                # Candlestick visualizers
-│   └── utils/                   # Data loading, paths, helpers
-├── configs/
-│   └── config.yaml              # Feature definitions, timeframes
-├── data/
-│   ├── processed/               # Processed OHLCV data by date
-│   └── raw/                     # Raw CSV exports
-├── artifacts/
-│   ├── models/                  # Trained model artifacts
-│   ├── hyperparams/             # Best hyperparameters per symbol/timeframe
-│   ├── metrics/                 # Pipeline metrics
-│   └── allowed_symbols.json     # Valid stock symbols
-├── pyproject.toml               # Package metadata
-├── requirements.txt             # Dependencies
-└── README.md
-```
+- `src/api/` — FastAPI application, routes, database models, and security
+- `src/pipelines/` — analysis pipeline implementation and runtime orchestration
+- `src/components/` — data loading, feature engineering, anomaly detection, visualization, and explanation services
+- `src/models/` — ML model implementations used by the analysis engine
+- `src/utils/` — helper utilities for I/O, OTP, and environment handling
+- `configs/` — configuration for feature definitions and timeframes
+- `data/` — dataset CSV files for stock symbols
+- `artifacts/` — cached results, hyperparameters, explanations, and model metadata
+- `requirements.txt` — Python dependency list
+- `pyproject.toml` — package metadata and dependency declaration
 
-## How it works
+## Quick start
 
-1. **Backend (FastAPI)**: Handles authentication, authorization, pipeline execution, caching, and user management
-   - `/login` — JWT-based user authentication with role assignment
-   - `/me` — Get current user profile and notifications
-   - `/analyze` — Execute pipeline with automatic caching and logging
-   - `/cache/{hash}` — Retrieve cached results
-   - `/users` — Admin user management (CRUD operations)
-   - `/users/{id}/activity` — Admin audit log access
-
-2. **Frontend (AnomalyUI)**: Interactive React dashboard with role-based UI
-   - Login required before access
-   - Role-specific features (admin panel for user management)
-   - Real-time visual feedback and notifications
-   - Admin controls for system management
-
-3. **Database (SQLite)**: Persistent storage for users, cache, audit trails, and notifications
-
-## Prerequisites
-
-- Python **3.10+**
-- `pip` and `venv`
-
-## Quick Start
-
-### 1. Set up the environment
+### 1. Create and activate a Python environment
 
 ```bash
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+cd AnomalyEngine
+python -m venv .venv
+.venv\Scripts\Activate.ps1   # Windows PowerShell
+# or use `source .venv/bin/activate` on macOS/Linux
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2. Start the FastAPI backend
+### 2. Start the backend
 
 ```bash
-uvicorn src.api.app:app --reload
+uvicorn src.api.app:app --reload --host 127.0.0.1 --port 8000
 ```
 
-This will:
-- Create the SQLite database (`anomaly_engine.db`)
-- Create the default admin user: `admin` / `admin123`
-- Start the backend on `http://localhost:8000`
+The backend will:
+- create the SQLite database schema automatically
+- create a default admin user if none exists (`admin` / `admin123`)
+- start the API on `http://localhost:8000`
 
-### 3. Start the AnomalyUI frontend (in a new terminal)
+### 3. Start the frontend
+
+The frontend is located in the sibling `AnomalyUI/` folder:
 
 ```bash
-cd AnomalyUI
+cd ../AnomalyUI
 npm install
 npm run dev
 ```
 
-The frontend dev server typically runs at `http://localhost:5173` (Vite default).
+Then open `http://localhost:5173` in your browser.
 
-### 4. Log in
+## Default credentials
 
 - Username: `admin`
 - Password: `admin123`
 
-## Features
+## Environment variables
 
-### Authentication & Authorization
+Create a `.env` file in `AnomalyEngine/` to configure optional services:
 
-- JWT-based session tokens with role assignment
-- Password hashing with bcrypt
-- Role-based access control (user, analyst, admin)
-- Admin panel for user management
+```env
+ENV=development
+ARTIFACTS=./artifacts
+GMAIL_ADDRESS=your-email@example.com
+GMAIL_APP_PASSWORD=your-app-password
+TAVILY_API_KEY=your-tavily-api-key
+TOKEN=your-azure-keyvault-token-or-openai-token
+MODEL_ENDPOINT=https://your-azure-openai-endpoint
+MODEL_NAME=openai/gpt-4.1
+```
 
-### Analysis Modes
+These values are used for:
+- artifact path overrides
+- OTP email notifications
+- AI explanation integration via Azure / Tavily
 
-- **Static**: Analyze historical data for a date range
-- **Realtime Simulation**: Simulate rolling-window anomaly detection
+## Key features
 
-### Result Caching
+- JWT authentication with bcrypt password hashing
+- Role-based access control for users, analysts, and admins
+- Admin user management and activity audit logs
+- Analysis execution with result caching and history
+- AI explanations persisted as immutable artifacts
+- SQLite storage for persistence and fast local development
 
-- Automatic cache on `/analyze` endpoint: the backend computes a deterministic `config_hash` and writes a compact analysis cache entry on cache miss.
-- Full artifact persistence: the backend also writes a gzipped JSON artifact containing `{ metrics, data, best_params }` to `artifacts/results/{user_id}/{config_hash}.json.gz` and records the path in `UserAnalysis.data_path` for retrieval.
-- Explicit cache save via `/cache` endpoint remains available but is no longer required for the common workflow.
+## Project structure overview
 
-### Audit & Monitoring
+- `src/api/app.py` — FastAPI app setup, CORS, and startup lifecycle
+- `src/api/routes/` — route modules for auth, analysis, admin, and artifacts
+- `src/api/database.py` — SQLAlchemy engine/session configuration
+- `src/api/models.py` — SQLAlchemy ORM models
+- `src/api/crud.py` — database access helpers
+- `src/api/security.py` — JWT and password utilities
+- `src/pipelines/analysis_engine.py` — central analysis engine
+- `src/components/explanation_engine.py` — AI explanation logic
+- `src/utils/io.py` — artifact path and file I/O helpers
 
-- Complete activity logging for all user actions
-- Analysis history tracking with performance metrics
-- System notifications for completion and errors
-- Admin access to user activity logs
+## API routes
 
-### Favorites & history (new)
-
-- Every analysis run is recorded in `UserAnalysis` and can be listed via `GET /me/analyses`.
-- Users can mark important analyses as favorites via `POST /me/analyses/{id}/favorite` (body `{ "favorite": true }`).
-- The React frontend (`AnomalyUI`) includes an analysis history panel and a favorite toggle to quickly revisit or highlight notable runs.
-
-### Explanation artifacts & history (AI explanations)
-
-- AI-generated explanations are written to disk as immutable JSON artifacts under `artifacts/explanations/{user_id}`. Each artifact is serialized deterministically and hashed using SHA256. The backend stores a lightweight history record in the `explanations` table containing `artifact_path`, `artifact_hash`, `summary`, `highlights`, `anomaly_count`, `user_id`, and `created_at`.
-- The UI surfaces only the history entries (summary/highlights). Full explanation content is retrieved from the artifact on-demand and is not stored in the DB to avoid bloating SQLite with large AI outputs.
-- For auditability, duplicate artifact detection can be performed by comparing `artifact_hash` values. Consider retention policies for artifact cleanup.
-
-### Visualizations
-
-- Time series with anomaly markers
-- Scatter plot (price vs. volume, colored by cluster)
-- Technical analysis (SMA, RSI, Bollinger Bands)
-
-Recent UI update (May 2026):
-
-- Anomaly overlay rendering: the `AnomalyChart` component (AnomalyUI `src/components/AnomalyChart.jsx`) no longer uses a single combined `anomalyPoints` series that could hide overlapping markers. Instead, anomaly markers are plotted using numeric x-indices with small horizontal offsets and retain the original date label for tooltip titles. This makes multiple concurrent detector flags visible and easier to inspect. Tweak the offsets or add jitter/legend controls in `AnomalyChart.jsx` if you prefer a different visual behavior.
+- `POST /login` — authenticate and return JWT access/token
+- `GET /me` — current user profile and notifications
+- `POST /analyze` — execute anomaly analysis and cache results
+- `POST /analyze/explain` — execute anomaly analysis and cache results
+- `GET /users` — admin list users
+- `POST /users` — admin create a user
+- `DELETE /users/{id}` — admin delete a user
+- `GET /users/{id}/activity` — admin view user audit log
 
 ## Running tests
 
-See [TESTING.md](TESTING.md) for instructions to run unit and integration tests locally. Recommended command to run the full suite:
+Run the Python test suite from the backend root:
 
-```
+```bash
+cd AnomalyEngine
 python -m pytest -q
 ```
 
-## Configuration
-
-Edit `configs/config.yaml` to define:
-- Feature columns for analysis
-- Valid timeframes
-- Market holidays
-
-Example:
-
-```yaml
-features:
-  - close
-  - volume
-  - returns
-  - volatility
-```
-
-Edit hyperparameters in `artifacts/hyperparams/{SYMBOL}.json`:
-
-```json
-{
-  "1H": {
-    "dbscan": {
-      "eps": 0.5,
-      "min_pts": 5
-    }
-  }
-}
-```
-
-## Deployment
-
-### For local development
+If you only want a subset:
 
 ```bash
-# Terminal 1: Backend
-uvicorn src.api.app:app --reload
-
-# Terminal 2: Frontend (AnomalyUI)
-cd AnomalyUI && npm install && npm run dev
+python -m pytest tests/unit -q
+python -m pytest tests/integration -q
 ```
 
-### For production
+## Development notes
 
-1. Change `SECRET_KEY` in `src/api/security.py`
-2. Use a production WSGI server (e.g., Gunicorn)
-3. Use PostgreSQL instead of SQLite for scaling
-4. Deploy frontend behind a reverse proxy
-
-Example production backend startup:
-
-```bash
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.api.app:app
-```
-
-## Development Notes
-
-- Add new users via the backend API (extend the `/users` endpoint)
-- Modify caching strategy in `src/api/crud.py` and `src/api/app.py`
-- Pipeline logic is implemented as a class-based engine in `src/pipelines/analysis_engine.py`
-- The API still calls compatibility wrappers in `src/pipelines/anomaly_detection_pipeline.py` and `src/pipelines/realtime_detection_pipeline.py`
-- Visualizations use Plotly; customize in `src/components/visualization.py`
- - Pipeline logic is implemented as a fully OOP, class-based engine in `src/pipelines/analysis_engine.py`.
- - Component modules have been converted to class-based services: `DataLoader`, `Preprocessor`, `FeatureEngineering`, `FeatureScaler`, `Evaluator`, and `AnomalyDetector` (compatibility functional wrappers retained).
- - The API still calls compatibility wrappers in `src/pipelines/anomaly_detection_pipeline.py` and `src/pipelines/realtime_detection_pipeline.py`
- - Visualizations use Plotly; customize in `src/components/visualization.py`
+- Update analysis behavior in `src/pipelines/analysis_engine.py`
+- Change caching or database logic in `src/api/crud.py`
+- Add admin API routes in `src/api/routes/admin.py`
+- Customize explanations in `src/components/explanation_engine.py`
+- Adjust frontend/backend integration using `AnomalyUI/`
 
 ## Troubleshooting
 
-**Backend fails to start:**
-- Ensure port 8000 is not in use: `lsof -i :8000` (Mac/Linux) or `netstat -ano | findstr :8000` (Windows)
-- Check that the venv is activated
+- Backend startup fails: verify `.venv` is activated and `requirements.txt` is installed.
+- Port conflict: confirm `127.0.0.1:8000` is available.
+- UI authentication issues: make sure frontend is using `VITE_API_BASE_URL=http://localhost:8000`.
+- To reset the database: stop the backend, delete `anomaly_engine.db`, then restart.
 
-**Frontend shows "Could not validate credentials":**
-- Verify the backend is running on `http://localhost:8000`
-- Check that you're using correct username/password (default: `admin` / `admin123`)
+## Notes
 
-**Results not caching:**
-- Verify the database file exists: `ls anomaly_engine.db`
-- Check backend logs for database errors
-- Ensure the same config payload is used (hash is based on stock, dates, features, timeframe, mode)
-
-**API keeps creating the default admin user:**
-- Delete `anomaly_engine.db` and restart the backend to reset
-
-## License
-
-Educational project for stock anomaly detection on NEPSE data.
+The frontend and backend are separate services. To use the full application, run both `AnomalyEngine` and `AnomalyUI` concurrently.

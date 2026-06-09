@@ -5,24 +5,27 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "anomaly-engine"
 version = "0.1.0"
-description = "NEPSE anomaly detection pipeline"
+description = "NEPSE anomaly detection platform backend"
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.100.0",
     "uvicorn[standard]>=0.23.0",
     "sqlalchemy>=2.0",
-    "passlib[bcrypt]>=1.7.0",
+    "bcrypt>=4.0.0",
     "python-jose[cryptography]>=3.0.0",
     "python-multipart>=0.0.6",
-    "requests>=2.0",
-    "pandas",
-    "numpy",
-    "scikit-learn",
-    "scipy",
-    "matplotlib",
-    "azure-ai-inference",
-    "python-dotenv",
-    "flask>=3.0",
+    "PyYAML>=6.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "numpy>=2.2.3",
+    "pandas>=2.2.3",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.15.2",
+    "matplotlib>=3.10.0",
+    "plotly>=5.0.0",
+    "azure-ai-inference>=1.0.0",
+    "tavily>=1.0.0",
     "alembic>=1.11.1",
     "pytest>=7.4.0",
     "pytest-asyncio>=0.22.0",

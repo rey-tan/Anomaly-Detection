@@ -14,6 +14,7 @@ tavily>=1.0.0
 # Web scraping
 seaborn
 beautifulsoup4>=4.12.2
+lxml
 
 # Data & ML
 numpy>=2.2.3

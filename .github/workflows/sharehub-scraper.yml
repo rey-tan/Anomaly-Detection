@@ -28,7 +28,6 @@ jobs:
       - name: Run ShareHub scraper
         working-directory: AnomalyEngine
         run: python -c "from src.components.sharesansar_scraper import ShareSansarScraper; from datetime import datetime; scraper = ShareSansarScraper(); scraper.scrape(datetime.now().strftime('%Y-%m-%d'))"
-        continue-on-error: true
 
       - name: Notify on failure
         if: failure()

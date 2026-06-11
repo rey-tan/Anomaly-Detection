@@ -2,8 +2,8 @@ name: ShareHub Scraper
 
 on:
   schedule:
-    # Every day at 20:00 Nepal Time (UTC+5:45) => 14:15 UTC
-    - cron: '15 14 * * *'
+    # Every day at 18:00 Nepal Time (UTC+5:45) => 12:15 UTC
+    - cron: '15 12 * * *'
   workflow_dispatch: {}
 
 permissions:

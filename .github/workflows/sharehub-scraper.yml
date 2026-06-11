@@ -30,8 +30,8 @@ jobs:
 
       - name: Run ShareHub scraper
         working-directory: AnomalyEngine
-        # run: python -c "from src.components.sharesansar_scraper import ShareSansarScraper; from datetime import datetime; scraper = ShareSansarScraper(); scraper.scrape(datetime.now().strftime('%Y-%m-%d'))"
-        run: python -c "from src.components.sharesansar_scraper import ShareSansarScraper; from datetime import datetime; scraper = ShareSansarScraper(); scraper.scrape('2026-06-10')"
+        run: python -c "from src.components.sharesansar_scraper import ShareSansarScraper; from datetime import datetime; scraper = ShareSansarScraper(); scraper.scrape(datetime.now().strftime('%Y-%m-%d'))"
+        # run: python -c "from src.components.sharesansar_scraper import ShareSansarScraper; from datetime import datetime; scraper = ShareSansarScraper(); scraper.scrape('2026-06-10')"
 
       
       - name: Commit changes

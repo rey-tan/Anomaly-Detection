@@ -294,3 +294,5 @@ AnomalyEngine/artifacts/results/
 
 
 .vscode/
+
+__pycache__/

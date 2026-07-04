@@ -13,47 +13,49 @@ from tavily import TavilyClient
 from src.api import crud, models, schemas
 from src.utils.io import write_explanation_artifact
 
+system_message = """You are a NEPSE (Nepal Stock Exchange) financial analyst. 
+                Analyze the provided anomalies and web search results to identify correlations. 
+                Use the search context to validate or explain the detected anomalies. 
+                Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; 
+                (2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; 
+                (3) Market events: sector news, competitor moves, macroeconomic changes; 
+                (4) Company news: executive changes, major contracts, product launches. 
+                Search 2 weeks before to 2 weeks after each anomaly date. Correlate findings with technical anomalies. 
+                Report only what you find—do not speculate or invent facts."""
+            
 
 class ExplanationEngine:
     def __init__(self, request: schemas.AnomalyExplanationRequest):
         self.request = request
 
     def explain(self) -> Dict[str, Any]:
+        anomaly_rows = self._extract_anomaly_rows(self.request.data or [])
+        search_context = self._build_search_context(self.request.stock, anomaly_rows)
+        prompt = self._build_ai_prompt(self.request, search_context)
+        token = os.getenv("TOKEN", "").strip()
         
-        github_token = os.getenv("TOKEN", "").strip()
-        # if github_token:
-          
-            # return self._call_github_ai_explanation(github_token, self.request)
-        return self._heuristic_anomaly_explanation(self.request)
+        if token and prompt:
+            return self._call_github_ai_explanation(token, self.request,anomaly_rows,prompt)
+        
+        return self._heuristic_anomaly_explanation(self.request,anomaly_rows)
 
     def _call_github_ai_explanation(
         self,
         token: str,
         payload: schemas.AnomalyExplanationRequest,
+        anomaly_rows: List[Dict[str, Any]],
+        prompt: str
     ) -> Dict[str, Any]:
         endpoint = os.getenv("MODEL_ENDPOINT")
         model = os.getenv("MODEL_NAME", "openai/gpt-4.1")
 
-        anomaly_rows = self._extract_anomaly_rows(payload.data or [])
-        search_context = self._build_search_context(payload.stock, anomaly_rows)
-        prompt = self._build_ai_prompt(payload, search_context=search_context)
 
         try:
             client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(token))
             response = client.complete(
                 model=model,
                 messages=[
-                    SystemMessage(
-                        "You are a NEPSE (Nepal Stock Exchange) financial analyst. "
-                        "Analyze the provided anomalies and web search results to identify correlations. "
-                        "Use the search context to validate or explain the detected anomalies. "
-                        "Focus on: (1) Financial events: earnings, dividends, regulatory changes, sector policy; "
-                        "(2) Real-world events: political developments, strikes, protests, natural disasters, supply chain disruptions; "
-                        "(3) Market events: sector news, competitor moves, macroeconomic changes; "
-                        "(4) Company news: executive changes, major contracts, product launches. "
-                        "Search 2 weeks before to 2 weeks after each anomaly date. Correlate findings with technical anomalies. "
-                        "Report only what you find—do not speculate or invent facts."
-                    ),
+                    SystemMessage(system_message),
                     UserMessage(prompt),
                 ],
                 temperature=0.2,
@@ -61,10 +63,10 @@ class ExplanationEngine:
             summary = str(response.choices[0].message.content).strip()
         except Exception as e:
             print("Error calling AI model endpoint, falling back to heuristic explanation", e)
-            return self._heuristic_anomaly_explanation(payload)
+            return self._heuristic_anomaly_explanation(payload, anomaly_rows)
 
         if not summary:
-            return self._heuristic_anomaly_explanation(payload)
+            return self._heuristic_anomaly_explanation(payload, anomaly_rows)
 
         entries = self._parse_ai_explanation_entries(summary)
         overall = self._extract_overall_summary(summary)
@@ -77,8 +79,8 @@ class ExplanationEngine:
             "source": model,
         }
 
-    def _heuristic_anomaly_explanation(self, payload: schemas.AnomalyExplanationRequest) -> Dict[str, Any]:
-        anomaly_rows = self._extract_anomaly_rows(payload.data)
+    def _heuristic_anomaly_explanation(self, payload: schemas.AnomalyExplanationRequest,anomaly_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+      
         if not anomaly_rows:
             return {
                 "raw_summary": "No rows in the result set were marked as anomalies, so there is nothing to explain.",
@@ -103,7 +105,6 @@ class ExplanationEngine:
             bb_width = row.get("bb_width")
             rsi = row.get("RSI")
             volume = row.get("volume")
-            average_volume = row.get("average_volume")
 
             detectors = []
             if row.get("dbscan_label") == -1:
@@ -215,9 +216,17 @@ class ExplanationEngine:
                 continue
             try:
                 anomaly_date = datetime.strptime(str(date_str), "%Y-%m-%d")
+                # queries = [
+                #     f"{stock} Nepal {date_str}",
+                #     f"Nepal protest {anomaly_date.strftime('%B %Y')}",
+                # ]
                 queries = [
                     f"{stock} Nepal {date_str}",
-                    f"Nepal protest {anomaly_date.strftime('%B %Y')}",
+                    f"{stock} dividend OR bonus share OR rights share {anomaly_date.year}",
+                    f"{stock} earnings OR quarterly report {anomaly_date.year}",
+                    f"{stock} NEPSE news {date_str}",
+                    f"Nepal political news {anomaly_date.strftime('%B %Y')}",
+
                 ]
                 section_found = False
                 for query in queries:

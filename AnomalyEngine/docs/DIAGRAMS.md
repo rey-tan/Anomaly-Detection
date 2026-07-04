@@ -378,6 +378,76 @@ Explanation --> AIService
 Explanation --> NewsAPI
 @enduml
 
+@startuml
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam nodesep 150
+skinparam ranksep 250
+skinparam padding 20
+
+package "Presentation Layer (React + Vite)" {
+  [Auth Pages\nLogin, Register, Profile] as AuthPages
+  [Analysis Pages\nDashboard, Analysis Form, Results, Charts] as AnalysisPages
+  [Admin Pages\nUser Management, Activity Log, Data Browser] as AdminPages
+}
+
+package "API Layer (FastAPI)" {
+  [Auth API\nPOST /login, /register*, GET] as AuthAPI
+  [Analysis API\nPOST /analyze, /analyze/{id}\nGET /symbols, /ma/analysis] as AnalysisAPI
+  [Admin API\nCRUD /admin/users\nPOST /admin/scrape, GET /admin/data*] as AdminAPI
+}
+
+package "Service Layer" {
+  [Auth Service\nJWT create/decode\nbcrypt hashing, OTP] as AuthService
+  [Analysis Engine\nPipeline orchestrator\ncache check, artifact I/O] as AnalysisEngine
+  [Explanation Engine\nAI (Azure OpenAI + Tavily)\nor Heuristic fallback] as ExplanationEngine
+  [Admin Service\nUser CRUD, activity audit\ndata listing] as AdminService
+}
+package "Infrastructure Layer" {
+  [Web Scraper\nShareSansar daily\nprice data scraper] as WebScraper
+  [SQLite Database\nSQLAlchemy ORM\nUsers, Analyses, Cache, Explanations] as DB
+  [File System\nGzipped JSON artifacts\nCSV data files, Hyperparameter JSON] as FileSystem
+  [External APIs\nAzure OpenAI, Tavily\nWeb Search, Gmail SMTP] as ExternalAPIs
+}
+
+package "Domain Layer" {
+  [DBSCAN\nDensity-based clustering\neps + min_pts] as DBSCAN
+  [Isolation Forest\nTree-based isolation\nn_trees + contamination] as IsolationForest
+  [Z-Score\nStatistical deviation\nthreshold] as ZScore
+  [Feature Engineering\nReturns, Volatility, RSI\nSMA, Bollinger Bands] as FeatureEng
+}
+
+
+
+AuthPages --> AuthAPI
+AnalysisPages --> AnalysisAPI
+AdminPages --> AdminAPI
+
+"Presentation Layer (React + Vite)" -down-> "API Layer (FastAPI)" : HTTP Requests
+
+AuthAPI --> AuthService
+AnalysisAPI --> AnalysisEngine
+AdminAPI --> AdminService
+
+"API Layer (FastAPI)" -down-> "Service Layer" : Delegates to
+
+"Service Layer" -down-> "Domain Layer" : Uses
+"Service Layer" -down-> "Infrastructure Layer" : Reads/Writes
+
+AnalysisEngine --> DBSCAN
+AnalysisEngine --> IsolationForest
+AnalysisEngine --> ZScore
+AnalysisEngine --> FeatureEng
+
+AuthService --> DB
+AnalysisEngine --> DB
+AdminService --> DB
+AnalysisEngine --> FileSystem
+ExplanationEngine --> ExternalAPIs
+
+WebScraper -right-> FileSystem : Appends CSV
+
+@enduml
 
 ## 9. Use Case Diagram
 

@@ -21,7 +21,7 @@ function formatParamValue(val) {
 }
 
 export default function MetricsGrid({ results = {} ,handleToggleFavorite = null}) {
-  const metricEntries = Object.entries(results || {}).filter(([model]) => model.toLowerCase() !== "zscore");
+  const metricEntries = Object.entries(results || {}).filter(([model]) => model.toLowerCase() !== "z_score");
   return (
     <div className="metrics-wrapper">
       <div className="section-heading compact results-title">

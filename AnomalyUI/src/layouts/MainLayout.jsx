@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { id: 'analysis', path: '/analysis', label: 'Analysis', description: 'Run model' },
   { id: 'activity', path: '/activity', label: 'Activity', description: 'Audit log' },
   { id: 'results', path: '/results', label: 'Results', description: 'Charts & metrics' },
-  { id: 'data', path: '/data', label: 'Data', description: 'Data ' },
+  { id: 'data', path: '/data', label: 'Data', description: 'Market Data ' },
   { id: 'users', path: '/users', label: 'Users', description: 'User management' },
 ]
 

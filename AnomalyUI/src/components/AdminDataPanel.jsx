@@ -290,7 +290,7 @@ export default function AdminDataPanel({ token }) {
                 </div>
             </div>
         </div>
-        <div className="page-panel admin-page-panel">
+        <div className="page-panel admin-page-panel" style={{ display: 'none' }}>
             <div className="admin-panel">
                 <div className="admin-panel-head">
                     <div>

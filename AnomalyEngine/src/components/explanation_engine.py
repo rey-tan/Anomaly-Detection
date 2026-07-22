@@ -2,6 +2,7 @@ import json
 import os
 import re
 from datetime import datetime
+import traceback
 from typing import Any, Dict, List, Optional
 
 from azure.ai.inference import ChatCompletionsClient
@@ -47,7 +48,7 @@ class ExplanationEngine:
         prompt: str
     ) -> Dict[str, Any]:
         endpoint = os.getenv("MODEL_ENDPOINT")
-        model = os.getenv("MODEL_NAME", "openai/gpt-4.1")
+        model = os.getenv("MODEL_NAME")
 
 
         try:
@@ -205,7 +206,9 @@ class ExplanationEngine:
                 })
             return results
         except Exception as e:
-            print(f"Error fetching Tavily Search results: {e}")
+            # print(f"Error fetching Tavily Search results: {e}")
+            print("Tavily error:", repr(e))
+            traceback.print_exc()
             return []
 
     def _build_search_context(self, stock: str, anomaly_rows: List[Dict[str, Any]]) -> str:

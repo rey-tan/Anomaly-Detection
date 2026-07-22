@@ -1,0 +1,474 @@
+{
+  "explanation": {
+    "anomaly_count": 6,
+    "entries": [
+      {
+        "bullets": [
+          "Close: 425",
+          "Volume: 272,552",
+          "BB width 0.000 shows extremely compressed bands",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2021-07-22",
+        "row_number": 1,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 564.3",
+          "Volume: 1,447,672",
+          "BB width 0.288 indicates elevated volatility spike",
+          "RSI 90 indicates overbought conditions",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2021-08-04",
+        "row_number": 2,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 607.2",
+          "Volume: 1,388,891",
+          "BB width 0.372 indicates elevated volatility spike",
+          "RSI 88 indicates overbought conditions",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2021-08-08",
+        "row_number": 3,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 640",
+          "Volume: 1,341,240",
+          "BB width 0.500 indicates elevated volatility spike",
+          "RSI 77 indicates overbought conditions",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2021-08-17",
+        "row_number": 4,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 433",
+          "Volume: 400,225",
+          "BB width 0.457 indicates elevated volatility spike",
+          "RSI 22 indicates oversold conditions",
+          "Flagged by DBSCAN"
+        ],
+        "date": "2021-09-05",
+        "row_number": 5,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 368",
+          "Volume: 250,535",
+          "BB width 0.343 indicates elevated volatility spike",
+          "RSI 22 indicates oversold conditions",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2022-03-28",
+        "row_number": 6,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      }
+    ],
+    "raw_summary": "Detected 6 anomalous rows. Price anomalies shown via z-score deviation. Volatility changes via Bollinger Band width. RSI indicates momentum extremes. Volume spikes show trading strength.",
+    "source": "heuristic",
+    "summary": "Detected 6 anomalous rows. Price anomalies shown via z-score deviation. Volatility changes via Bollinger Band width. RSI indicates momentum extremes. Volume spikes show trading strength."
+  },
+  "request": {
+    "analysis_id": 5,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Lower_BB": 425,
+        "RSI": 50,
+        "SMA_10": 425,
+        "SMA_20": 425,
+        "SMA_50": 425,
+        "Upper_BB": 425,
+        "adjacent_rows": [
+          {
+            "close": 432,
+            "date": "2021-07-25",
+            "volume": 323406
+          },
+          {
+            "close": 444,
+            "date": "2021-07-26",
+            "volume": 517464
+          },
+          {
+            "close": 479,
+            "date": "2021-07-27",
+            "volume": 1022918
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 425,
+        "date": "2021-07-22",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 439,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.92,
+        "low": 424,
+        "open": 437,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 425,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 272552,
+        "z_score": 0.03903948669588346,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 392.3754215424013,
+        "RSI": 90.14409221902017,
+        "SMA_10": 473.71999999999997,
+        "SMA_20": 473.71999999999997,
+        "SMA_50": 473.71999999999997,
+        "Upper_BB": 555.0645784575987,
+        "adjacent_rows": [
+          {
+            "close": 475,
+            "date": "2021-08-01",
+            "volume": 562022
+          },
+          {
+            "close": 472,
+            "date": "2021-08-02",
+            "volume": 325742
+          },
+          {
+            "close": 513,
+            "date": "2021-08-03",
+            "volume": 950319
+          },
+          {
+            "close": 552,
+            "date": "2021-08-05",
+            "volume": 1037392
+          },
+          {
+            "close": 607.2,
+            "date": "2021-08-08",
+            "volume": 1388891
+          },
+          {
+            "close": 631,
+            "date": "2021-08-09",
+            "volume": 855879
+          }
+        ],
+        "average_volume": 553651.7777777778,
+        "bb_width": 0.2883025995307415,
+        "close": 564.3,
+        "date": "2021-08-04",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 564.3,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -6.13,
+        "low": 523.2,
+        "open": 523.2,
+        "previous_close": 513,
+        "returns": 0.09999999999999987,
+        "rolling_mean": 473.71999999999997,
+        "rolling_std": 0.0436372228931072,
+        "volatility": 0.0436372228931072,
+        "volume": 1447672,
+        "z_score": 2.5806429546008602,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 378.39695766679733,
+        "RSI": 87.80082987551869,
+        "SMA_10": 503.93999999999994,
+        "SMA_20": 491.3666666666666,
+        "SMA_50": 491.3666666666666,
+        "Upper_BB": 604.3363756665359,
+        "adjacent_rows": [
+          {
+            "close": 513,
+            "date": "2021-08-03",
+            "volume": 950319
+          },
+          {
+            "close": 564.3,
+            "date": "2021-08-04",
+            "volume": 1447672
+          },
+          {
+            "close": 552,
+            "date": "2021-08-05",
+            "volume": 1037392
+          },
+          {
+            "close": 631,
+            "date": "2021-08-09",
+            "volume": 855879
+          },
+          {
+            "close": 612,
+            "date": "2021-08-10",
+            "volume": 842878
+          },
+          {
+            "close": 634,
+            "date": "2021-08-11",
+            "volume": 842791
+          }
+        ],
+        "average_volume": 678902.7272727273,
+        "bb_width": 0.37210049077690804,
+        "close": 607.2,
+        "date": "2021-08-08",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 607.2,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -6.07,
+        "low": 545,
+        "open": 560,
+        "previous_close": 552,
+        "returns": 0.10000000000000009,
+        "rolling_mean": 491.3666666666666,
+        "rolling_std": 0.047392297185213664,
+        "volatility": 0.047392297185213664,
+        "volume": 1388891,
+        "z_score": 2.580642954600866,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 380.58927202315033,
+        "RSI": 77.33630006357279,
+        "SMA_10": 609.84,
+        "SMA_20": 540.5947368421052,
+        "SMA_50": 540.5947368421052,
+        "Upper_BB": 700.6002016610602,
+        "adjacent_rows": [
+          {
+            "close": 626,
+            "date": "2021-08-12",
+            "volume": 660607
+          },
+          {
+            "close": 600.1,
+            "date": "2021-08-15",
+            "volume": 1175489
+          },
+          {
+            "close": 631.8,
+            "date": "2021-08-16",
+            "volume": 763623
+          },
+          {
+            "close": 630,
+            "date": "2021-08-18",
+            "volume": 985423
+          },
+          {
+            "close": 613.9,
+            "date": "2021-08-19",
+            "volume": 596038
+          },
+          {
+            "close": 567,
+            "date": "2021-08-24",
+            "volume": 609900
+          }
+        ],
+        "average_volume": 777671.5555555555,
+        "bb_width": 0.5000170775592341,
+        "close": 640,
+        "date": "2021-08-17",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 670,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -6.33,
+        "low": 634,
+        "open": 644.4,
+        "previous_close": 631.8,
+        "returns": 0.012978790756568603,
+        "rolling_mean": 540.5947368421052,
+        "rolling_std": 0.04419489290335417,
+        "volatility": 0.04419489290335417,
+        "volume": 1341240,
+        "z_score": 0.36890888265696214,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 486.8203075765741,
+        "RSI": 21.8329596412556,
+        "SMA_10": 561.68,
+        "SMA_20": 585.76,
+        "SMA_50": 547.8655172413793,
+        "Upper_BB": 684.6996924234259,
+        "adjacent_rows": [
+          {
+            "close": 558.4,
+            "date": "2021-08-31",
+            "volume": 531501
+          },
+          {
+            "close": 551.5,
+            "date": "2021-09-01",
+            "volume": 424353
+          },
+          {
+            "close": 529,
+            "date": "2021-09-02",
+            "volume": 613640
+          },
+          {
+            "close": 476.3,
+            "date": "2021-09-06",
+            "volume": 352895
+          },
+          {
+            "close": 478,
+            "date": "2021-09-07",
+            "volume": 395281
+          },
+          {
+            "close": 467,
+            "date": "2021-09-08",
+            "volume": 190334
+          }
+        ],
+        "average_volume": 827196.05,
+        "bb_width": 0.45699626985416103,
+        "close": 433,
+        "date": "2021-09-05",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 480,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -6.35,
+        "low": 430.9,
+        "open": 480,
+        "previous_close": 529,
+        "returns": -0.1814744801512287,
+        "rolling_mean": 585.76,
+        "rolling_std": 0.06355115766313658,
+        "volatility": 0.06355115766313658,
+        "volume": 400225,
+        "z_score": -4.57332219419028,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 425.6097701536499,
+        "RSI": 22.222222222222214,
+        "SMA_10": 478.2799999999999,
+        "SMA_20": 488.80999999999995,
+        "SMA_50": 513.854,
+        "Upper_BB": 552.0102298463501,
+        "adjacent_rows": [
+          {
+            "close": 492,
+            "date": "2022-03-23",
+            "volume": 123535
+          },
+          {
+            "close": 483.4,
+            "date": "2022-03-24",
+            "volume": 212658
+          },
+          {
+            "close": 466.9,
+            "date": "2022-03-27",
+            "volume": 586214
+          },
+          {
+            "close": 358.3,
+            "date": "2022-03-29",
+            "volume": 107311
+          },
+          {
+            "close": 365,
+            "date": "2022-03-30",
+            "volume": 111966
+          },
+          {
+            "close": 354,
+            "date": "2022-03-31",
+            "volume": 73195
+          }
+        ],
+        "average_volume": 243272.6,
+        "bb_width": 0.3434795100345113,
+        "close": 368,
+        "date": "2022-03-28",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 380,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -6.05,
+        "low": 363,
+        "open": 370.5,
+        "previous_close": 466.9,
+        "returns": -0.21182266009852213,
+        "rolling_mean": 488.80999999999995,
+        "rolling_std": 0.050461407132687056,
+        "volatility": 0.050461407132687056,
+        "volume": 250535,
+        "z_score": -5.344652588176734,
+        "z_score_label": -1
+      }
+    ],
+    "end_date": "2022-07-22",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.008264462809917356,
+        "n_clusters": 1,
+        "n_noise": 2
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.02066115702479339,
+        "n_clusters": 1,
+        "n_noise": 5
+      },
+      "z_score": {
+        "anomaly_rate": 0.008264462809917356,
+        "n_clusters": 1,
+        "n_noise": 2
+      }
+    },
+    "start_date": "2021-07-22",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-07-22T09:10:00.395335",
+  "user_id": 1
+}

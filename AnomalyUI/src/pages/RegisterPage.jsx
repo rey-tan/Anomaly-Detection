@@ -2,6 +2,8 @@ import React from 'react'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { registerRequest, verifyOTP } from '../api'
+import ThemeToggle from '../components/ui/ThemeToggle'
+
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -88,6 +90,9 @@ export default function RegisterPage() {
         <span />
         <span />
       </div>
+       <div className="auth-theme">
+          <ThemeToggle />
+        </div>
       <div className="auth-panel">
         <div className="brand-block">
           <p className="eyebrow">Get started</p>

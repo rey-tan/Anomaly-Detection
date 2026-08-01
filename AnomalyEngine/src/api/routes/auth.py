@@ -35,31 +35,18 @@ def register_request(
     db: Session = Depends(database.get_db)
 ):
     """Public registration request that sends an OTP to the provided email."""
-    existing_user = crud.get_user_by_username(db, request.username)
+    existing_user = crud.check_user_exists(db, request.username, request.email)
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Username already exists",
-        )
-    if crud.get_user_by_email(db, request.email):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,detail="Username or email already exists")
+
     if request.role and request.role != "analyst":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only analyst role can be self-registered. Contact an admin for higher privileges.",
         )
 
-    user = crud.create_user(
-        db,
-        username=request.username,
-        email=request.email,
-        password=request.password,
-        role="analyst",
-        email_verified=False,
-    )
+    user = crud.create_user(db,username=request.username,email=request.email,password=request.password,role="analyst",email_verified=False)
+    
     otp_code = generate_otp()
     expires_at = get_otp_expiration()
     crud.save_otp(db, request.email, otp_code, expires_at)

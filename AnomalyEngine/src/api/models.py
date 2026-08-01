@@ -28,6 +28,7 @@ class PipelineCache(Base):
     timeframe = Column(String, nullable=False)
     start_date = Column(String, nullable=False)
     end_date = Column(String, nullable=False)
+    algorithm = Column(String, nullable=False)
     best_params = Column(JSON, nullable=True)
     metrics = Column(JSON, nullable=True)
     data = Column(JSON, nullable=True)

@@ -14,6 +14,17 @@ import {
   Tooltip,
 } from "chart.js";
 
+
+function getThemeColor() {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue("--text-color")
+    .trim();
+}
+function getBackgroundColor(){
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue("--bg-color")
+    .trim();
+}
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,6 +36,7 @@ ChartJS.register(
   Legend,
   Filler,
 );
+
 
 function getValue(row) {
   return row.close ?? row.price ?? row.adj_close ?? null;
@@ -58,23 +70,23 @@ function chartOptions(yCallback, xLabels = []) {
     maintainAspectRatio: false,
     interaction: { mode: "nearest", intersect: false },
     plugins: {
-      legend: {
-        position: "top",
-        labels: { color: "#eef2ff", boxWidth: 12, boxHeight: 12 },
-      },
+        legend: {
+          position: "top",
+          labels: { color: getThemeColor(), boxWidth: 12, boxHeight: 12 },
+        },
       tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.96)",
-        titleColor: "#f8fafc",
-        bodyColor: "#e2e8f0",
+        backgroundColor: getBackgroundColor(),
+        titleColor: getThemeColor(),
+        bodyColor: getThemeColor(),
         borderColor: "rgba(148, 163, 184, 0.24)",
         borderWidth: 1,
       },
     },
     scales: {
       x: {
-        title: { display: true, text: "Date", color: "#cbd5e1" },
+        title: { display: true, text: "Date", color: getThemeColor() },
         ticks: {
-          color: "#cbd5e1",
+          color: getThemeColor(),
           maxRotation: 0,
           autoSkip: true,
           maxTicksLimit: 8,
@@ -91,7 +103,7 @@ function chartOptions(yCallback, xLabels = []) {
         grid: { display: false },
       },
       y: {
-        ticks: { color: "#cbd5e1", callback: yCallback },
+        ticks: { color: getThemeColor(), callback: yCallback },
         grid: { color: "rgba(148, 163, 184, 0.14)" },
       },
     },
@@ -197,7 +209,7 @@ function DensityChart({ data }) {
     if (!rows.length) return [];
 
     const points = rows.map((row) => {
-      const x = Number(row.close ?? row.price);
+      const x = Number(row.returns);
       const y = Number(row.volume);
       const state = getAnomalyState(row);
       const value = Number(getValue(row));
@@ -287,12 +299,12 @@ function DensityChart({ data }) {
     interaction: { mode: "nearest", intersect: false },
     plugins: {
       legend: {
-        labels: { color: "#eef2ff", boxWidth: 12, boxHeight: 12 },
+        labels: { color: getThemeColor(), boxWidth: 12, boxHeight: 12 },
       },
       tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.96)",
-        titleColor: "#f8fafc",
-        bodyColor: "#e2e8f0",
+        backgroundColor: getBackgroundColor(),
+        titleColor: getThemeColor(),
+        bodyColor: getThemeColor(),
         callbacks: {
           label: (context) => {
             const { x, y, density: count, label, anomaly, dbscan, isolationForest } = context.raw || {};
@@ -309,13 +321,13 @@ function DensityChart({ data }) {
     },
     scales: {
       x: {
-        title: { display: true, text: "Price", color: "#cbd5e1" },
-        ticks: { color: "#cbd5e1" },
+        title: { display: true, text: "Price", color: getThemeColor() },
+        ticks: { color: getThemeColor() },
         grid: { color: "rgba(148, 163, 184, 0.14)" },
       },
       y: {
-        title: { display: true, text: "Volume", color: "#cbd5e1" },
-        ticks: { color: "#cbd5e1", callback: (value) => Number(value).toLocaleString() },
+        title: { display: true, text: "Volume", color: getThemeColor() },
+        ticks: { color: getThemeColor(), callback: (value) => Number(value).toLocaleString() },
         grid: { color: "rgba(148, 163, 184, 0.14)" },
       },
     },
@@ -451,9 +463,9 @@ function AnomalyOverlayChart({ data }) {
     plugins: {
       ...chartOptions(() => "", labels).plugins,
       tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.96)",
-        titleColor: "#f8fafc",
-        bodyColor: "#e2e8f0",
+        backgroundColor: getBackgroundColor(),
+        titleColor: getThemeColor(),
+        bodyColor: getThemeColor(),
         borderColor: "rgba(148, 163, 184, 0.24)",
         borderWidth: 1,
         callbacks: {
@@ -597,12 +609,16 @@ function AnomalyRowsReport({ data }) {
 }
 
 export default function AnomalyChart({ data = [] }) {
+  const textColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--text-color")
+    .trim();
+
   return (
     <>
-      <TechnicalChart data={data} />
-      <DensityChart data={data} />
-      <AnomalyOverlayChart data={data} />
-      <AnomalyRowsReport data={data} />
+      <TechnicalChart data={data} textColor={textColor} />
+      <DensityChart data={data}  textColor={textColor}/>
+      <AnomalyOverlayChart data={data}  textColor={textColor}/>
+      <AnomalyRowsReport data={data}  textColor={textColor} />
       <div className="chart-card-footer">
         <p>The views are ordered for interpretation: technical baseline, density distribution, explainable anomalies, and anomalous rows.</p>
       </div>

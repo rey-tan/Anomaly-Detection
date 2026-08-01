@@ -20,18 +20,51 @@ function formatParamValue(val) {
   return String(val);
 }
 
-export default function MetricsGrid({ results = {} ,handleToggleFavorite = null}) {
+export default function MetricsGrid({ results = {}, data = {}, handleToggleFavorite = null }) {
   const metricEntries = Object.entries(results || {}).filter(([model]) => model.toLowerCase() !== "z_score");
+  let ensemble = false;
+  let criticalPoints = [];
+  let densityPoints = [];
+  let structurePoints = [];
+
+  if (metricEntries.length === 2) {
+    ensemble = true;
+
+    criticalPoints = data.filter(
+      row => row.dbscan_label === -1 &&
+        row.isolation_forest_label === -1
+    );
+
+    densityPoints = data.filter(
+      row => row.dbscan_label === -1 &&
+        row.isolation_forest_label !== -1
+    );
+
+    structurePoints = data.filter(
+      row => row.isolation_forest_label === -1 &&
+        row.dbscan_label !== -1
+    );
+  }
+  console.log("ensemble:", ensemble);
+
   return (
     <div className="metrics-wrapper">
       <div className="section-heading compact results-title">
         <div style={{ width: "100%" }}>
-              <h2>Analysis feedback</h2>
+          <h2>Analysis feedback</h2>
           <p>Review model metrics, event counts, and tuning parameters.</p>
         </div>
-        
+
       </div>
       <div className="detector-summary">
+        {ensemble && (
+          <div className="detector-summary-card">
+            <strong>Ensemble Results</strong>
+            <small>{criticalPoints.length} critical anomalies</small>
+            <small>{densityPoints.length} density anomalies</small>
+            <small>{structurePoints.length} structural anomalies</small>
+          </div>
+        )}
         {metricEntries.map(([model, modelData]) => (
           <div className="detector-summary-card" key={model}>
             <strong>{model.replace(/_/g, " ")}</strong>
@@ -47,7 +80,7 @@ export default function MetricsGrid({ results = {} ,handleToggleFavorite = null}
         {console.log("Rendering MetricsGrid with entries:", metricEntries)}
         {metricEntries.map(([model, modelData]) => {
           const { metrics, params } = modelData || {};
-          
+
           return (
             <div className="analysis-block" key={model}>
               <h3>{model.replace(/_/g, " ")}</h3>

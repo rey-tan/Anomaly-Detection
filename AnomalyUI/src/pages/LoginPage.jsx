@@ -2,6 +2,8 @@ import React from 'react'
 import { useState } from 'react'
 import { login } from '../api'
 import { Link } from 'react-router-dom'
+import ThemeToggle from '../components/ui/ThemeToggle'
+
 
 export default function LoginPage({ onSuccess }) {
   const [username, setUsername] = useState('')
@@ -30,11 +32,16 @@ export default function LoginPage({ onSuccess }) {
 
   return (
     <main className="auth-page">
+
       <div className="auth-background">
         <span />
         <span />
         <span />
       </div>
+      <div className="auth-theme">
+        <ThemeToggle />
+      </div>
+
       <div className="auth-panel">
         <div className="brand-block">
           <p className="eyebrow">Secure access</p>

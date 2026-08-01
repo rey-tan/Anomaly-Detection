@@ -2,7 +2,7 @@ import React from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import FavoritesPanel from '../components/FavoritesPanel'
 import NavButton from '../components/ui/NavButton'
-
+import ThemeToggle from '../components/ui/ThemeToggle'
 
 const NAV_ITEMS = [
   { id: 'dashboard', path: '/dashboard', label: 'Dashboard', description: 'Overview' },
@@ -46,6 +46,7 @@ export default function MainLayout({
           </p>
         </div>
         <div className="topbar-actions">
+          <ThemeToggle />
           <div className="user-chip">
             <div>
               <span>Signed in as</span>

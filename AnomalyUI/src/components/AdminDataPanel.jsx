@@ -118,9 +118,15 @@ export default function AdminDataPanel({ token }) {
         return <div className="admin-muted">No preview rows available.</div>;
     };
 
-    const todayDate = fmtDate(new Date());
-    const minDate = adminSymbols ? fmtDate(addDays(adminSymbols[0]?.last_date, 1)) : "";
+  
+    const rawMinDate = adminSymbols ? addDays(adminSymbols[0]?.last_date, 1) : null;
+    const rawMaxDate = new Date();
+    const minDate = rawMinDate ? fmtDate(rawMinDate) : "";    
+    const todayDate = fmtDate(rawMaxDate);
     const maxDate = todayDate;
+
+
+   
 
     const loadAdminSymbols = async () => {
         if (!token) return;
@@ -170,6 +176,12 @@ export default function AdminDataPanel({ token }) {
     const handleRunScrape = async (event) => {
         event.preventDefault();
         setScrapeState((prev) => ({ ...prev, error: "", successMessage: "", result: null }));
+
+        if(rawMinDate > rawMaxDate){
+            console.log("failed");
+            setScrapeState((prev) => ({ ...prev, loading:false,error: "Invalid date range. Start date must be before end date." }));
+            return;
+        }
         if (!scrapePayload.source) {
             setScrapeState((prev) => ({ ...prev, error: "Select a scrape source before running." }));
             return;
@@ -290,7 +302,7 @@ export default function AdminDataPanel({ token }) {
                 </div>
             </div>
         </div>
-        <div className="page-panel admin-page-panel" style={{ display: 'none' }}>
+        <div className="page-panel admin-page-panel">
             <div className="admin-panel">
                 <div className="admin-panel-head">
                     <div>
@@ -314,8 +326,8 @@ export default function AdminDataPanel({ token }) {
                     </div>
                     {(minDate || maxDate) ? <div className="admin-muted admin-range-note">{`Available range: ${minDate || "—"} → ${maxDate || "—"}`}</div> : null}
                     <div className="admin-submit-row">
-                        <button className="primary-button admin-submit" type="submit" disabled={scrapeState.loading}>
-                            {scrapeState.loading ? "Scraping..." : "Run scrape"}
+                        <button className="primary-button admin-submit" type="submit" disabled={scrapeState.loading && !rawMinDate}>
+                            {scrapeState.loading && !rawMinDate ? "Scraping..." : "Run scrape"}
                         </button>
                     </div>
                     {scrapeState.error ? <div className="form-error admin-error">{scrapeState.error}</div> : null}

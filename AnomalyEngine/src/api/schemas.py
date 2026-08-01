@@ -83,6 +83,7 @@ class AnalyzeConfig(BaseModel):
     start_date: str
     end_date: str
     timeframe: str
+    algorithm:str
 
 
 class ModelResult(BaseModel):

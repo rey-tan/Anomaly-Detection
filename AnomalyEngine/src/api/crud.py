@@ -26,6 +26,10 @@ def get_user_by_id(db: Session, user_id: int):
 def get_users(db: Session) -> List[models.User]:
     return db.query(models.User).all()
 
+def check_user_exists(db: Session, username: str, email: str) -> bool:
+    user_by_username = get_user_by_username(db, username)
+    user_by_email = get_user_by_email(db, email)
+    return user_by_username is not None or user_by_email is not None
 
 def create_user(
     db: Session,
@@ -312,6 +316,7 @@ def create_cache_entry(
     timeframe: str,
     start_date: str,
     end_date: str,
+    algorithm: str,
     best_params: dict,
     metrics: dict,
     data: list,
@@ -323,6 +328,7 @@ def create_cache_entry(
         timeframe=timeframe,
         start_date=start_date,
         end_date=end_date,
+        algorithm=algorithm,
         best_params=best_params,
         metrics=metrics,
         data=data,

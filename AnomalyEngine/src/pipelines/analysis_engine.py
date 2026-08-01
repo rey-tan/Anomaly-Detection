@@ -23,6 +23,7 @@ class AnalysisRequest:
     start_date: str
     end_date: str
     timeframe: str
+    algorithm: str
     features: Optional[list[str]] = None
 
     @classmethod
@@ -32,6 +33,7 @@ class AnalysisRequest:
             start_date=config["start_date"],
             end_date=config["end_date"],
             timeframe=config["timeframe"],
+            algorithm = config["algorithm"],
             features = load_config(CONFIG / "config.yaml").get("features", [])
         )
 
@@ -56,18 +58,38 @@ class PipelineResult:
 
 
 class AnomalyDetectorService:
-    def predict(self, X: np.ndarray, df: pd.DataFrame, best_params: dict[str, Any]) -> dict[str, np.ndarray]:
-        db_labels = self._predict_dbscan(X, best_params.get("dbscan", {}))
-        if_labels, if_scores = self._predict_isolation_forest(X, best_params.get("isolation_forest", {}))
+    def predict(self, X: np.ndarray, df: pd.DataFrame, best_params: dict[str, Any], algorithm: str = "ensemble") -> dict[str, np.ndarray]:
+
+        result = {}
+
         z_labels,z_scores = self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 3.0))
 
-        return {
-            "dbscan_label": db_labels,
-            "isolation_forest_label": if_labels,
-            "isolation_forest_score": if_scores,
-            "z_score_label": z_labels,
-            "z_score": z_scores
-        }
+        result["z_score_label"] = z_labels
+        result["z_score"] = z_scores
+
+        if algorithm == "ensemble" :
+            db_labels = self._predict_dbscan(X, best_params.get("dbscan", {}))
+            if_labels, if_scores = self._predict_isolation_forest(X, best_params.get("isolation_forest", {}))
+
+            result["dbscan_label"] = db_labels
+            result["isolation_forest_label"] = if_labels
+            result["isolation_forest_score"] = if_scores
+
+        elif algorithm == "dbscan":
+            db_labels = self._predict_dbscan(X, best_params.get("dbscan", {}))  
+
+            result["dbscan_label"] = db_labels
+
+        elif algorithm == "isolation_forest":
+            if_labels, if_scores = self._predict_isolation_forest(X, best_params.get("isolation_forest", {}))
+
+            result["isolation_forest_label"] = if_labels
+            result["isolation_forest_score"] = if_scores
+
+
+        return result
+    
+      
 
     def _predict_dbscan(self, X: np.ndarray, params: dict[str, Any]) -> np.ndarray:
         model = DBSCAN(eps=params.get("eps", 1.0), min_pts=params.get("min_pts", 5))
@@ -136,26 +158,52 @@ class AnalysisEngine:
 
     def _build_metrics(self, feature_df: pd.DataFrame, label_sets: dict[str, np.ndarray]) -> dict[str, Any]:
         evaluator = Evaluator()
-        return {
-            "dbscan": evaluator.compute(feature_df, label_sets["dbscan_label"]),
-            "isolation_forest": evaluator.compute(feature_df, label_sets["isolation_forest_label"]),
-            "z_score": evaluator.compute(feature_df, label_sets["z_score_label"]),
+
+        metrics = {
+            "z_score": evaluator.compute(feature_df, label_sets["z_score_label"])
         }
+    
+        if self.config.algorithm == "isolation_forest":
+            metrics["isolation_forest"] = evaluator.compute(feature_df, label_sets["isolation_forest_label"])
+        elif self.config.algorithm == "dbscan":
+            metrics["dbscan"] = evaluator.compute(feature_df, label_sets["dbscan_label"])
+        elif self.config.algorithm == "ensemble":
+            metrics["dbscan"] = evaluator.compute(feature_df, label_sets["dbscan_label"])
+            metrics["isolation_forest"] = evaluator.compute(feature_df, label_sets["isolation_forest_label"])
+        else:
+            raise ValueError(f"Unknown algorithm specified: {self.config.algorithm}")
+        
+        return metrics
+       
 
     def _attach_labels(self, feature_df: pd.DataFrame, label_sets: dict[str, np.ndarray]) -> pd.DataFrame:
         result_df = feature_df.copy()
-        result_df["dbscan_label"] = label_sets["dbscan_label"]
-        result_df["isolation_forest_label"] = label_sets["isolation_forest_label"]
-        result_df["z_score_label"] = label_sets["z_score_label"]
-        result_df["isolation_forest_score"] = label_sets["isolation_forest_score"]
-        result_df["z_score"] = label_sets["z_score"]
 
+        result_df["z_score"] = label_sets["z_score"]
+        result_df["z_score_label"] = label_sets["z_score_label"]
+
+        if self.config.algorithm == "isolation_forest":
+            result_df["isolation_forest_label"] = label_sets["isolation_forest_label"]
+            result_df["isolation_forest_score"] = label_sets["isolation_forest_score"]
+
+        elif self.config.algorithm == "dbscan":
+            result_df["dbscan_label"] = label_sets["dbscan_label"]
+
+        elif self.config.algorithm == "ensemble":
+            result_df["dbscan_label"] = label_sets["dbscan_label"]
+            result_df["isolation_forest_label"] = label_sets["isolation_forest_label"]
+            result_df["isolation_forest_score"] = label_sets["isolation_forest_score"]
+
+        else:
+            raise ValueError(f"Unknown algorithm specified: {self.config.algorithm}")
+        
         return result_df
+
 
     def run(self) -> PipelineResult:
         feature_df = self._prepare_features()
         X_scaled = self.scaler.fit_transform(feature_df, self.config.features)
-        label_sets = self.detector.predict(X_scaled, feature_df, self.best_params)
+        label_sets = self.detector.predict(X_scaled, feature_df, self.best_params,self.config.algorithm)
         metrics = self._build_metrics(feature_df, label_sets)
         result_df = self._attach_labels(feature_df, label_sets)
         return PipelineResult(data=result_df, labels=label_sets, metrics=metrics, best_params=self.best_params)

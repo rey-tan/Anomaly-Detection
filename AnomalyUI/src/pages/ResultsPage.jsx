@@ -4,6 +4,8 @@ import MetricsGrid from '../components/MetricsGrid'
 import AnalysisHistory from '../components/AnalysisHistory'
 import { toggleFavorite } from '../api'
 import ExplainAnalysis from './ExplainAnalysis'
+import useTheme from "../hooks/useTheme";
+
 
 
 export default function ResultsPage({
@@ -15,6 +17,8 @@ export default function ResultsPage({
   handleSelectAnalysis,
   navigate,
 }) {
+  const theme = useTheme();
+
   const handleToggleFavorite = async () => {
     if (!selectedAnalysis) return;
 
@@ -43,7 +47,6 @@ export default function ResultsPage({
           <p className="eyebrow">Results</p>
           <h2>Inspect the latest analysis outputs</h2>
           <p>Chart, metrics, and tuned parameters:</p>
-
         </div>
 
         {results ?
@@ -68,7 +71,7 @@ export default function ResultsPage({
 
           : null}
         {results ?
-          <MetricsGrid results={results.models} selectedAnalysis={selectedAnalysis} handleToggleFavorite={handleToggleFavorite} /> : 
+          <MetricsGrid results={results.models} data={results.data} selectedAnalysis={selectedAnalysis} handleToggleFavorite={handleToggleFavorite} /> : 
             <section className="empty-state-card">
               <h2>No results yet</h2>
               <p>Run an analysis from the Analysis page to populate this view.</p>

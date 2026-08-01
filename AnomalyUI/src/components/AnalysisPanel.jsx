@@ -1,8 +1,8 @@
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { analyze,fetchSymbols} from "../api";
+import { analyze, fetchSymbols } from "../api";
 import { useNavigate } from "react-router-dom";
-import {  countAnomalyRows,  enrichAnalysisWithAnomalyCount } from '../utils/analysisHelpers';
+import { countAnomalyRows, enrichAnalysisWithAnomalyCount } from '../utils/analysisHelpers';
 
 
 
@@ -13,46 +13,47 @@ defaultStart.setDate(defaultStart.getDate() - 365);
 const endDate = today.toISOString().split('T')[0];
 const startDate = defaultStart.toISOString().split('T')[0];
 
-export default function AnalysisPanel({ token,setError,setResults,setSelectedAnalysis}) {
+export default function AnalysisPanel({ token, setError, setResults, setSelectedAnalysis }) {
   const [symbols, setSymbols] = useState([]);
   const [symbolsLoading, setSymbolsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
 
-  
+
   const [form, setForm] = useState({
     stock: "API",
     timeframe: "1D",
     start_date: startDate,
     end_date: endDate,
+    algorithm: "ensemble"
   });
   const onSubmit = async (payload) => {
-      setError("");
-      setLoading(true);
+    setError("");
+    setLoading(true);
+    try {
+      const response = await analyze(token, payload);
+      setResults(response);
+      const currentAnomalyCount = countAnomalyRows(response.data || []);
+      let selected = { ...payload, anomalyCount: currentAnomalyCount, analysis_id: response.analysis_id };
       try {
-        const response = await analyze(token, payload);
-        setResults(response);
-        const currentAnomalyCount = countAnomalyRows(response.data || []);
-        let selected = { ...payload, anomalyCount: currentAnomalyCount,analysis_id: response.analysis_id };
-        try {
-          const analyses = await fetchAnalyses(token);
-          if (analyses?.length) {
-            selected = await enrichAnalysisWithAnomalyCount(analyses[0], token, response.data);
-          }
-        } catch (err) {
-          // If the history lookup fails, keep using the request payload as a fallback.
+        const analyses = await fetchAnalyses(token);
+        if (analyses?.length) {
+          selected = await enrichAnalysisWithAnomalyCount(analyses[0], token, response.data);
         }
-        setSelectedAnalysis(selected);
-        
-        
-        navigate('/results');
       } catch (err) {
-        setError(err.message || "Analysis failed");
-      } finally {
-        setLoading(false);
+        // If the history lookup fails, keep using the request payload as a fallback.
       }
-    };
+      setSelectedAnalysis(selected);
+
+
+      navigate('/results');
+    } catch (err) {
+      setError(err.message || "Analysis failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -96,7 +97,7 @@ export default function AnalysisPanel({ token,setError,setResults,setSelectedAna
     return form.stock.trim() && form.start_date && form.end_date && start <= end;
   }, [form]);
 
-  
+
 
   return (
     <form
@@ -130,14 +131,26 @@ export default function AnalysisPanel({ token,setError,setResults,setSelectedAna
             ))}
           </select>
         </label>
-       
-        <label className="field-group">
+
+        <label className="field-group" style={{ display: 'none' }}> --- IGNORE ---
           <span>Timeframe</span>
           <select
             value={form.timeframe}
             onChange={(event) => setForm((prev) => ({ ...prev, timeframe: event.target.value }))}
           >
             <option value="1D">1 day</option>
+          </select>
+        </label>
+        
+        <label className="field-group">
+          <span>Algorithm</span>
+          <select
+            value={form.algorithm}
+            onChange={(event) => setForm((prev) => ({ ...prev, algorithm: event.target.value }))}
+          >
+            <option value="ensemble">Ensemble (DBSCAN + Isolation Forest)</option>
+            <option value="isolation_forest">Isolation Forest</option>
+            <option value="dbscan">DBSCAN</option>
           </select>
         </label>
       </div>
@@ -161,7 +174,8 @@ export default function AnalysisPanel({ token,setError,setResults,setSelectedAna
         </label>
       </div>
 
-      
+
+
 
       <div className="form-footer">
         <button type="submit" className="primary-button" disabled={!canSubmit || loading}>

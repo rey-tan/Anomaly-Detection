@@ -1,0 +1,326 @@
+{
+  "explanation": {
+    "anomaly_count": 5,
+    "entries": [],
+    "raw_summary": "**Row 1: 2025-07-22**\n\n- **Technical anomaly:** Isolation Forest flagged; close=312.07, volume=806,211 (high), z_score=-0.03 (not extreme), bb_width=0 (no volatility).\n- **Financial Events:** Api Power Company Limited announced its 22nd AGM (Annual General Meeting) scheduled for Poush (December 2025). No dividend or earnings news in this window.\n- **Market Events:** NEPSE index closed up +2.79% on this day, indicating broad market strength.\n- **Company News:** No major contracts, executive changes, or product launches reported.\n- **Correlation:** The anomaly is likely due to unusually high trading volume on a day of general market strength and AGM announcement, which may have prompted investor activity.\n\n---\n\n**Row 2: 2025-09-18**\n\n- **Technical anomaly:** Isolation Forest flagged; close=260.1 (down sharply from 287.28), volume=22,003 (very low), z_score=-5.29 (extreme), bb_width=0.12.\n- **Market Events:** NEPSE suffered a 6% crash; trading was halted due to a 160-point plunge. Sector-wide panic and liquidity crunch.\n- **Real-World Events:** Political turbulence and corruption protests noted in September 2025.\n- **Company News:** No API-specific news, but sector-wide panic affected all stocks.\n- **Correlation:** The anomaly is directly correlated with the NEPSE crash and trading halt, causing a sharp drop in price and volume for API.\n\n---\n\n**Row 3: 2025-09-21**\n\n- **Technical anomaly:** Isolation Forest flagged; close=286.1 (up from 260.1), volume=228,050 (very high), z_score=5.52 (extreme positive), bb_width=0.11.\n- **Financial Events:** News of Api Power investing Rs 10 billion in green hydrogen projects reported.\n- **Company News:** Announcement of 9% bonus share and 0.4737% cash dividend distribution.\n- **Market Events:** Recovery after NEPSE crash; sector sentiment improving.\n- **Correlation:** The anomaly is explained by positive company news (major investment, bonus shares, dividend) and market recovery, driving high volume and sharp price rebound.\n\n---\n\n**Row 4: 2026-03-24**\n\n- **Technical anomaly:** Isolation Forest flagged; close=361.4 (up from 348), volume=1,601,369 (very high), z_score=2.11 (moderate), bb_width=0.24.\n- **Market Events:** NEPSE index hit an eight-month high, broad bullish sentiment.\n- **Company News:** No new API-specific news; bonus/dividend announcement from previous months still in effect.\n- **Correlation:** The anomaly is explained by broad market rally and high trading volume, not by company-specific events.\n\n---\n\n**Row 5: 2026-04-05**\n\n- **Technical anomaly:** Isolation Forest flagged; close=325 (down from 353), volume=979,663 (high), z_score=-4.44 (extreme negative), bb_width=0.15.\n- **Market Events:** NEPSE index dropped -3.79% (105.5 points), IT & Banking stocks under pressure, selective action in Power & Infra.\n- **Real-World Events:** Major corruption scandal in Nepal’s public procurement system reported; political uncertainty.\n- **Company News:** No new API-specific news.\n- **Correlation:** The anomaly is explained by broad market decline and negative sentiment due to corruption scandal, leading to sharp price drop and high volume.\n\n---\n\n**Overall Summary:**\n\n- All anomalies flagged by Isolation Forest are correlated with significant market-wide events (crashes, rallies, sentiment shifts) or company-specific news (AGM, bonus shares, major investment).\n- Extreme z-scores and volume spikes/drops coincide with NEPSE crashes, recoveries, and sector news.\n- No anomalies are explained by executive changes or new product launches for API.\n- The most severe anomalies (Rows 2, 3, 5) are directly linked to NEPSE volatility and major company announcements.\n- No unexplained anomalies: all technical outliers are matched with relevant news or market context.",
+    "source": "openai/gpt-4.1",
+    "summary": "- All anomalies flagged by Isolation Forest are correlated with significant market-wide events (crashes, rallies, sentiment shifts) or company-specific news (AGM, bonus shares, major investment).\n- Extreme z-scores and volume spikes/drops coincide with NEPSE crashes, recoveries, and sector news.\n- No anomalies are explained by executive changes or new product launches for API.\n- The most severe anomalies (Rows 2, 3, 5) are directly linked to NEPSE volatility and major company announcements.\n- No unexplained anomalies: all technical outliers are matched with relevant news or market context."
+  },
+  "request": {
+    "analysis_id": 9,
+    "best_params": {
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Lower_BB": 312.07,
+        "RSI": 50,
+        "SMA_10": 312.07,
+        "SMA_20": 312.07,
+        "SMA_50": 312.07,
+        "Upper_BB": 312.07,
+        "adjacent_rows": [
+          {
+            "close": 320.52,
+            "date": "2025-07-23",
+            "volume": 864614
+          },
+          {
+            "close": 326.63,
+            "date": "2025-07-24",
+            "volume": 744394
+          },
+          {
+            "close": 320.46,
+            "date": "2025-07-27",
+            "volume": 847098
+          }
+        ],
+        "average_volume": null,
+        "bb_width": 0,
+        "close": 312.07,
+        "date": "2025-07-22",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 314.1,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.18,
+        "low": 304,
+        "open": 304,
+        "previous_close": null,
+        "returns": 0,
+        "rolling_mean": 312.07,
+        "rolling_std": 0,
+        "volatility": 0,
+        "volume": 806211,
+        "z_score": -0.03277104152172429,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 275.5507382968362,
+        "RSI": 16.830727658753176,
+        "SMA_10": 288.81600000000003,
+        "SMA_20": 291.783,
+        "SMA_50": 298.9585714285714,
+        "Upper_BB": 308.01526170316384,
+        "adjacent_rows": [
+          {
+            "close": 290.42,
+            "date": "2025-09-04",
+            "volume": 103704
+          },
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 286.1,
+            "date": "2025-09-21",
+            "volume": 228050
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          }
+        ],
+        "average_volume": 106723.2,
+        "bb_width": 0.12481554558372801,
+        "close": 260.1,
+        "date": "2025-09-18",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 281.6,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.75,
+        "low": 258.8,
+        "open": 281.6,
+        "previous_close": 287.28,
+        "returns": -0.09461152882205492,
+        "rolling_mean": 291.783,
+        "rolling_std": 0.022612523770143698,
+        "volatility": 0.022612523770143698,
+        "volume": 22003,
+        "z_score": -5.289521381702691,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 275.0427099018123,
+        "RSI": 45.52248590533632,
+        "SMA_10": 287.537,
+        "SMA_20": 291.18850000000003,
+        "SMA_50": 298.6013888888889,
+        "Upper_BB": 307.33429009818775,
+        "adjacent_rows": [
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 260.1,
+            "date": "2025-09-18",
+            "volume": 22003
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          },
+          {
+            "close": 290,
+            "date": "2025-09-25",
+            "volume": 65656
+          }
+        ],
+        "average_volume": 97605.85,
+        "bb_width": 0.11286815867310532,
+        "close": 286.1,
+        "date": "2025-09-21",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 286.1,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.73,
+        "low": 260.1,
+        "open": 260.5,
+        "previous_close": 260.1,
+        "returns": 0.09996155324875056,
+        "rolling_mean": 291.18850000000003,
+        "rolling_std": 0.0326647452039823,
+        "volatility": 0.0326647452039823,
+        "volume": 228050,
+        "z_score": 5.521234221765958,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 281.2585589707287,
+        "RSI": 85.27315914489313,
+        "SMA_10": 342.84000000000003,
+        "SMA_20": 324.805,
+        "SMA_50": 307.138,
+        "Upper_BB": 368.3514410292713,
+        "adjacent_rows": [
+          {
+            "close": 344.4,
+            "date": "2026-03-19",
+            "volume": 1528471
+          },
+          {
+            "close": 343.5,
+            "date": "2026-03-22",
+            "volume": 1005619
+          },
+          {
+            "close": 348,
+            "date": "2026-03-23",
+            "volume": 799386
+          },
+          {
+            "close": 359,
+            "date": "2026-03-25",
+            "volume": 1429057
+          },
+          {
+            "close": 364.2,
+            "date": "2026-03-26",
+            "volume": 886488
+          },
+          {
+            "close": 356,
+            "date": "2026-03-29",
+            "volume": 1046367
+          }
+        ],
+        "average_volume": 687620.45,
+        "bb_width": 0.24098749877847986,
+        "close": 361.4,
+        "date": "2026-03-24",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 367.9,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.36,
+        "low": 351,
+        "open": 354,
+        "previous_close": 348,
+        "returns": 0.03850574712643673,
+        "rolling_mean": 324.805,
+        "rolling_std": 0.022131749862582914,
+        "volatility": 0.022131749862582914,
+        "volume": 1601369,
+        "z_score": 2.106662723326535,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 320.7280526710761,
+        "RSI": 42.127659574468076,
+        "SMA_10": 353.23,
+        "SMA_20": 345.415,
+        "SMA_50": 317.554,
+        "Upper_BB": 370.1019473289239,
+        "adjacent_rows": [
+          {
+            "close": 358.1,
+            "date": "2026-03-31",
+            "volume": 1143683
+          },
+          {
+            "close": 350,
+            "date": "2026-04-01",
+            "volume": 1304796
+          },
+          {
+            "close": 353,
+            "date": "2026-04-02",
+            "volume": 787287
+          },
+          {
+            "close": 346,
+            "date": "2026-04-06",
+            "volume": 936872
+          },
+          {
+            "close": 341.5,
+            "date": "2026-04-07",
+            "volume": 428867
+          },
+          {
+            "close": 349,
+            "date": "2026-04-08",
+            "volume": 472857
+          }
+        ],
+        "average_volume": 1016388.95,
+        "bb_width": 0.15191967587030097,
+        "close": 325,
+        "date": "2026-04-05",
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 350.5,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.23,
+        "low": 324.6,
+        "open": 350.5,
+        "previous_close": 353,
+        "returns": -0.07932011331444755,
+        "rolling_mean": 345.415,
+        "rolling_std": 0.028883726373798126,
+        "volatility": 0.028883726373798126,
+        "volume": 979663,
+        "z_score": -4.4399087111089415,
+        "z_score_label": -1
+      }
+    ],
+    "end_date": "2026-07-22",
+    "metrics": {
+      "isolation_forest": {
+        "anomaly_rate": 0.022321428571428572,
+        "n_clusters": 1,
+        "n_noise": 5
+      },
+      "z_score": {
+        "anomaly_rate": 0.026785714285714284,
+        "n_clusters": 1,
+        "n_noise": 6
+      }
+    },
+    "start_date": "2025-07-22",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-07-22T18:01:35.332677",
+  "user_id": 1
+}

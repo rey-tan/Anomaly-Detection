@@ -223,17 +223,25 @@ class ExplanationEngine:
                 #     f"{stock} Nepal {date_str}",
                 #     f"Nepal protest {anomaly_date.strftime('%B %Y')}",
                 # ]
+              
                 queries = [
-                    f"{stock} Nepal {date_str}",
-                    f"{stock} dividend OR bonus share OR rights share {anomaly_date.year}",
-                    f"{stock} earnings OR quarterly report {anomaly_date.year}",
-                    f"{stock} NEPSE news {date_str}",
-                    f"Nepal political news {anomaly_date.strftime('%B %Y')}",
-
+                    # Company-specific
+                    f"{stock} Nepal company announcement {date_str}",
+                    f"{stock} NEPSE price movement news {date_str}",
+                    f"{stock} dividend bonus rights share announcement",
+                    
+                    # Financial
+                    f"{stock} quarterly result earnings report {anomaly_date.year}",
+                    
+                    # Market-wide
+                    f"Nepal NEPSE market crash rally news {date_str}",
+                    
+                    # External events
+                    f"Nepal corruption arrest businessman investigation {anomaly_date.strftime('%B %Y')}",
                 ]
                 section_found = False
                 for query in queries:
-                    results = self._tavily_search(query, num_results=1)
+                    results = self._tavily_search(query, num_results=2)
                     if results:
                         if not section_found:
                             search_context_parts.append(f"\n### {date_str} ({stock})")

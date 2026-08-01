@@ -5,11 +5,10 @@ from datetime import datetime
 import traceback
 from typing import Any, Dict, List, Optional
 
-from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
-from azure.core.credentials import AzureKeyCredential
 from sqlalchemy.orm import Session
 from tavily import TavilyClient
+from openrouter import OpenRouter
 
 from src.api import crud, models, schemas
 from src.utils.io import write_explanation_artifact
@@ -23,47 +22,53 @@ system_message = """You are a NEPSE (Nepal Stock Exchange) financial analyst.
                 (4) Company news: executive changes, major contracts, product launches. 
                 Search 2 weeks before to 2 weeks after each anomaly date. Correlate findings with technical anomalies. 
                 Report only what you find—do not speculate or invent facts."""
-            
+
 
 class ExplanationEngine:
     def __init__(self, request: schemas.AnomalyExplanationRequest):
-        self.request = request
+        self.request = request 
 
     def explain(self) -> Dict[str, Any]:
         anomaly_rows = self._extract_anomaly_rows(self.request.data or [])
         search_context = self._build_search_context(self.request.stock, anomaly_rows)
+        search_context = ""
         prompt = self._build_ai_prompt(self.request, search_context)
         token = os.getenv("TOKEN", "").strip()
         
         if token and prompt:
-            return self._call_github_ai_explanation(token, self.request,anomaly_rows,prompt)
-        
-        return self._heuristic_anomaly_explanation(self.request,anomaly_rows)
+            return self._call_ai_explanation(
+                token, self.request, anomaly_rows, prompt
+            )
 
-    def _call_github_ai_explanation(
+        return self._heuristic_anomaly_explanation(self.request, anomaly_rows)
+
+    def _call_ai_explanation(
         self,
         token: str,
         payload: schemas.AnomalyExplanationRequest,
         anomaly_rows: List[Dict[str, Any]],
-        prompt: str
+        prompt: str,
     ) -> Dict[str, Any]:
-        endpoint = os.getenv("MODEL_ENDPOINT")
         model = os.getenv("MODEL_NAME")
-
-
+        print("Calling AI model for explanation with model:", model)
         try:
-            client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(token))
-            response = client.complete(
-                model=model,
-                messages=[
-                    SystemMessage(system_message),
-                    UserMessage(prompt),
-                ],
-                temperature=0.2,
-            )
+            with OpenRouter(api_key=token) as client:
+                response = client.chat.send(
+                    model=model,
+                   
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": prompt},
+                    ],
+                    temperature=0.2,
+                )
             summary = str(response.choices[0].message.content).strip()
         except Exception as e:
-            print("Error calling AI model endpoint, falling back to heuristic explanation", e)
+            print("Error calling AI model endpoint, falling back to heuristic explanation")
+            print(f"OpenRouter error type: {type(e).__name__}")
+            print(f"OpenRouter error: {e}")
+            traceback.print_exc()
+
             return self._heuristic_anomaly_explanation(payload, anomaly_rows)
 
         if not summary:
@@ -80,8 +85,12 @@ class ExplanationEngine:
             "source": model,
         }
 
-    def _heuristic_anomaly_explanation(self, payload: schemas.AnomalyExplanationRequest,anomaly_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
-      
+    def _heuristic_anomaly_explanation(
+        self,
+        payload: schemas.AnomalyExplanationRequest,
+        anomaly_rows: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+
         if not anomaly_rows:
             return {
                 "raw_summary": "No rows in the result set were marked as anomalies, so there is nothing to explain.",
@@ -92,7 +101,7 @@ class ExplanationEngine:
             }
 
         entries: List[Dict[str, Any]] = []
-        print("Printing anomaly rows:",anomaly_rows)
+        print("Printing anomaly rows:", anomaly_rows)
         for row in anomaly_rows:
             z_score = row.get("z_score_label")
             z_score_val = (
@@ -126,11 +135,17 @@ class ExplanationEngine:
 
             if bb_width is not None and isinstance(bb_width, (int, float)):
                 if bb_width > 0.15:
-                    bullets.append(f"BB width {bb_width:.3f} indicates elevated volatility spike")
+                    bullets.append(
+                        f"BB width {bb_width:.3f} indicates elevated volatility spike"
+                    )
                 elif bb_width < 0.02:
-                    bullets.append(f"BB width {bb_width:.3f} shows extremely compressed bands")
+                    bullets.append(
+                        f"BB width {bb_width:.3f} shows extremely compressed bands"
+                    )
                 else:
-                    bullets.append(f"BB width {bb_width:.3f} indicates notable volatility change")
+                    bullets.append(
+                        f"BB width {bb_width:.3f} indicates notable volatility change"
+                    )
 
             if rsi is not None and isinstance(rsi, (int, float)):
                 if rsi > 70:
@@ -171,21 +186,27 @@ class ExplanationEngine:
     def _extract_anomaly_rows(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         rows: List[Dict[str, Any]] = []
         for index, row in enumerate(data or [], start=1):
-            is_anomaly = row.get("dbscan_label") == -1 or row.get("isolation_forest_label") == -1
+            is_anomaly = (
+                row.get("dbscan_label") == -1 or row.get("isolation_forest_label") == -1
+            )
             if not is_anomaly:
                 continue
-            rows.append({
-                "index": index,
-                "date": row.get("date") or row.get("transaction_time"),
-                "close": row.get("close") or row.get("price") or row.get("adj_close"),
-                "volume": row.get("volume"),
-                "z_score":row.get("z_score"),
-                "dbscan_label": row.get("dbscan_label"),
-                "isolation_forest_label": row.get("isolation_forest_label"),
-                "bb_width": row.get("bb_width"),
-                "RSI": row.get("RSI") or row.get("rsi"),
-                "average_volume": row.get("average_volume"),
-            })
+            rows.append(
+                {
+                    "index": index,
+                    "date": row.get("date") or row.get("transaction_time"),
+                    "close": row.get("close")
+                    or row.get("price")
+                    or row.get("adj_close"),
+                    "volume": row.get("volume"),
+                    "z_score": row.get("z_score"),
+                    "dbscan_label": row.get("dbscan_label"),
+                    "isolation_forest_label": row.get("isolation_forest_label"),
+                    "bb_width": row.get("bb_width"),
+                    "RSI": row.get("RSI") or row.get("rsi"),
+                    "average_volume": row.get("average_volume"),
+                }
+            )
         return rows
 
     def _tavily_search(self, query: str, num_results: int = 5) -> List[Dict[str, Any]]:
@@ -196,14 +217,18 @@ class ExplanationEngine:
 
         try:
             tavily_client = TavilyClient(api_key=api_key)
-            response = tavily_client.search(query=query, max_results=min(num_results, 10), include_answer=False)
+            response = tavily_client.search(
+                query=query, max_results=min(num_results, 10), include_answer=False
+            )
             results = []
             for item in response.get("results", [])[:num_results]:
-                results.append({
-                    "title": item.get("title", ""),
-                    "link": item.get("url", ""),
-                    "snippet": item.get("content", ""),
-                })
+                results.append(
+                    {
+                        "title": item.get("title", ""),
+                        "link": item.get("url", ""),
+                        "snippet": item.get("content", ""),
+                    }
+                )
             return results
         except Exception as e:
             # print(f"Error fetching Tavily Search results: {e}")
@@ -211,7 +236,9 @@ class ExplanationEngine:
             traceback.print_exc()
             return []
 
-    def _build_search_context(self, stock: str, anomaly_rows: List[Dict[str, Any]]) -> str:
+    def _build_search_context(
+        self, stock: str, anomaly_rows: List[Dict[str, Any]]
+    ) -> str:
         search_context_parts = ["## Search Context\n"]
         for row in anomaly_rows[:5]:
             date_str = row.get("date", "")
@@ -219,58 +246,64 @@ class ExplanationEngine:
                 continue
             try:
                 anomaly_date = datetime.strptime(str(date_str), "%Y-%m-%d")
-                # queries = [
-                #     f"{stock} Nepal {date_str}",
-                #     f"Nepal protest {anomaly_date.strftime('%B %Y')}",
-                # ]
-              
                 queries = [
-                    # Company-specific
-                    f"{stock} Nepal company announcement {date_str}",
-                    f"{stock} NEPSE price movement news {date_str}",
-                    f"{stock} dividend bonus rights share announcement",
-                    
-                    # Financial
-                    f"{stock} quarterly result earnings report {anomaly_date.year}",
-                    
-                    # Market-wide
-                    f"Nepal NEPSE market crash rally news {date_str}",
-                    
-                    # External events
-                    f"Nepal corruption arrest businessman investigation {anomaly_date.strftime('%B %Y')}",
+                    f"{stock} Nepal {date_str}",
+                    f"Nepal protest {anomaly_date.strftime('%B %Y')}",
                 ]
+
+                # queries = [
+                #     # Company-specific
+                #     f"{stock} Nepal company announcement {date_str}",
+                #     f"{stock} dividend bonus rights share announcement",
+                #     # Financial
+                #     f"{stock} quarterly result earnings report {anomaly_date.year}",
+                #     # Market-wide
+                #     f"Nepal NEPSE market crash rally news {date_str}",
+                #     # External events
+                #     f"Nepal protest {anomaly_date.strftime('%B %Y')}",
+                #     f"Nepal corruption arrest businessman investigation {anomaly_date.strftime('%B %Y')}",
+                # ]
                 section_found = False
                 for query in queries:
-                    results = self._tavily_search(query, num_results=2)
+                    results = self._tavily_search(query, num_results=1)
                     if results:
                         if not section_found:
                             search_context_parts.append(f"\n### {date_str} ({stock})")
                             section_found = True
                         for result in results:
-                            search_context_parts.append(f"- {result['title']}: {result['snippet'][:100]}... ([link]({result['link']}))")
+                            search_context_parts.append(
+                                f"- {result['title']}: {result['snippet'][:100]}... ([link]({result['link']}))"
+                            )
                 if not section_found:
                     search_context_parts.append(f"\n### {date_str} ({stock})")
                     search_context_parts.append("No news found.")
             except Exception as e:
                 print(f"Error processing anomaly date {date_str}: {e}")
                 continue
+
+            print("Querying Tavily Search..")
         return "\n".join(search_context_parts) if len(search_context_parts) > 1 else ""
 
-    def _build_ai_prompt(self, payload: schemas.AnomalyExplanationRequest, search_context: str = "") -> str:
+    def _build_ai_prompt(
+        self, payload: schemas.AnomalyExplanationRequest, search_context: str = ""
+    ) -> str:
         anomaly_rows = payload.data or []
         compact_rows = anomaly_rows
         row_summaries = []
         for index, row in enumerate(compact_rows, start=1):
             flags = []
-           
+
             if row.get("dbscan_label") == -1:
                 flags.append("DBSCAN")
             if row.get("isolation_forest_label") == -1:
                 flags.append("Isolation Forest")
-           
 
             z_score = row.get("z_score")
-            z_score_text = f"{float(z_score):.2f}" if isinstance(z_score, (int, float)) else str(z_score)
+            z_score_text = (
+                f"{float(z_score):.2f}"
+                if isinstance(z_score, (int, float))
+                else str(z_score)
+            )
 
             detail_parts = [
                 f"date={row.get('date')}",
@@ -302,7 +335,9 @@ class ExplanationEngine:
                 detail_parts.append(f"adjacent_rows={'; '.join(adjacent)}")
 
             if row.get("detector_flags"):
-                detail_parts.append(f"detector_flags={', '.join(row.get('detector_flags'))}")
+                detail_parts.append(
+                    f"detector_flags={', '.join(row.get('detector_flags'))}"
+                )
             elif flags:
                 detail_parts.append(f"flagged_by={', '.join(flags)}")
 
@@ -357,10 +392,14 @@ class ExplanationEngine:
         )
 
     def _extract_overall_summary(self, summary: str) -> str:
-        overall_match = re.search(r"\*\*(?:Overall\s+)?Summary:\*\*\s*(.*)", summary, re.S)
+        overall_match = re.search(
+            r"\*\*(?:Overall\s+)?Summary:\*\*\s*(.*)", summary, re.S
+        )
         if overall_match:
             overall_text = overall_match.group(1).strip()
-            overall_text = re.split(r"^-{3,}$", overall_text, maxsplit=1, flags=re.MULTILINE)[0].strip()
+            overall_text = re.split(
+                r"^-{3,}$", overall_text, maxsplit=1, flags=re.MULTILINE
+            )[0].strip()
             return overall_text
         return re.split(r"^-{3,}$", summary, maxsplit=1, flags=re.MULTILINE)[0].strip()
 
@@ -368,7 +407,9 @@ class ExplanationEngine:
         if not summary:
             return []
 
-        row_pattern = re.compile(r"^\*\*Row\s+(\d+)(?:\s*\([^)]+\))?:\s*\*\*", re.MULTILINE)
+        row_pattern = re.compile(
+            r"^\*\*Row\s+(\d+)(?:\s*\([^)]+\))?:\s*\*\*", re.MULTILINE
+        )
         matches = list(row_pattern.finditer(summary))
         if not matches:
             return []
@@ -380,7 +421,9 @@ class ExplanationEngine:
             block = summary[start:end].strip()
             block = re.split(r"\*\*Overall Summary:\*\*", block, maxsplit=1)[0].strip()
             block = re.split(r"\*\*Summary:\*\*", block, maxsplit=1)[0].strip()
-            block = re.split(r"^-{3,}$", block, maxsplit=1, flags=re.MULTILINE)[0].strip()
+            block = re.split(r"^-{3,}$", block, maxsplit=1, flags=re.MULTILINE)[
+                0
+            ].strip()
 
             bullets = []
             row_summary = ""
@@ -393,13 +436,13 @@ class ExplanationEngine:
                 elif normalized and not row_summary:
                     row_summary = normalized
 
-            entries.append({
-                "row_number": int(match.group(1)),
-                "date": None,
-                "bullets": bullets,
-                "summary": row_summary,
-            })
+            entries.append(
+                {
+                    "row_number": int(match.group(1)),
+                    "date": None,
+                    "bullets": bullets,
+                    "summary": row_summary,
+                }
+            )
 
         return entries
-
-   

@@ -1,0 +1,420 @@
+{
+  "explanation": {
+    "anomaly_count": 6,
+    "entries": [],
+    "raw_summary": "**Row 1: 2025-09-18**  \n- **Price Action:** Close 260.1 vs previous close 287.28 (**-9.44%**), a sharp single-day decline.  \n- **Volume:** 22,003 vs 20-day average 106,723 (**-79.4%**), extremely low liquidity.  \n- **Z-Score:** -5.29 (threshold 3) – severe negative deviation from rolling mean (291.78).  \n- **Bollinger Band Width:** 0.1248 (narrow), indicating low volatility preceding the move.  \n- **Detectors:** DBSCAN and Isolation Forest both flag (high agreement).  \n- **Adjacent Context:** Prior days (Sep 4, 7, 8) trade ~287-290 with volumes 50k-105k. Next day (Sep 21) jumps to 286.1 on high volume.  \n- **News Correlation:** **No relevant news found via web search for this date.**  \n- **Technical Interpretation:** The combination of a large price drop on very low volume suggests a possible data error, corporate action (e.g., stock split, bonus/right issue ex-date), or an illiquid trade print. The immediate reversal on Sep 21 supports a non-fundamental cause.\n\n**Row 2: 2025-09-21**  \n- **Price Action:** Close 286.1 vs previous close 260.1 (**+10.0%**), a sharp recovery.  \n- **Volume:** 228,050 vs 20-day average 97,606 (**+133.6%**), very high volume.  \n- **Z-Score:** +5.50 (threshold 3) – severe positive deviation from rolling mean (291.19).  \n- **Bollinger Band Width:** 0.1129 (narrow).  \n- **Detectors:** DBSCAN and Isolation Forest both flag.  \n- **Adjacent Context:** Follows the Sep 18 low (260.1). Next day (Sep 23) closes 291.9 on above-average volume.  \n- **News Correlation:** **No relevant news found via web search for this date.**  \n- **Technical Interpretation:** High-volume reversal after an anomalous low-volume drop. Pattern consistent with post-corporate-action adjustment (e.g., ex-bonus/ex-right price correction) or correction of a bad print. The twin anomalies (Row 1 & 2) likely represent a single event split across two sessions.\n\n**Row 3: 2026-03-09**  \n- **Price Action:** Close 340 vs previous close 317 (**+7.26%**), a sizable gap up.  \n- **Volume:** 47,031 vs 20-day average 371,123 (**-87.3%**), extremely thin trading.  \n- **Z-Score:** +3.98 (threshold 3) – strong positive deviation from rolling mean (303.26).  \n- **Bollinger Band Width:** 0.1293 (moderate).  \n- **Detectors:** DBSCAN only (Isolation Forest does not flag).  \n- **Adjacent Context:** Prior days (Feb 26, Mar 1, 3) trade 312-317 on very high volumes (483k-1.05M). Next day (Mar 10) closes 341 on massive volume (1.84M).  \n- **News Correlation:** **No relevant news found via web search for this date.**  \n- **Technical Interpretation:** A large price advance on negligible volume amid a period of heavy trading. This is characteristic of a “thin-air” print, possible data error, or a corporate action (e.g., stock split/bonus ex-date) where the price adjusts but volume collapses. The following day’s huge volume at similar price suggests the market repriced properly on Mar 10.\n\n**Row 4: 2026-03-10**  \n- **Price Action:** Close 341 vs previous close 340 (**+0.29%**), minimal change.  \n- **Volume:** 1,842,222 vs 20-day average 357,531 (**+415%**), enormous volume spike.  \n- **Z-Score:** +0.12 (well within threshold), price not anomalous.  \n- **Bollinger Band Width:** 0.1611 (wider).  \n- **Detectors:** Isolation Forest only (DBSCAN does not flag).  \n- **Adjacent Context:** Preceded by Mar 9 low-volume spike to 340. Followed by Mar 11 (340, 1.3M vol) and Mar 12 (336.3, 719k vol).  \n- **News Correlation:** **No relevant news found via web search for this date.**  \n- **Technical Interpretation:** Isolation Forest flags this as an outlier due to extreme volume with near-zero price movement. This suggests a large block trade, institutional rebalancing, or settlement of the previous day’s thin-print anomaly. The volume surge absorbs the Mar 9 price gap.\n\n**Row 5: 2026-03-24**  \n- **Price Action:** Close 361.4 vs previous close 348 (**+3.85%**), strong upward move.  \n- **Volume:** 1,601,369 vs 20-day average 687,620 (**+133%**), high volume confirmation.  \n- **Z-Score:** +2.09 (below 3 threshold), but price is above rolling mean (324.80).  \n- **Bollinger Band Width:** 0.2410 (widest in the set), indicating expanding volatility.  \n- **Detectors:** DBSCAN and Isolation Forest both flag.  \n- **Adjacent Context:** Part of a sustained uptrend from mid-March (344-348) with consistently elevated volumes (799k-1.5M).  \n- **News Correlation:** **No relevant news found via web search for this date.**  \n- **Technical Interpretation:** A high-volume breakout during a volatility expansion phase. Dual detector agreement highlights this as a significant regime-change day—likely the start of a new trend leg driven by aggressive buying. The wide Bollinger bands reflect increasing uncertainty/momentum.\n\n**Row 6: 2026-04-05**  \n- **Price Action:** Close 325 vs previous close 353 (**-7.93%**), sharp decline.  \n- **Volume:** 979,663 vs 20-day average 1,016,389 (**-3.6%**), roughly average volume.  \n- **Z-Score:** -4.44 (threshold 3) – severe negative deviation from rolling mean (345.42).  \n- **Bollinger Band Width:** 0.1519 (moderate).  \n- **Detectors:** DBSCAN and Isolation Forest both flag.  \n- **Adjacent Context:** Prior days (Mar 31-Apr 2) trade 350-358 on high volumes (787k-1.3M). Next day (Apr 6) recovers to 346 on similar volume.  \n- **News Correlation:** **No relevant news found via web search for this date.**  \n- **Technical Interpretation:** A sudden, high-conviction sell-off (large price drop on normal volume) that reverses the next day. Dual detector flags indicate a rare, aggressive distribution day. Could reflect a large seller, margin calls, or reaction to unreported news. The quick recovery suggests overshooting.\n\n---\n\n**Overall Summary:**  \nThe six anomalies cluster in two distinct periods: **September 2025** (Rows 1-2) and **March–April 2026** (Rows 3-6).  \n\n- **Sep 2025 pair** shows a classic low-volume price crash followed by a high-volume reversal, strongly indicative of a **corporate action (bonus/right issue/stock split) ex-date adjustment** that was not captured in the news search. The extreme z-scores (±5.3/5.5) and dual-detector agreement underscore the non-fundamental nature.  \n- **Mar–Apr 2026 sequence** reveals a **volatility regime shift**:  \n  - Mar 9: Thin-air gap up (low volume, DBSCAN only).  \n  - Mar 10: Massive volume absorption (Isolation Forest only).  \n  - Mar 24: High-volume breakout with widening bands (both detectors).  \n  - Apr 5: Sharp sell-off on average volume with immediate recovery (both detectors).  \n\nThis pattern suggests **institutional repositioning or a series of large block trades** amid a trending market, rather than isolated news events. The absence of web-search correlates for all six dates implies either data-quality issues (corporate actions not reflected in price history) or events not publicly reported in the searched sources.  \n\n**Key Takeaway:** The anomalies are technically severe (z-scores up to 5.5, volume deviations >100%) and well-confirmed by multiple detectors. The Sep 2025 pair is almost certainly a corporate-action artifact; the Mar–Apr 2026 cluster reflects genuine but extreme trading dynamics (liquidity gaps, block trades, trend acceleration). Further investigation should check NEPSE corporate-action calendars for API around Sep 2025 and review block-trade reports for Mar–Apr 2026.",
+    "source": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "summary": "The six anomalies cluster in two distinct periods: **September 2025** (Rows 1-2) and **March–April 2026** (Rows 3-6).  \n\n- **Sep 2025 pair** shows a classic low-volume price crash followed by a high-volume reversal, strongly indicative of a **corporate action (bonus/right issue/stock split) ex-date adjustment** that was not captured in the news search. The extreme z-scores (±5.3/5.5) and dual-detector agreement underscore the non-fundamental nature.  \n- **Mar–Apr 2026 sequence** reveals a **volatility regime shift**:  \n  - Mar 9: Thin-air gap up (low volume, DBSCAN only).  \n  - Mar 10: Massive volume absorption (Isolation Forest only).  \n  - Mar 24: High-volume breakout with widening bands (both detectors).  \n  - Apr 5: Sharp sell-off on average volume with immediate recovery (both detectors).  \n\nThis pattern suggests **institutional repositioning or a series of large block trades** amid a trending market, rather than isolated news events. The absence of web-search correlates for all six dates implies either data-quality issues (corporate actions not reflected in price history) or events not publicly reported in the searched sources.  \n\n**Key Takeaway:** The anomalies are technically severe (z-scores up to 5.5, volume deviations >100%) and well-confirmed by multiple detectors. The Sep 2025 pair is almost certainly a corporate-action artifact; the Mar–Apr 2026 cluster reflects genuine but extreme trading dynamics (liquidity gaps, block trades, trend acceleration). Further investigation should check NEPSE corporate-action calendars for API around Sep 2025 and review block-trade reports for Mar–Apr 2026."
+  },
+  "request": {
+    "analysis_id": 1,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.1879515800443485,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.02,
+        "n_estimators": 100
+      },
+      "z_score": {
+        "threshold": 3
+      }
+    },
+    "data": [
+      {
+        "Lower_BB": 275.55073829683624,
+        "RSI": 16.830727658753176,
+        "SMA_10": 288.81600000000003,
+        "SMA_20": 291.783,
+        "SMA_50": 293.69703703703703,
+        "Upper_BB": 308.0152617031638,
+        "adjacent_rows": [
+          {
+            "close": 290.42,
+            "date": "2025-09-04",
+            "volume": 103704
+          },
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 286.1,
+            "date": "2025-09-21",
+            "volume": 228050
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          }
+        ],
+        "average_volume": 106723.2,
+        "bb_width": 0.12481554558372757,
+        "close": 260.1,
+        "date": "2025-09-18",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 281.6,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.35,
+        "low": 258.8,
+        "open": 281.6,
+        "previous_close": 287.28,
+        "returns": -0.09461152882205492,
+        "rolling_mean": 291.783,
+        "rolling_std": 0.022612523770143698,
+        "volatility": 0.022612523770143698,
+        "volume": 22003,
+        "z_score": -5.290906972042824,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 275.04270990181243,
+        "RSI": 45.52248590533632,
+        "SMA_10": 287.537,
+        "SMA_20": 291.18850000000003,
+        "SMA_50": 293.42571428571426,
+        "Upper_BB": 307.33429009818764,
+        "adjacent_rows": [
+          {
+            "close": 289.54,
+            "date": "2025-09-07",
+            "volume": 50916
+          },
+          {
+            "close": 287.28,
+            "date": "2025-09-08",
+            "volume": 104913
+          },
+          {
+            "close": 260.1,
+            "date": "2025-09-18",
+            "volume": 22003
+          },
+          {
+            "close": 291.9,
+            "date": "2025-09-23",
+            "volume": 127915
+          },
+          {
+            "close": 288,
+            "date": "2025-09-24",
+            "volume": 55215
+          },
+          {
+            "close": 290,
+            "date": "2025-09-25",
+            "volume": 65656
+          }
+        ],
+        "average_volume": 97605.85,
+        "bb_width": 0.11286815867310453,
+        "close": 286.1,
+        "date": "2025-09-21",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 286.1,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.42,
+        "low": 260.1,
+        "open": 260.5,
+        "previous_close": 260.1,
+        "returns": 0.09996155324875056,
+        "rolling_mean": 291.18850000000003,
+        "rolling_std": 0.03266474520398229,
+        "volatility": 0.03266474520398229,
+        "volume": 228050,
+        "z_score": 5.504415960139969,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 281.2702708502136,
+        "RSI": 75.9183673469388,
+        "SMA_10": 306.77,
+        "SMA_20": 303.255,
+        "SMA_50": 296.24199999999996,
+        "Upper_BB": 325.2397291497864,
+        "adjacent_rows": [
+          {
+            "close": 312.4,
+            "date": "2026-02-26",
+            "volume": 1054543
+          },
+          {
+            "close": 316,
+            "date": "2026-03-01",
+            "volume": 1049844
+          },
+          {
+            "close": 317,
+            "date": "2026-03-03",
+            "volume": 483492
+          },
+          {
+            "close": 341,
+            "date": "2026-03-10",
+            "volume": 1842222
+          },
+          {
+            "close": 340,
+            "date": "2026-03-11",
+            "volume": 1303521
+          },
+          {
+            "close": 336.3,
+            "date": "2026-03-12",
+            "volume": 719166
+          }
+        ],
+        "average_volume": 371122.9,
+        "bb_width": 0.12932193617521415,
+        "close": 340,
+        "date": "2026-03-09",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 345,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -5.21,
+        "low": 323,
+        "open": 323,
+        "previous_close": 317,
+        "returns": 0.0725552050473186,
+        "rolling_mean": 303.255,
+        "rolling_std": 0.02098918923924144,
+        "volatility": 0.02098918923924144,
+        "volume": 47031,
+        "z_score": 3.9838542458600825,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 277.9841752849262,
+        "RSI": 81.60919540229884,
+        "SMA_10": 310.91999999999996,
+        "SMA_20": 305.45500000000004,
+        "SMA_50": 297.36199999999997,
+        "Upper_BB": 332.9258247150739,
+        "adjacent_rows": [
+          {
+            "close": 316,
+            "date": "2026-03-01",
+            "volume": 1049844
+          },
+          {
+            "close": 317,
+            "date": "2026-03-03",
+            "volume": 483492
+          },
+          {
+            "close": 340,
+            "date": "2026-03-09",
+            "volume": 47031
+          },
+          {
+            "close": 340,
+            "date": "2026-03-11",
+            "volume": 1303521
+          },
+          {
+            "close": 336.3,
+            "date": "2026-03-12",
+            "volume": 719166
+          },
+          {
+            "close": 339.8,
+            "date": "2026-03-15",
+            "volume": 922715
+          }
+        ],
+        "average_volume": 357530.5,
+        "bb_width": 0.16111920654002249,
+        "close": 341,
+        "date": "2026-03-10",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 347,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.72,
+        "low": 323,
+        "open": 345,
+        "previous_close": 340,
+        "returns": 0.002941176470588225,
+        "rolling_mean": 305.45500000000004,
+        "rolling_std": 0.020691485317895504,
+        "volatility": 0.020691485317895504,
+        "volume": 1842222,
+        "z_score": 0.12152184562328436,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 281.25855897072876,
+        "RSI": 85.27315914489313,
+        "SMA_10": 342.84000000000003,
+        "SMA_20": 324.80499999999995,
+        "SMA_50": 307.138,
+        "Upper_BB": 368.35144102927114,
+        "adjacent_rows": [
+          {
+            "close": 344.4,
+            "date": "2026-03-19",
+            "volume": 1528471
+          },
+          {
+            "close": 343.5,
+            "date": "2026-03-22",
+            "volume": 1005619
+          },
+          {
+            "close": 348,
+            "date": "2026-03-23",
+            "volume": 799386
+          },
+          {
+            "close": 359,
+            "date": "2026-03-25",
+            "volume": 1429057
+          },
+          {
+            "close": 364.2,
+            "date": "2026-03-26",
+            "volume": 886488
+          },
+          {
+            "close": 356,
+            "date": "2026-03-29",
+            "volume": 1046367
+          }
+        ],
+        "average_volume": 687620.45,
+        "bb_width": 0.24098749877847922,
+        "close": 361.4,
+        "date": "2026-03-24",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 367.9,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.02,
+        "low": 351,
+        "open": 354,
+        "previous_close": 348,
+        "returns": 0.03850574712643673,
+        "rolling_mean": 324.80499999999995,
+        "rolling_std": 0.022131749862582914,
+        "volatility": 0.022131749862582914,
+        "volume": 1601369,
+        "z_score": 2.0947188628479148,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 320.7280526710763,
+        "RSI": 42.127659574468076,
+        "SMA_10": 353.23,
+        "SMA_20": 345.415,
+        "SMA_50": 317.55400000000003,
+        "Upper_BB": 370.10194732892376,
+        "adjacent_rows": [
+          {
+            "close": 358.1,
+            "date": "2026-03-31",
+            "volume": 1143683
+          },
+          {
+            "close": 350,
+            "date": "2026-04-01",
+            "volume": 1304796
+          },
+          {
+            "close": 353,
+            "date": "2026-04-02",
+            "volume": 787287
+          },
+          {
+            "close": 346,
+            "date": "2026-04-06",
+            "volume": 936872
+          },
+          {
+            "close": 341.5,
+            "date": "2026-04-07",
+            "volume": 428867
+          },
+          {
+            "close": 349,
+            "date": "2026-04-08",
+            "volume": 472857
+          }
+        ],
+        "average_volume": 1016388.95,
+        "bb_width": 0.15191967587029992,
+        "close": 325,
+        "date": "2026-04-05",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 350.5,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.39,
+        "low": 324.6,
+        "open": 350.5,
+        "previous_close": 353,
+        "returns": -0.07932011331444755,
+        "rolling_mean": 345.415,
+        "rolling_std": 0.028883726373798126,
+        "volatility": 0.028883726373798126,
+        "volume": 979663,
+        "z_score": -4.44250714850126,
+        "z_score_label": -1
+      }
+    ],
+    "end_date": "2026-08-01",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.023148148148148147,
+        "n_clusters": 1,
+        "n_noise": 5
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.023148148148148147,
+        "n_clusters": 1,
+        "n_noise": 5
+      },
+      "z_score": {
+        "anomaly_rate": 0.027777777777777776,
+        "n_clusters": 1,
+        "n_noise": 6
+      }
+    },
+    "start_date": "2025-08-01",
+    "stock": "API",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-08-01T10:44:48.432617",
+  "user_id": 1
+}

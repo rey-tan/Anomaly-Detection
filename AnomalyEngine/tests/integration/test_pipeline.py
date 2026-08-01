@@ -34,6 +34,7 @@ def test_pipeline_basic_run():
         'stock': 'ADBL',
         'start_date': str(df.index[0].date()),
         'end_date': str(df.index[-1].date()),
+        'algorithm':'ensemble',
         'timeframe': '1D',
     }
 

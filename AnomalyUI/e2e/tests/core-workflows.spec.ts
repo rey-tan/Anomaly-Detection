@@ -10,6 +10,8 @@ const analysisData = {
       close: 100,
       anomaly: true,
       cluster: -1,
+      dbscan_label: -1,
+      isolation_forest_label: -1,
       volume: 1000,
       change: 0,
     },
@@ -139,8 +141,10 @@ test('Results -> Analyze with AI -> explanation displayed', async ({ page }) => 
   await page.getByRole('button', { name: /run analysis/i }).click()
 
   await page.waitForURL('**/results', { timeout: 15000 })
-  await expect(page.getByRole('button', { name: /analyze with AI/i })).toBeVisible()
-  await page.getByRole('button', { name: /analyze with AI/i }).click()
+  const aiButton = page.getByRole('button', { name: /analyze with AI/i })
+  await expect(aiButton).toBeVisible()
+  await expect(aiButton).toBeEnabled()
+  await aiButton.click()
   await expect(page.getByText(/AI generated summary/i)).toBeVisible()
 })
 
@@ -199,6 +203,8 @@ test('Returning user journey: Login → view analysis history → run new analys
         close: 110,
         cluster: -1,
         cluster_dbscan: -1,
+        dbscan_label: -1,
+        isolation_forest_label: -1,
         anomaly: true,
         volume: 1500,
         change: 1.0,
@@ -209,6 +215,8 @@ test('Returning user journey: Login → view analysis history → run new analys
         close: 112,
         cluster: 1,
         cluster_dbscan: 1,
+        dbscan_label: 1,
+        isolation_forest_label: 1,
         anomaly: false,
         volume: 900,
         change: 0.02,
@@ -255,7 +263,9 @@ test('Returning user journey: Login → view analysis history → run new analys
   await expect(page.getByText('110')).toBeVisible()
   await expect(page.getByText(/Data points/i)).toBeVisible()
   // Request AI explanation for the new results and verify it's displayed
-  await page.getByRole('button', { name: /analyze with AI/i }).click()
+  const aiButton = page.getByRole('button', { name: /analyze with AI/i })
+  await expect(aiButton).toBeEnabled()
+  await aiButton.click()
   await expect(page.getByText(/AI generated summary/i)).toBeVisible()
 
   await page.getByRole('button', { name: /sign out/i }).click()

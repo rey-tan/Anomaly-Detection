@@ -59,6 +59,7 @@ def test_analyze_with_invalid_stock_symbol(test_db_with_user):
     payload = {
         "stock": "NONEXISTENT",
         "timeframe": "1D",
+        "algorithm": "ensemble",
         "start_date": "2024-01-01",
         "end_date": "2024-01-10",
     }
@@ -80,6 +81,7 @@ def test_analyze_with_start_date_after_end_date(test_db_with_user):
         "timeframe": "1D",
         "start_date": "2024-01-31",
         "end_date": "2024-01-01",
+        "algorithm": "ensemble",
     }
 
     response = client.post("/analyze", json=payload, headers=headers)
@@ -96,6 +98,7 @@ def test_analyze_without_authentication(test_db_with_user):
         "timeframe": "1D",
         "start_date": "2024-01-01",
         "end_date": "2024-01-10",
+        "algorithm": "ensemble",
     }
 
     response = client.post("/analyze", json=payload)
@@ -115,6 +118,7 @@ def test_analyze_successful_run_returns_expected_payload(test_db_with_user, monk
         "timeframe": "1D",
         "start_date": "2024-01-01",
         "end_date": "2024-01-02",
+        "algorithm": "ensemble",
     }
 
     dummy_df = pd.DataFrame({"date": ["2024-01-01"], "close": [100.0]})

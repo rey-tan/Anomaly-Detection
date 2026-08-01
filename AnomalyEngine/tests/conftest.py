@@ -26,3 +26,8 @@ def pytest_configure(config):
         "filterwarnings",
         r"ignore:Using `httpx` with `starlette\.testclient` is deprecated.*",
     )
+    # Filter out the Pandas4Warning for datetime.date slicing
+    config.addinivalue_line(
+        "filterwarnings",
+        r"ignore:Slicing with a datetime\.date object is deprecated.*:pandas.errors.Pandas4Warning",
+    )

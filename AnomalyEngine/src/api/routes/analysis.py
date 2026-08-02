@@ -241,10 +241,14 @@ def explain_analysis(
     try:
         explanation_engine = ExplanationEngine(request)
         explanation = explanation_engine.explain()
-        print(request.data)
+    
 
     except Exception as e:
         print("Error generating explanation:", e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate explanation: {str(e)}"
+        )
     
     try:
         artifact_payload = {

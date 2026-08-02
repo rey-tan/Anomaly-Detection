@@ -1,0 +1,355 @@
+{
+  "explanation": {
+    "anomaly_count": 5,
+    "entries": [],
+    "raw_summary": "**Row 1: 2025-09-18**  \n- **Technical anomaly**: Close 464 vs. previous close 497.36 (‑6.7%), z‑score ‑5.14 (extreme negative deviation). Volume 10,795 vs. 30‑day average 40,591 (≈73% below average). Flagged by DBSCAN only.  \n- **News correlation**:  \n  - *Market event*: NEPSE suffered a 6% crash on 2025‑09‑18, wiping out Rs. 2.68 kharba in minutes (ShareSansar).  \n  - *Real‑world event*: Gen Z protests erupted in September 2025; former energy minister arrested in money‑laundering case (DW, Participedia).  \n- **Category**: MARKET EVENT (broad market crash) + REAL‑WORLD EVENT (political unrest).  \n- **Interpretation**: The sharp price drop and very low volume align with a market‑wide circuit‑breaker decline and panic selling amid political protests.\n\n**Row 2: 2025-09-21**  \n- **Technical anomaly**: Close 491.68 vs. previous close 464 (+5.9%), z‑score +4.62 (extreme positive deviation). Volume 85,259 vs. average 37,031 (≈2.3× average). Flagged by DBSCAN and Isolation Forest (two detectors agree).  \n- **News correlation**:  \n  - *Market event*: NEPSE rebounded 111.7 points after the Thursday plunge (Kathmandu Post).  \n  - *Real‑world event*: Ongoing Gen Z protests and ex‑energy minister arrest continued to dominate sentiment.  \n- **Category**: MARKET EVENT (sharp recovery rally).  \n- **Interpretation**: The strong bounce on high volume mirrors the broader market rebound; the dual‑detector flag confirms the move is statistically unusual.\n\n**Row 3: 2026-01-01**  \n- **Technical anomaly**: Close 471 vs. previous close 506.9 (‑7.1%), z‑score ‑5.43 (extreme negative). Volume 40,421 vs. average 36,648 (slightly above average). Flagged by DBSCAN only.  \n- **News correlation**:  \n  - *Financial event*: CHCL declared 8% bonus shares and 4% cash dividend for FY 2081/82 (ShareSansar, Hamroshare). The ex‑dividend/ex‑bonus adjustment (theoretical ex‑price ≈ 465‑470) matches the observed drop.  \n  - *Market event*: NEPSE continued sliding in early 2026 (NepalNews).  \n  - *Real‑world event*: Gen Z anti‑corruption protests and arrest of alleged power broker Deepak Bhatta (OCCRP, The Science Survey).  \n- **Category**: FINANCIAL EVENT (dividend/bonus ex‑date) + MARKET EVENT (broader downtrend).  \n- **Interpretation**: The price gap is consistent with the corporate action (bonus + cash dividend); the moderate volume suggests orderly ex‑date adjustment rather than panic.\n\n**Row 4: 2026-03-09**  \n- **Technical anomaly**: Close 509 vs. previous close 479.9 (+6.1%), z‑score +4.69 (extreme positive). Volume only 30 shares vs. average 33,528 (near‑zero liquidity). Flagged by DBSCAN and Isolation Forest (two detectors agree).  \n- **News correlation**:  \n  - *Market event*: NEPSE hit a 6% upper circuit breaker on 2026‑03‑09, triggering a “huge rally” (Nepals Buzz Pages).  \n  - *Company notice*: CHCL issued a re‑bid invitation for contracts (Chilime website) – unlikely to drive a circuit‑breaker move.  \n- **Category**: MARKET EVENT (market‑wide upper circuit).  \n- **Interpretation**: The 6% price jump with almost no volume is classic upper‑circuit behavior—buyers cannot execute because sellers are absent. The dual‑detector flag underscores the extremity of the session.\n\n**Row 5: 2026-03-10**  \n- **Technical anomaly**: Close 500.1 vs. previous close 509 (‑1.7%), z‑score ‑1.32 (moderate negative). Volume 154,523 vs. average 30,612 (≈5× average). Flagged by Isolation Forest only.  \n- **News correlation**:  \n  - *Market event*: NEPSE slipped 32 points as investors booked profits after Monday’s circuit‑breaker rally (Kathmandu Post).  \n  - *Real‑world event*: General election held 2026‑03‑05; post‑election protests and Deepak Khadka arrest (YouTube, NepalNews).  \n- **Category**: MARKET EVENT (profit‑booking after sharp rally).  \n- **Interpretation**: The high‑volume pullback reflects profit‑taking after the previous day’s locked‑up rally; the Isolation Forest flag captures the volume surge rather than the price change magnitude.\n\n**Overall Summary:**  \nThe five anomalies for CHCL cluster around three distinct episodes:  \n1. **Mid‑September 2025** – A market‑wide crash (Row 1) and immediate rebound (Row 2) driven by political protests and a 6% NEPSE circuit‑breaker drop/recovery.  \n2. **Early January 2026** – An ex‑dividend/ex‑bonus adjustment (8% bonus + 4% cash) that explains the ~7% gap down (Row 3).  \n3. **Early March 2026** – A market‑wide upper circuit breaker (Row 4) followed by heavy profit‑booking (Row 5).  \n\nIn each case, the technical extremes (z‑scores > |4.6|, volume anomalies) align with identifiable external catalysts—broad market circuit breakers, corporate actions, or political unrest. No company‑specific operational news (earnings, contracts, management changes) was found for the anomaly dates beyond the dividend declaration and a routine re‑bid notice. The detector agreement (DBSCAN + Isolation Forest on Rows 2, 4) highlights the most statistically robust anomalies.",
+    "source": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "summary": "The five anomalies for CHCL cluster around three distinct episodes:  \n1. **Mid‑September 2025** – A market‑wide crash (Row 1) and immediate rebound (Row 2) driven by political protests and a 6% NEPSE circuit‑breaker drop/recovery.  \n2. **Early January 2026** – An ex‑dividend/ex‑bonus adjustment (8% bonus + 4% cash) that explains the ~7% gap down (Row 3).  \n3. **Early March 2026** – A market‑wide upper circuit breaker (Row 4) followed by heavy profit‑booking (Row 5).  \n\nIn each case, the technical extremes (z‑scores > |4.6|, volume anomalies) align with identifiable external catalysts—broad market circuit breakers, corporate actions, or political unrest. No company‑specific operational news (earnings, contracts, management changes) was found for the anomaly dates beyond the dividend declaration and a routine re‑bid notice. The detector agreement (DBSCAN + Isolation Forest on Rows 2, 4) highlights the most statistically robust anomalies."
+  },
+  "request": {
+    "analysis_id": 9,
+    "best_params": {
+      "dbscan": {
+        "eps": 2.296841048605388,
+        "min_pts": 4
+      },
+      "isolation_forest": {
+        "contamination": 0.01,
+        "n_estimators": 100
+      },
+      "z_score": {}
+    },
+    "data": [
+      {
+        "Lower_BB": 483.11989619584716,
+        "RSI": 18.140677527799355,
+        "SMA_10": 501.72700000000003,
+        "SMA_20": 507.7754999999999,
+        "SMA_50": 513.7551851851852,
+        "Upper_BB": 532.4311038041527,
+        "adjacent_rows": [
+          {
+            "close": 503.2,
+            "date": "2025-09-04",
+            "volume": 49479
+          },
+          {
+            "close": 501.49,
+            "date": "2025-09-07",
+            "volume": 35260
+          },
+          {
+            "close": 497.36,
+            "date": "2025-09-08",
+            "volume": 27390
+          },
+          {
+            "close": 491.68,
+            "date": "2025-09-21",
+            "volume": 85259
+          },
+          {
+            "close": 502.2,
+            "date": "2025-09-23",
+            "volume": 41659
+          },
+          {
+            "close": 496,
+            "date": "2025-09-24",
+            "volume": 18374
+          }
+        ],
+        "average_volume": 40590.9,
+        "bb_width": 0.10627415432824472,
+        "close": 464,
+        "date": "2025-09-18",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 490,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -4.45,
+        "low": 456,
+        "open": 488,
+        "previous_close": 497.36,
+        "returns": -0.06707415152002572,
+        "rolling_mean": 507.7754999999999,
+        "rolling_std": 0.016413168494856894,
+        "volatility": 0.016413168494856894,
+        "volume": 10795,
+        "z_score": -5.143970102692896,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 481.3941097127558,
+        "RSI": 40.3658182522017,
+        "SMA_10": 499.117,
+        "SMA_20": 506.371,
+        "SMA_50": 512.9667857142857,
+        "Upper_BB": 531.3478902872441,
+        "adjacent_rows": [
+          {
+            "close": 501.49,
+            "date": "2025-09-07",
+            "volume": 35260
+          },
+          {
+            "close": 497.36,
+            "date": "2025-09-08",
+            "volume": 27390
+          },
+          {
+            "close": 464,
+            "date": "2025-09-18",
+            "volume": 10795
+          },
+          {
+            "close": 502.2,
+            "date": "2025-09-23",
+            "volume": 41659
+          },
+          {
+            "close": 496,
+            "date": "2025-09-24",
+            "volume": 18374
+          },
+          {
+            "close": 497,
+            "date": "2025-09-25",
+            "volume": 11872
+          }
+        ],
+        "average_volume": 37030.9,
+        "bb_width": 0.10159815443883898,
+        "close": 491.68,
+        "date": "2025-09-21",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 500,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.03,
+        "low": 458.1,
+        "open": 460,
+        "previous_close": 464,
+        "returns": 0.059655172413793034,
+        "rolling_mean": 506.371,
+        "rolling_std": 0.021963618814014436,
+        "volatility": 0.021963618814014436,
+        "volume": 85259,
+        "z_score": 4.6189157350130365,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 478.9457906379737,
+        "RSI": 35.39944903581268,
+        "SMA_10": 494.58000000000004,
+        "SMA_20": 493.34000000000003,
+        "SMA_50": 491.4939999999999,
+        "Upper_BB": 507.7342093620264,
+        "adjacent_rows": [
+          {
+            "close": 504.9,
+            "date": "2025-12-28",
+            "volume": 72382
+          },
+          {
+            "close": 501.5,
+            "date": "2025-12-29",
+            "volume": 66397
+          },
+          {
+            "close": 506.9,
+            "date": "2025-12-31",
+            "volume": 134557
+          },
+          {
+            "close": 470.5,
+            "date": "2026-01-04",
+            "volume": 69102
+          },
+          {
+            "close": 470.2,
+            "date": "2026-01-05",
+            "volume": 23284
+          },
+          {
+            "close": 470.9,
+            "date": "2026-01-06",
+            "volume": 24897
+          }
+        ],
+        "average_volume": 36647.9,
+        "bb_width": 0.061121908119007834,
+        "close": 471,
+        "date": "2026-01-01",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN"
+        ],
+        "high": 478.1,
+        "isolation_forest_label": 1,
+        "isolation_forest_score": -4.55,
+        "low": 464,
+        "open": 464,
+        "previous_close": 506.9,
+        "returns": -0.07082264746498323,
+        "rolling_mean": 493.34000000000003,
+        "rolling_std": 0.017428072885823386,
+        "volatility": 0.017428072885823386,
+        "volume": 40421,
+        "z_score": -5.432744135708612,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 450.7887586482983,
+        "RSI": 75.93085106382978,
+        "SMA_10": 471.45,
+        "SMA_20": 470.80999999999995,
+        "SMA_50": 477.862,
+        "Upper_BB": 490.8312413517016,
+        "adjacent_rows": [
+          {
+            "close": 468,
+            "date": "2026-02-26",
+            "volume": 29534
+          },
+          {
+            "close": 469,
+            "date": "2026-03-01",
+            "volume": 42208
+          },
+          {
+            "close": 479.9,
+            "date": "2026-03-03",
+            "volume": 39111
+          },
+          {
+            "close": 500.1,
+            "date": "2026-03-10",
+            "volume": 154523
+          },
+          {
+            "close": 503,
+            "date": "2026-03-11",
+            "volume": 117369
+          },
+          {
+            "close": 510,
+            "date": "2026-03-12",
+            "volume": 68795
+          }
+        ],
+        "average_volume": 33527.7,
+        "bb_width": 0.07866892476110661,
+        "close": 509,
+        "date": "2026-03-09",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 509,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -3.64,
+        "low": 489.4,
+        "open": 489.4,
+        "previous_close": 479.9,
+        "returns": 0.06063763284017498,
+        "rolling_mean": 470.80999999999995,
+        "rolling_std": 0.01597573890460746,
+        "volatility": 0.01597573890460746,
+        "volume": 30,
+        "z_score": 4.694601840525915,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 448.3959521575611,
+        "RSI": 69.54933008526189,
+        "SMA_10": 474.46000000000004,
+        "SMA_20": 472.31000000000006,
+        "SMA_50": 478.034,
+        "Upper_BB": 496.224047842439,
+        "adjacent_rows": [
+          {
+            "close": 469,
+            "date": "2026-03-01",
+            "volume": 42208
+          },
+          {
+            "close": 479.9,
+            "date": "2026-03-03",
+            "volume": 39111
+          },
+          {
+            "close": 509,
+            "date": "2026-03-09",
+            "volume": 30
+          },
+          {
+            "close": 503,
+            "date": "2026-03-11",
+            "volume": 117369
+          },
+          {
+            "close": 510,
+            "date": "2026-03-12",
+            "volume": 68795
+          },
+          {
+            "close": 508.6,
+            "date": "2026-03-15",
+            "volume": 41296
+          }
+        ],
+        "average_volume": 30611.85,
+        "bb_width": 0.09563706395696439,
+        "close": 500.1,
+        "date": "2026-03-10",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 525,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.05,
+        "low": 492,
+        "open": 519.1,
+        "previous_close": 509,
+        "returns": -0.01748526522593319,
+        "rolling_mean": 472.31000000000006,
+        "rolling_std": 0.01646569665296913,
+        "volatility": 0.01646569665296913,
+        "volume": 154523,
+        "z_score": -1.323775843935302,
+        "z_score_label": 1
+      }
+    ],
+    "end_date": "2026-08-02",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.018018018018018018,
+        "n_clusters": 1,
+        "n_noise": 4
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.013513513513513514,
+        "n_clusters": 1,
+        "n_noise": 3
+      },
+      "z_score": {
+        "anomaly_rate": 0.018018018018018018,
+        "n_clusters": 1,
+        "n_noise": 4
+      }
+    },
+    "start_date": "2025-08-02",
+    "stock": "CHCL",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-08-02T10:33:23.386051",
+  "user_id": 1
+}

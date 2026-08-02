@@ -62,7 +62,7 @@ class AnomalyDetectorService:
 
         result = {}
 
-        z_labels,z_scores = self._predict_zscore(df, best_params.get("z_score", {}).get("threshold", 3.0))
+        z_labels,z_scores = self._predict_zscore(df, 3.0)
 
         result["z_score_label"] = z_labels
         result["z_score"] = z_scores

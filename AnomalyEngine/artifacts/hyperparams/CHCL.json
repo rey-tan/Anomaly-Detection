@@ -7,9 +7,6 @@
     "dbscan": {
       "eps": 2.296841048605388,
       "min_pts": 4
-    },
-    "z_score": {
-      "threshold": 3
     }
   }
 }

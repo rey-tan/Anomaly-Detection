@@ -22,7 +22,7 @@ export default function AnalysisPanel({ token, setError, setResults, setSelected
 
 
   const [form, setForm] = useState({
-    stock: "API",
+    stock: "CHCL",
     timeframe: "1D",
     start_date: startDate,
     end_date: endDate,

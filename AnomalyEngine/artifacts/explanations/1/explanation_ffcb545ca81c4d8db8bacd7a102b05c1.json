@@ -1,0 +1,717 @@
+{
+  "explanation": {
+    "anomaly_count": 9,
+    "entries": [
+      {
+        "bullets": [
+          "Close: 265.18 with -7.07% change",
+          "Volume: 180,266 which is 10.57x the 20-day average",
+          "Price is 3.04σ below mean",
+          "BB width 0.167 indicates elevated volatility spike",
+          "RSI 19 indicates oversold conditions",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2025-08-31",
+        "row_number": 1,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 243.49 with -6.45% change",
+          "Volume: 130,407 which is 4.93x the 20-day average",
+          "Price is 2.77σ below mean",
+          "BB width 0.313 indicates elevated volatility spike",
+          "RSI 14 indicates oversold conditions",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2025-09-03",
+        "row_number": 2,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 229 with -5.74% change",
+          "Volume: 1,169 which is 0.03x the 20-day average",
+          "Price is 2.46σ below mean",
+          "BB width 0.451 indicates elevated volatility spike",
+          "RSI 9 indicates oversold conditions",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2025-09-18",
+        "row_number": 3,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 263.9 with 9.50% change",
+          "Volume: 71,519 which is 1.91x the 20-day average",
+          "Price is 4.12σ above mean",
+          "BB width 0.391 indicates elevated volatility spike",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2025-09-23",
+        "row_number": 4,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 277 with 6.29% change",
+          "Volume: 185,273 which is 4.94x the 20-day average",
+          "Price is 2.74σ above mean",
+          "BB width 0.137 indicates notable volatility change",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2025-11-23",
+        "row_number": 5,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 298 with 6.43% change",
+          "Volume: 354,438 which is 4.40x the 20-day average",
+          "Price is 2.80σ above mean",
+          "BB width 0.165 indicates elevated volatility spike",
+          "RSI 70 indicates overbought conditions",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2026-02-05",
+        "row_number": 6,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 307.5 with 6.07% change",
+          "Volume: 30 which is 0.00x the 20-day average",
+          "Price is 2.64σ above mean",
+          "BB width 0.129 indicates notable volatility change",
+          "Flagged by Isolation Forest"
+        ],
+        "date": "2026-03-09",
+        "row_number": 7,
+        "summary": "Anomaly detected with 1 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 313.1 with 1.82% change",
+          "Volume: 322,318 which is 3.67x the 20-day average",
+          "Price is 0.80σ above mean",
+          "BB width 0.148 indicates notable volatility change",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2026-03-10",
+        "row_number": 8,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      },
+      {
+        "bullets": [
+          "Close: 326 with 2.84% change",
+          "Volume: 256,804 which is 2.84x the 20-day average",
+          "Price is 1.24σ above mean",
+          "BB width 0.215 indicates elevated volatility spike",
+          "RSI 84 indicates overbought conditions",
+          "Strong signal: DBSCAN + Isolation Forest agreement"
+        ],
+        "date": "2026-03-19",
+        "row_number": 9,
+        "summary": "Anomaly detected with 2 detector(s) confirming."
+      }
+    ],
+    "raw_summary": "Detected 9 anomalous rows. Price anomalies shown via z-score deviation. Volatility changes via Bollinger Band width. RSI indicates momentum extremes. Volume spikes show trading strength.",
+    "source": "heuristic",
+    "summary": "Detected 9 anomalous rows. Price anomalies shown via z-score deviation. Volatility changes via Bollinger Band width. RSI indicates momentum extremes. Volume spikes show trading strength."
+  },
+  "request": {
+    "analysis_id": 10,
+    "best_params": {
+      "dbscan": {
+        "eps": 1.1953133068304809,
+        "min_pts": 8
+      },
+      "isolation_forest": {
+        "contamination": 0.04,
+        "n_estimators": 100
+      },
+      "z_score": {}
+    },
+    "data": [
+      {
+        "Lower_BB": 277.5697941064478,
+        "RSI": 18.979817528338373,
+        "SMA_10": 293.36199999999997,
+        "SMA_20": 299.728,
+        "SMA_50": 299.728,
+        "Upper_BB": 321.88620589355224,
+        "adjacent_rows": [
+          {
+            "close": 290.32,
+            "date": "2025-08-26",
+            "volume": 11452
+          },
+          {
+            "close": 294.15,
+            "date": "2025-08-27",
+            "volume": 19433
+          },
+          {
+            "close": 285.36,
+            "date": "2025-08-28",
+            "volume": 41002
+          },
+          {
+            "close": 261.15,
+            "date": "2025-09-01",
+            "volume": 42340
+          },
+          {
+            "close": 260.27,
+            "date": "2025-09-02",
+            "volume": 25428
+          },
+          {
+            "close": 243.49,
+            "date": "2025-09-03",
+            "volume": 130407
+          }
+        ],
+        "average_volume": 17051.36842105263,
+        "bb_width": 0.16711822832455114,
+        "close": 265.18,
+        "date": "2025-08-31",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 280,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.81,
+        "low": 264,
+        "open": 279.7,
+        "previous_close": 285.36,
+        "returns": -0.07071768993552008,
+        "rolling_mean": 299.728,
+        "rolling_std": 0.022254179686299082,
+        "volatility": 0.022254179686299082,
+        "volume": 180266,
+        "z_score": -3.0378824463778935,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 253.45871629905128,
+        "RSI": 14.48979591836735,
+        "SMA_10": 278.637,
+        "SMA_20": 291.5545,
+        "SMA_50": 293.89,
+        "Upper_BB": 329.65028370094876,
+        "adjacent_rows": [
+          {
+            "close": 265.18,
+            "date": "2025-08-31",
+            "volume": 180266
+          },
+          {
+            "close": 261.15,
+            "date": "2025-09-01",
+            "volume": 42340
+          },
+          {
+            "close": 260.27,
+            "date": "2025-09-02",
+            "volume": 25428
+          },
+          {
+            "close": 246.26,
+            "date": "2025-09-04",
+            "volume": 50491
+          },
+          {
+            "close": 244.69,
+            "date": "2025-09-07",
+            "volume": 45246
+          },
+          {
+            "close": 242.94,
+            "date": "2025-09-08",
+            "volume": 27063
+          }
+        ],
+        "average_volume": 26472.45,
+        "bb_width": 0.31291456487698666,
+        "close": 243.49,
+        "date": "2025-09-03",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 260.1,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.74,
+        "low": 242,
+        "open": 260,
+        "previous_close": 260.27,
+        "returns": -0.06447151035463161,
+        "rolling_mean": 291.5545,
+        "rolling_std": 0.025411373602847745,
+        "volatility": 0.025411373602847745,
+        "volume": 130407,
+        "z_score": -2.7679746492237913,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 226.4950690687127,
+        "RSI": 8.667425968109299,
+        "SMA_10": 257.249,
+        "SMA_20": 278.1685,
+        "SMA_50": 286.0133333333333,
+        "Upper_BB": 329.8419309312873,
+        "adjacent_rows": [
+          {
+            "close": 246.26,
+            "date": "2025-09-04",
+            "volume": 50491
+          },
+          {
+            "close": 244.69,
+            "date": "2025-09-07",
+            "volume": 45246
+          },
+          {
+            "close": 242.94,
+            "date": "2025-09-08",
+            "volume": 27063
+          },
+          {
+            "close": 241.01,
+            "date": "2025-09-21",
+            "volume": 64414
+          },
+          {
+            "close": 263.9,
+            "date": "2025-09-23",
+            "volume": 71519
+          },
+          {
+            "close": 258.7,
+            "date": "2025-09-24",
+            "volume": 38620
+          }
+        ],
+        "average_volume": 35883.35,
+        "bb_width": 0.4512963400112429,
+        "close": 229,
+        "date": "2025-09-18",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 242,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.47,
+        "low": 229,
+        "open": 242,
+        "previous_close": 242.94,
+        "returns": -0.057380423149748894,
+        "rolling_mean": 278.1685,
+        "rolling_std": 0.02503761774674888,
+        "volatility": 0.02503761774674888,
+        "volume": 1169,
+        "z_score": -2.461556989899098,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 221.60585338089973,
+        "RSI": 36.888233252342914,
+        "SMA_10": 249.789,
+        "SMA_20": 273.23199999999997,
+        "SMA_50": 283.6989655172414,
+        "Upper_BB": 324.85814661910024,
+        "adjacent_rows": [
+          {
+            "close": 242.94,
+            "date": "2025-09-08",
+            "volume": 27063
+          },
+          {
+            "close": 229,
+            "date": "2025-09-18",
+            "volume": 1169
+          },
+          {
+            "close": 241.01,
+            "date": "2025-09-21",
+            "volume": 64414
+          },
+          {
+            "close": 258.7,
+            "date": "2025-09-24",
+            "volume": 38620
+          },
+          {
+            "close": 267.2,
+            "date": "2025-09-25",
+            "volume": 41999
+          },
+          {
+            "close": 273,
+            "date": "2025-09-28",
+            "volume": 55459
+          }
+        ],
+        "average_volume": 37385.85,
+        "bb_width": 0.3912553741500588,
+        "close": 263.9,
+        "date": "2025-09-23",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 265,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.64,
+        "low": 237.1,
+        "open": 245.6,
+        "previous_close": 241.01,
+        "returns": 0.09497531222770839,
+        "rolling_mean": 273.23199999999997,
+        "rolling_std": 0.03735344279772335,
+        "volatility": 0.03735344279772335,
+        "volume": 71519,
+        "z_score": 4.121987461071296,
+        "z_score_label": -1
+      },
+      {
+        "Lower_BB": 231.59882689141438,
+        "RSI": 63.328424153166445,
+        "SMA_10": 253.33,
+        "SMA_20": 250.625,
+        "SMA_50": 256.73580000000004,
+        "Upper_BB": 269.6511731085856,
+        "adjacent_rows": [
+          {
+            "close": 259,
+            "date": "2025-11-18",
+            "volume": 49633
+          },
+          {
+            "close": 254,
+            "date": "2025-11-19",
+            "volume": 37722
+          },
+          {
+            "close": 260.6,
+            "date": "2025-11-20",
+            "volume": 76715
+          },
+          {
+            "close": 273.7,
+            "date": "2025-11-24",
+            "volume": 94305
+          },
+          {
+            "close": 282.9,
+            "date": "2025-11-25",
+            "volume": 132344
+          },
+          {
+            "close": 281.8,
+            "date": "2025-11-26",
+            "volume": 91975
+          }
+        ],
+        "average_volume": 37511.95,
+        "bb_width": 0.1373730910367193,
+        "close": 277,
+        "date": "2025-11-23",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 279,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.54,
+        "low": 255.4,
+        "open": 255.4,
+        "previous_close": 260.6,
+        "returns": 0.06293169608595539,
+        "rolling_mean": 250.625,
+        "rolling_std": 0.026123343947448727,
+        "volatility": 0.026123343947448727,
+        "volume": 185273,
+        "z_score": 2.7373295700085527,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 250.29203040792365,
+        "RSI": 70.2816901408451,
+        "SMA_10": 284.08,
+        "SMA_20": 274.845,
+        "SMA_50": 267.32599999999996,
+        "Upper_BB": 299.39796959207644,
+        "adjacent_rows": [
+          {
+            "close": 279,
+            "date": "2026-02-02",
+            "volume": 66913
+          },
+          {
+            "close": 277,
+            "date": "2026-02-03",
+            "volume": 62358
+          },
+          {
+            "close": 280,
+            "date": "2026-02-04",
+            "volume": 51384
+          },
+          {
+            "close": 295,
+            "date": "2026-02-08",
+            "volume": 137920
+          },
+          {
+            "close": 287.9,
+            "date": "2026-02-09",
+            "volume": 147558
+          },
+          {
+            "close": 292.9,
+            "date": "2026-02-10",
+            "volume": 169091
+          }
+        ],
+        "average_volume": 80555.8,
+        "bb_width": 0.16478503081930465,
+        "close": 298,
+        "date": "2026-02-05",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 308,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -3.61,
+        "low": 280.1,
+        "open": 285,
+        "previous_close": 280,
+        "returns": 0.06428571428571428,
+        "rolling_mean": 274.845,
+        "rolling_std": 0.020995398226223816,
+        "volatility": 0.020995398226223816,
+        "volume": 354438,
+        "z_score": 2.7958389459992286,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 266.0335744519321,
+        "RSI": 57.55743651753325,
+        "SMA_10": 283.12,
+        "SMA_20": 285.8,
+        "SMA_50": 272.746,
+        "Upper_BB": 305.5664255480679,
+        "adjacent_rows": [
+          {
+            "close": 282.7,
+            "date": "2026-02-26",
+            "volume": 32485
+          },
+          {
+            "close": 284.1,
+            "date": "2026-03-01",
+            "volume": 37223
+          },
+          {
+            "close": 289.9,
+            "date": "2026-03-03",
+            "volume": 44798
+          },
+          {
+            "close": 313.1,
+            "date": "2026-03-10",
+            "volume": 322318
+          },
+          {
+            "close": 310.5,
+            "date": "2026-03-11",
+            "volume": 110091
+          },
+          {
+            "close": 318,
+            "date": "2026-03-12",
+            "volume": 98840
+          }
+        ],
+        "average_volume": 97493.5,
+        "bb_width": 0.12856211738580747,
+        "close": 307.5,
+        "date": "2026-03-09",
+        "dbscan_label": 1,
+        "detector_flags": [
+          "Isolation Forest"
+        ],
+        "high": 307.5,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.69,
+        "low": 295.6,
+        "open": 295.6,
+        "previous_close": 289.9,
+        "returns": 0.06071058985857203,
+        "rolling_mean": 285.8,
+        "rolling_std": 0.026518137072229726,
+        "volatility": 0.026518137072229726,
+        "volume": 30,
+        "z_score": 2.641351879755685,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 264.1441005537816,
+        "RSI": 65.51724137931036,
+        "SMA_10": 285.33,
+        "SMA_20": 287.30499999999995,
+        "SMA_50": 273.878,
+        "Upper_BB": 310.4658994462183,
+        "adjacent_rows": [
+          {
+            "close": 284.1,
+            "date": "2026-03-01",
+            "volume": 37223
+          },
+          {
+            "close": 289.9,
+            "date": "2026-03-03",
+            "volume": 44798
+          },
+          {
+            "close": 307.5,
+            "date": "2026-03-09",
+            "volume": 30
+          },
+          {
+            "close": 310.5,
+            "date": "2026-03-11",
+            "volume": 110091
+          },
+          {
+            "close": 318,
+            "date": "2026-03-12",
+            "volume": 98840
+          },
+          {
+            "close": 318.8,
+            "date": "2026-03-15",
+            "volume": 106185
+          }
+        ],
+        "average_volume": 87714.6,
+        "bb_width": 0.1479457007104335,
+        "close": 313.1,
+        "date": "2026-03-10",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 324.3,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -4.38,
+        "low": 301,
+        "open": 313.6,
+        "previous_close": 307.5,
+        "returns": 0.01821138211382123,
+        "rolling_mean": 287.30499999999995,
+        "rolling_std": 0.026361281460517222,
+        "volatility": 0.026361281460517222,
+        "volume": 322318,
+        "z_score": 0.8048905045051475,
+        "z_score_label": 1
+      },
+      {
+        "Lower_BB": 261.4069809334603,
+        "RSI": 83.9352428393524,
+        "SMA_10": 309.59000000000003,
+        "SMA_20": 296.525,
+        "SMA_50": 281.11199999999997,
+        "Upper_BB": 331.64301906653964,
+        "adjacent_rows": [
+          {
+            "close": 318.8,
+            "date": "2026-03-15",
+            "volume": 106185
+          },
+          {
+            "close": 311,
+            "date": "2026-03-16",
+            "volume": 81352
+          },
+          {
+            "close": 317,
+            "date": "2026-03-17",
+            "volume": 70603
+          },
+          {
+            "close": 320,
+            "date": "2026-03-22",
+            "volume": 197362
+          },
+          {
+            "close": 316.1,
+            "date": "2026-03-23",
+            "volume": 69650
+          },
+          {
+            "close": 324,
+            "date": "2026-03-24",
+            "volume": 104349
+          }
+        ],
+        "average_volume": 90484.7,
+        "bb_width": 0.21544796973337213,
+        "close": 326,
+        "date": "2026-03-19",
+        "dbscan_label": -1,
+        "detector_flags": [
+          "DBSCAN",
+          "Isolation Forest"
+        ],
+        "high": 330,
+        "isolation_forest_label": -1,
+        "isolation_forest_score": -5.26,
+        "low": 318,
+        "open": 323.3,
+        "previous_close": 317,
+        "returns": 0.028391167192429068,
+        "rolling_mean": 296.525,
+        "rolling_std": 0.023166579677688072,
+        "volatility": 0.023166579677688072,
+        "volume": 256804,
+        "z_score": 1.2447759305463917,
+        "z_score_label": 1
+      }
+    ],
+    "end_date": "2026-08-02",
+    "metrics": {
+      "dbscan": {
+        "anomaly_rate": 0.02702702702702703,
+        "n_clusters": 1,
+        "n_noise": 6
+      },
+      "isolation_forest": {
+        "anomaly_rate": 0.04054054054054054,
+        "n_clusters": 1,
+        "n_noise": 9
+      },
+      "z_score": {
+        "anomaly_rate": 0.009009009009009009,
+        "n_clusters": 1,
+        "n_noise": 2
+      }
+    },
+    "start_date": "2025-08-02",
+    "stock": "CHL",
+    "timeframe": "1D"
+  },
+  "requested_at": "2026-08-02T12:27:46.544448",
+  "user_id": 1
+}

@@ -45,7 +45,6 @@ export default function MetricsGrid({ results = {}, data = {}, handleToggleFavor
         row.dbscan_label !== -1
     );
   }
-  console.log("ensemble:", ensemble);
 
   return (
     <div className="metrics-wrapper">

@@ -321,7 +321,7 @@ function DensityChart({ data }) {
     },
     scales: {
       x: {
-        title: { display: true, text: "Price", color: getThemeColor() },
+        title: { display: true, text: "Returns", color: getThemeColor() },
         ticks: { color: getThemeColor() },
         grid: { color: "rgba(148, 163, 184, 0.14)" },
       },

@@ -28,7 +28,7 @@ class ExplanationEngine:
     def __init__(self, request: schemas.AnomalyExplanationRequest):
         self.request = request 
 
-    def explain(self) -> Dict[str, Any]:
+    def explain(self) -> Dict[str, Any]: 
         anomaly_rows = self._extract_anomaly_rows(self.request.data or [])
         # search_context = self._build_search_context(self.request.stock, anomaly_rows)
         # prompt = self._build_ai_prompt(self.request, search_context)
@@ -40,6 +40,7 @@ class ExplanationEngine:
         #     )
 
         return self._heuristic_anomaly_explanation(self.request, anomaly_rows)
+    
 
     def _call_ai_explanation(
         self,
@@ -75,7 +76,7 @@ class ExplanationEngine:
 
         entries = self._parse_ai_explanation_entries(summary)
         overall = self._extract_overall_summary(summary)
-
+        
         return {
             "raw_summary": summary,
             "summary": overall,
@@ -101,19 +102,16 @@ class ExplanationEngine:
 
         entries: List[Dict[str, Any]] = []
         print("Printing anomaly rows:", anomaly_rows)
+        print("\n")
         for row in anomaly_rows:
-            z_score = row.get("z_score_label")
-            z_score_val = (
-                float(z_score)
-                if z_score is not None
-                and str(z_score).replace(".", "", 1).replace("-", "", 1).isdigit()
-                else None
-            )
 
+            z_score = row.get("z_score")
             close = row.get("close")
             bb_width = row.get("bb_width")
             rsi = row.get("RSI")
             volume = row.get("volume")
+            avg_volume= row.get("average_volume")
+            returns = row.get("returns")
 
             detectors = []
             if row.get("dbscan_label") == -1:
@@ -125,12 +123,20 @@ class ExplanationEngine:
 
             bullets: List[str] = []
             if close is not None:
-                bullets.append(f"Close: {close}")
+                text = f"Close: {close}"
+                if returns is not None:
+                    text = text + f" with {returns:.2%} change"
+                bullets.append(text)
+
             if volume is not None:
-                bullets.append(f"Volume: {volume:,}")
+                text = f"Volume: {volume:,}"
+                if avg_volume is not None and avg_volume > 0:
+                    volume_ratio = volume / avg_volume
+                    text = text + f" which is {volume_ratio:.2f}x the 20-day average"
+                bullets.append(text)
             if z_score is not None:
-                direction = "above" if z_score_val > 0 else "below"
-                bullets.append(f"Price is {abs(z_score_val):.2f}σ {direction} mean")
+                direction = "above" if z_score > 0 else "below"
+                bullets.append(f"Price is {abs(z_score):.2f}σ {direction} mean")
 
             if bb_width is not None and isinstance(bb_width, (int, float)):
                 if bb_width > 0.15:
@@ -198,6 +204,7 @@ class ExplanationEngine:
                     or row.get("price")
                     or row.get("adj_close"),
                     "volume": row.get("volume"),
+                    "returns": row.get("returns"),
                     "z_score": row.get("z_score"),
                     "dbscan_label": row.get("dbscan_label"),
                     "isolation_forest_label": row.get("isolation_forest_label"),
@@ -245,23 +252,23 @@ class ExplanationEngine:
                 continue
             try:
                 anomaly_date = datetime.strptime(str(date_str), "%Y-%m-%d")
-                queries = [
-                    f"{stock} Nepal {date_str}",
-                    f"Nepal protest {anomaly_date.strftime('%B %Y')}",
-                ]
-
                 # queries = [
-                #     # Company-specific
-                #     f"{stock} Nepal company announcement {date_str}",
-                #     f"{stock} dividend bonus rights share announcement",
-                #     # Financial
-                #     f"{stock} quarterly result earnings report {anomaly_date.year}",
-                #     # Market-wide
-                #     f"Nepal NEPSE market crash rally news {date_str}",
-                #     # External events
+                #     f"{stock} Nepal {date_str}",
                 #     f"Nepal protest {anomaly_date.strftime('%B %Y')}",
-                #     f"Nepal corruption arrest businessman investigation {anomaly_date.strftime('%B %Y')}",
                 # ]
+
+                queries = [
+                    # Company-specific
+                    f"{stock} Nepal company announcement {date_str}",
+                    f"{stock} dividend bonus rights share announcement",
+                    # Financial
+                    f"{stock} quarterly result earnings report {anomaly_date.year}",
+                    # Market-wide
+                    f"Nepal NEPSE market crash rally news {date_str}",
+                    # External events
+                    f"Nepal protest {anomaly_date.strftime('%B %Y')}",
+                    f"Nepal corruption arrest businessman investigation {anomaly_date.strftime('%B %Y')}",
+                ]
                 section_found = False
                 for query in queries:
                     results = self._tavily_search(query, num_results=1)

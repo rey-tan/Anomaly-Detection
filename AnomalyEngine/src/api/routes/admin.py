@@ -11,6 +11,8 @@ from src.components.sharesansar_scraper import ShareSansarScraper
 from src.utils.paths import DATA
 from .. import crud, database, models, schemas
 from ..dependencies import get_current_user, require_role
+from src.utils.io import get_symbols
+
 
 router = APIRouter(tags=["admin"], prefix="/admin")
 
@@ -96,17 +98,39 @@ def _summarize_csv_file(path: Path, preview_limit: int) -> schemas.AdminDataAsse
     )
 
 
+# def _list_admin_data_files() -> List[schemas.AdminDataAssetRead]:
+#     """List all data asset files."""
+#     datasets = []
+#     root = DATA
+#     if root.exists():
+#         for path in sorted(root.glob("*.csv")):
+#             try:
+#                 datasets.append(_summarize_csv_file(path, preview_limit=0))
+#             except Exception:
+#                 continue
+#     return datasets
+
 def _list_admin_data_files() -> List[schemas.AdminDataAssetRead]:
     """List all data asset files."""
     datasets = []
+    symbols = get_symbols()
+
     root = DATA
+
     if root.exists():
-        for path in sorted(root.glob("*.csv")):
-            try:
-                datasets.append(_summarize_csv_file(path, preview_limit=0))
-            except Exception:
-                continue
+        for symbol in symbols:
+            path = root / f"{symbol}.csv"
+
+            if path.exists():
+                try:
+                    datasets.append(
+                        _summarize_csv_file(path, preview_limit=0)
+                    )
+                except Exception:
+                    continue
+
     return datasets
+
 
 
 def _list_admin_data_symbols() -> List[schemas.AdminDataSymbolRead]:

@@ -26,18 +26,18 @@ system_message = """You are a NEPSE (Nepal Stock Exchange) financial analyst.
 
 class ExplanationEngine:
     def __init__(self, request: schemas.AnomalyExplanationRequest):
-        self.request = request 
+        self.request = request
 
     def explain(self) -> Dict[str, Any]: 
         anomaly_rows = self._extract_anomaly_rows(self.request.data or [])
-        # search_context = self._build_search_context(self.request.stock, anomaly_rows)
-        # prompt = self._build_ai_prompt(self.request, search_context)
-        # token = os.getenv("TOKEN", "").strip()
+        search_context = self._build_search_context(self.request.stock, anomaly_rows)
+        prompt = self._build_ai_prompt(self.request, search_context)
+        token = os.getenv("TOKEN", "").strip()
         
-        # if token and prompt:
-        #     return self._call_ai_explanation(
-        #         token, self.request, anomaly_rows, prompt
-        #     )
+        if token and prompt:
+            return self._call_ai_explanation(
+                token, self.request, anomaly_rows, prompt
+            )
 
         return self._heuristic_anomaly_explanation(self.request, anomaly_rows)
     
